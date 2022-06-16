@@ -106,8 +106,8 @@ class Packer {
                 Item* itp = &masterItemRegister_->getItem(item_to_pack);
         
                 /* Check if item would exceed weight or volume limit. */
-                if((bins_.back().GetActVolumeUtil() + itp->volume_) >= bins_.back().maxVolume_ ||
-                    (bins_.back().GetActWeightUtil() + itp->weight_) >= bins_.back().maxWeight_){
+                if((bins_.back().GetActVolumeUtil() + itp->volume_) > bins_.back().maxVolume_ ||
+                    (bins_.back().GetActWeightUtil() + itp->weight_) > bins_.back().maxWeight_){
                     bins_.back().GetUnfittedItems().push_back(itp->transientSysId_);
                     continue;
                 };

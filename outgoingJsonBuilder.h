@@ -122,6 +122,7 @@ class jsonResponseBuilder{
             if(!includeBins_) { return; };
 
             // Only relevant if bins need to be included in the response.
+            outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::TYPE]       = PackingProcessor.requestedBinType_;
             outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_WIDTH]  = PackingProcessor.requestedBinWidth_;
             outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_DEPTH]  = PackingProcessor.requestedBinDepth_;
             outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_HEIGHT] = PackingProcessor.requestedBinHeight_;

@@ -42,6 +42,7 @@ namespace json{
             };
             
             namespace bindetails{
+                const std::string TYPE = "type";
                 const std::string MAX_WIDTH = "maxWidth";
                 const std::string MAX_DEPTH = "maxDepth";
                 const std::string MAX_HEIGHT = "maxHeight";

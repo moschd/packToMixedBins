@@ -62,12 +62,19 @@ bool arePointsSame(std::array<double,3> point1, std::array<double,3> point2){
 
 void endpointsInKdTree(Node* root, int depth, std::array<double,3>& startPoint, std::array<double,3> maxSearchPoint, std::vector<int>& passedNodes){
     if (root == NULL){ return; };
+    // std::cout << "  " << "STARTING POINT " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
 
     unsigned int cd = depth % k;
 
+    // std::cout << "      TRAVERSING 3RD_TREE - LEVEL "<< cd << " ITEM "<< root->itemSysId_ << "\n";
+    // std::cout << "      " << root->partitionPoint_[0] << " " << root->partitionPoint_[1] << " " << root->partitionPoint_[2] << "\n";
+
     if(root->left_ == NULL && root->right_ == NULL){
+        // std::cout << "          REACHED LEAF " << root->itemSysId_ <<"\n";
+        // std::cout << "              " << root->endPoint_[0] << " " << root->endPoint_[1] << " " << root->endPoint_[2] << "\n";
         if(startPoint[0] < root->endPoint_[0] && startPoint[1] < root->endPoint_[1] && startPoint[2] < root->endPoint_[2]){
             passedNodes.push_back(root->itemSysId_);
+            // std::cout << "      Single return on: "<< root->itemSysId_ <<"\n";
             return;          
         };
     };
@@ -75,14 +82,18 @@ void endpointsInKdTree(Node* root, int depth, std::array<double,3>& startPoint, 
     if(startPoint[0] < root->partitionPoint_[0] && startPoint[1] < root->partitionPoint_[1] && startPoint[2] < root->partitionPoint_[2]){
         passedNodes.insert(passedNodes.end(), root->myChildren_.begin(), root->myChildren_.end()); 
         passedNodes.push_back(root->itemSysId_);
+            // std::cout << "      Me and children return on: "<< root->itemSysId_ <<"\n";
         return;
     };
 
-    if(startPoint[cd] < root->partitionPoint_[cd]){
-        endpointsInKdTree(root->left_, depth+1, startPoint, maxSearchPoint, passedNodes);
-    };
 
+    if(startPoint[cd] < root->partitionPoint_[cd]){
+        // std::cout << "      TURNING LEFT\n";
+        endpointsInKdTree(root->left_, depth+1, startPoint, maxSearchPoint, passedNodes);
+
+    };
     if(root->partitionPoint_[cd] < (startPoint[cd]+maxSearchPoint[cd])){
+        // std::cout << "      TURNING RIGHT\n";
         endpointsInKdTree(root->right_, depth+1, startPoint, maxSearchPoint, passedNodes);
     };
 };
@@ -106,9 +117,10 @@ Node* init_tree(){
     return root;
 };
 
-void printTree(Node* root,int p, std::string W){
+void printTree(Node* root,int rootID, std::string direction){
     if(root == NULL){ return; };
-
+    std::cout << "PARENT " << rootID << " ME " << root->itemSysId_ << " " << direction <<"\n";
+    std::cout << root->partitionPoint_[0] << " " << root->partitionPoint_[1] << " " << root->partitionPoint_[2] << "\n";
     printTree(root->left_, root->itemSysId_, "L");
     printTree(root->right_, root->itemSysId_, "R");
 };

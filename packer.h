@@ -132,7 +132,7 @@ class Packer {
                 bins_.back().FindItemPosition(item_to_pack);
 
             };
-            
+
             // Delete the created bin when if it contains no items.
             if(itemsToBePacked.size() == bins_.back().GetUnfittedItems().size()){ 
                 GetPackedBinVector().pop_back();

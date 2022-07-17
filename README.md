@@ -120,19 +120,19 @@ This parameter controls the level of gravity that needs to be taken into account
 
 # Inner Workings
 
-1. main.cpp
+1. main.cpp  
 Driver Program.
 
-2. packer.h
+2. packer.h  
 Class that represents the packing process for all items across all bins.
 
-3. bin.h
+3. bin.h  
 Class that represents a individual bin.
 
-4. item.h
+4. item.h  
 Class that represents a individual item.
 
-5. 3r-kd-tree.h
+5. 3r-kd-tree.h  
 # 3R kd-tree.
 The packToBin algorithm stores its geospatial data a kd-tree datastructure. The kd-tree contains 3 dimensions which are the cartesian coordinates of each item that is placed in the bin.
 
@@ -157,22 +157,22 @@ The number of leaves on the pre-generated kd-tree is determined by the maxDepth 
 
 The max depth parameter is a calculated value based on a estimation of the number of items that will go into the bin. This will allow the tree to grow accordingly and leading to improved performance.
 
-6. gravity.h
+6. gravity.h  
 Class that hold gravity logic.
 
-7. itemregister.h
+7. itemregister.h  
 Register to contain all items to prevent duplicating a item objects.
 
-8. outgoingJsonBuilder.h
+8. outgoingJsonBuilder.h  
 Holds the logic for building the outgoing JSON.
 
-9. miscfunctions.h
+9. miscfunctions.h  
 Holds multiple general purpose functions.
 
-10. ~~binsection.h~~
+10. ~~binsection.h~~  
 Deprecated.
 Class that represented a virtual bin inside a bigger bin.
 
-11. ~~partitioner.h~~
+11. ~~partitioner.h~~  
 Deprecated.
 Class that was used to parition bins into multiple bin sections.

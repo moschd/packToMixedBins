@@ -13,7 +13,7 @@ Make a function call to <i>packToBinAlgorhitm</i>.
 | itemDimensionsAfter |  bool  | 1 |
 | jsonPrecision |  int | 5 |
 | gravityStrength |  double | 0.0 |
-| mainSortMethod |  char | VOLUME |
+| mainSortMethod |  int | 1 |
 
 #### incomingJson
 This is the parameter which supplies the JSON.

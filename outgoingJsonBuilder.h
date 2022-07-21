@@ -8,7 +8,7 @@ void writeMyContentToConsole(Packer &PackingProcessor)
 {
     for (auto bin : PackingProcessor.GetPackedBinVector())
     {
-        std::cout << "Content of: " << bin.name << "\n";
+        std::cout << "Content of: " << bin.id_ << "\n";
 
         bin.kdTree2_->printTreeImpHelper();
 
@@ -75,7 +75,7 @@ private:
     Json::Value binToJson(Bin &bin)
     {
         Json::Value mappedBin;
-        mappedBin[constants::json::bin::BIN_NAME] = bin.name;
+        mappedBin[constants::json::bin::BIN_NAME] = bin.id_;
         mappedBin[constants::json::bin::NR_OF_ITEMS] = int(bin.GetFittedItems().size());
         mappedBin[constants::json::bin::ACTUAL_VOLUME] = bin.GetActVolumeUtil();
         mappedBin[constants::json::bin::ACTUAL_VOLUME_UTIL] = bin.GetActVolumeUtilizationPercentage();

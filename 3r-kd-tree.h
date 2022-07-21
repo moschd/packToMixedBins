@@ -1,126 +1,274 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 #include "constants.h"
-  
-const int k = constants::AllAxis.size();
-unsigned int searchhits = 0;
 
-
-struct Node {
-    int itemSysId_;
-    std::array<double,3> endPoint_, partitionPoint_, minSearchDimensions_, maxSearchDimensions_; 
+struct Nodex
+{
+    int id;
+    bool isLeaf_;
+    int myDepth_;
+    int leafNr_;
+    Nodex *left_, *right_;
     std::vector<int> myChildren_;
-    Node *left_, *right_;
+    std::array<double, 3> partitionPoint_, minSearchDimensions_, maxSearchDimensions_;
+};
 
-    Node* addToTree(Node* root, int sysid, std::array<double,3> maxDims, std::array<double,3> endPoint){
-        return insertNodeInTree(root, sysid, 0, endPoint, {maxDims[0]/2, maxDims[1]/2, maxDims[2]/2}, {0.0,0.0,0.0}, maxDims);
+/**
+ * @brief Spawn a Nodex.
+ *
+ * This method creates a Nodex used as node in the kd-tree.
+ * Each node represents a point in 3R.
+ *
+ * @param aPartitionPoint   - the 3R point that the node will be representating and splitting.
+ * @param aMins             - 3R point marking the minimum border of the search area point for which this node will be responsable.
+ * @param aMaxs             - 3R point marking the maximum border of the search area point for which this node will be responsable.
+ * @param aCurrentDepth     - the tree depth on which this node is created.
+ */
+Nodex *genNodex(std::array<double, 3> aPartitionPoint, std::array<double, 3> aMins, std::array<double, 3> aMaxs, int aCurrentDepth)
+{
+    Nodex *branch = new Nodex;
+    branch->id = 0;
+    branch->isLeaf_ = 0;
+    branch->myDepth_ = aCurrentDepth;
+    branch->minSearchDimensions_ = aMins;
+    branch->maxSearchDimensions_ = aMaxs;
+    branch->left_ = branch->right_ = NULL;
+    branch->partitionPoint_ = aPartitionPoint;
+    return branch;
+};
+
+class KdTree
+{
+private:
+    Nodex *treeRoot_;
+    int maxDepth_;
+    std::array<double, 3> minDimensions_;
+    std::array<double, 3> maxDimensions_;
+    int nrOfLeaves_;
+
+public:
+    KdTree(int aRequestedDepth, std::array<double, 3> aMaxDimensions)
+    {
+        maxDepth_ = aRequestedDepth;
+        minDimensions_ = {0, 0, 0};
+        maxDimensions_ = aMaxDimensions;
+
+        treeRoot_ = genNodex({maxDimensions_[0] / 2, maxDimensions_[1] / 2, maxDimensions_[2] / 2}, minDimensions_, maxDimensions_, 0);
+        generateTreeHelper(treeRoot_);
     };
 
-    Node* insertNodeInTree(Node *root, unsigned int rItemSysId, unsigned int rDepth, 
-    std::array<double,3> rEndPoint, std::array<double,3> rPartitionPoint, std::array<double,3> rMins, std::array<double,3> rMaxs){
+    /**
+     * @brief Return the root of the tree.
+     *
+     */
 
-        /* Inserts a new node and returns root of modified tree */
+    Nodex *getRoot()
+    {
+        return treeRoot_;
+    };
 
-        unsigned int axis = rDepth % k;
-        unsigned int previousAxis = (rDepth-1) % k;
+    void calculateMaxDepth(int aEstimatedRequiredBins, int aNumberOfItemsToBePacked)
+    {
+        // the double is the desired number of items per bin section
+        maxDepth_ = ceil(sqrt((aNumberOfItemsToBePacked / aEstimatedRequiredBins) / 750.0));
+    };
 
-        std::array<double,3> newPartitionPoint = (root == NULL ? rPartitionPoint : root->partitionPoint_);
-        newPartitionPoint[previousAxis] = (rMins[previousAxis] + rMaxs[previousAxis])/2;
+    /**
+     * @brief Helper method to generate a new tree.
+     *
+     * This method provides a simple interface to the method that generates the kd-tree.
+     *
+     * @param aRoot - Node from which the tree will grow.
+     */
+    void generateTreeHelper(Nodex *aRoot)
+    {
+        generateTree(aRoot, aRoot->myDepth_, aRoot->partitionPoint_, aRoot->minSearchDimensions_, aRoot->maxSearchDimensions_, maxDepth_);
+    };
 
-        if (root == NULL){ 
-            Node* newNode   = new Node;
-            newNode->itemSysId_ = rItemSysId;
-            newNode->endPoint_  = rEndPoint;
-            newNode->partitionPoint_ = newPartitionPoint;
-            newNode->minSearchDimensions_ =  rMins;
-            newNode->maxSearchDimensions_ =  rMaxs;
-            newNode->left_ = newNode->right_ = NULL;
-            return newNode;
+    /**
+     * @brief Helper method to print the tree to the console.
+     *
+     */
+    void printTreeImpHelper()
+    {
+        printTreeImp(treeRoot_, "X");
+    };
+
+    /**
+     * @brief Helper function to add a new itemKey to the tree.
+     *
+     * This method provides a simple interface to the method that adds a item to the tree.
+     *
+     * @param aItemKey          - The itemKey which will be added to the tree.
+     * @param aItemMaxPosition  - The top right corner of the item, this is the position which will be used to search for the correct place to add the item.
+     */
+    void addItemKeyToLeafHelper(int aItemKey, std::array<double, 3> aItemMaxPosition)
+    {
+        addItemKeyToLeaf(treeRoot_, aItemKey, 0, aItemMaxPosition);
+    }
+
+    void deleteAllNodesHelper()
+    {
+        deleteAllNodes(treeRoot_);
+    }
+
+    /**
+     * @brief Find correct place to add itemKey in tree and add it.
+     *
+     * This method adds a itemKey to the corresponding tree leaf.
+     * Each bin to be packed uses a kd-tree for space partitioning and organizing the multidimensional data (items) that it contains.
+     *
+     * @param aRoot             - Node from which to start searching, normally start at the aRoot of the tree.
+     * @param aItemKey          - The key of the item that needs to be placed in the tree.
+     * @param aDepth            - The current depth of the tree.
+     * @param aItemMaxPosition  - The furthest point in space that the item reaches, ie top right corner.
+     */
+    void addItemKeyToLeaf(Nodex *aRoot, int aItemKey, int aDepth, std::array<double, 3> aItemMaxPosition)
+    {
+        if (aRoot->isLeaf_)
+        {
+            aRoot->myChildren_.push_back(aItemKey);
+            return;
         };
 
-        root->minSearchDimensions_ = rMins;
-        root->maxSearchDimensions_ = rMaxs;
-        
-        root->myChildren_.push_back(rItemSysId);
-        if (rEndPoint[axis] < root->partitionPoint_[axis]){
-            rMaxs[axis] = root->partitionPoint_[axis];
-            root->left_  = insertNodeInTree(root->left_, rItemSysId, rDepth + 1, rEndPoint, newPartitionPoint, rMins, rMaxs);
-        } else {
-            rMins[axis] = root->partitionPoint_[axis];
-            root->right_ = insertNodeInTree(root->right_, rItemSysId, rDepth + 1, rEndPoint, newPartitionPoint, rMins, rMaxs);
-        };
-        return root;
-    };
- 
-};
-  
-
-bool arePointsSame(std::array<double,3> point1, std::array<double,3> point2){
-    return (std::abs(point1[0]-point2[0])< 0.0001 &&
-            std::abs(point1[1]-point2[1])< 0.0001 &&
-            std::abs(point1[2]-point2[2])< 0.0001);
-};
-
-void endpointsInKdTree(Node* root, int depth, std::array<double,3>& startPoint, std::array<double,3> maxSearchPoint, std::vector<int>& passedNodes){
-    if (root == NULL){ return; };
-    // std::cout << "  " << "STARTING POINT " << startPoint[0] << " " << startPoint[1] << " " << startPoint[2] << "\n";
-
-    unsigned int cd = depth % k;
-
-    // std::cout << "      TRAVERSING 3RD_TREE - LEVEL "<< cd << " ITEM "<< root->itemSysId_ << "\n";
-    // std::cout << "      " << root->partitionPoint_[0] << " " << root->partitionPoint_[1] << " " << root->partitionPoint_[2] << "\n";
-
-    if(root->left_ == NULL && root->right_ == NULL){
-        // std::cout << "          REACHED LEAF " << root->itemSysId_ <<"\n";
-        // std::cout << "              " << root->endPoint_[0] << " " << root->endPoint_[1] << " " << root->endPoint_[2] << "\n";
-        if(startPoint[0] < root->endPoint_[0] && startPoint[1] < root->endPoint_[1] && startPoint[2] < root->endPoint_[2]){
-            passedNodes.push_back(root->itemSysId_);
-            // std::cout << "      Single return on: "<< root->itemSysId_ <<"\n";
-            return;          
+        int axis = aDepth % constants::R;
+        if (aItemMaxPosition[axis] < aRoot->partitionPoint_[axis])
+        {
+            addItemKeyToLeaf(aRoot->left_, aItemKey, aDepth + 1, aItemMaxPosition);
+        }
+        else
+        {
+            addItemKeyToLeaf(aRoot->right_, aItemKey, aDepth + 1, aItemMaxPosition);
         };
     };
 
-    if(startPoint[0] < root->partitionPoint_[0] && startPoint[1] < root->partitionPoint_[1] && startPoint[2] < root->partitionPoint_[2]){
-        passedNodes.insert(passedNodes.end(), root->myChildren_.begin(), root->myChildren_.end()); 
-        passedNodes.push_back(root->itemSysId_);
-            // std::cout << "      Me and children return on: "<< root->itemSysId_ <<"\n";
-        return;
+    /**
+     * @brief Adds itemKeys of items which might be intersecting with the item on the provided position.
+     *
+     * This method adds the itemKey of items which might be intersecting with the item on the provided position to a provided vector.
+     *
+     * @param aRoot             - Node from which to start searching, normally start at the aRoot of the tree.
+     * @param aDepth            - The current depth of the tree
+     * @param aStartPoint       - The 3R point from which to start searching.
+     * @param aMaxSearchPoint   - The furthest point in space that an item can be in order to still be considered a intersection candidate.
+     * @param aPassedNodes      - The vector to which itemKeys will be added.
+     */
+    void getPotentialIntersectingItemKeys(Nodex *aRoot, int aDepth, std::array<double, 3> &aStartPoint, std::array<double, 3> aMaxSearchPoint, std::vector<int> &aPassedNodes)
+    {
+        if (aRoot == NULL)
+        {
+            return;
+        };
+
+        if (aRoot->isLeaf_)
+        {
+            aPassedNodes.insert(aPassedNodes.end(), aRoot->myChildren_.begin(), aRoot->myChildren_.end());
+            return;
+        };
+
+        int axis = aDepth % constants::R;
+
+        if (aStartPoint[axis] < aRoot->partitionPoint_[axis])
+        {
+            getPotentialIntersectingItemKeys(aRoot->left_, aDepth + 1, aStartPoint, aMaxSearchPoint, aPassedNodes);
+        };
+
+        if (aRoot->partitionPoint_[axis] < (aStartPoint[axis] + aMaxSearchPoint[axis]))
+        {
+            getPotentialIntersectingItemKeys(aRoot->right_, aDepth + 1, aStartPoint, aMaxSearchPoint, aPassedNodes);
+        };
     };
 
+    /**
+     * @brief Pre generate a fixed depth balanced kd-tree.
+     *
+     * This method creates a kd-tree of a certain depth.
+     * The nodes in this tree each contain cartesian coordinates indicating a 3R point in a space.
+     * Used for 3R space partisioning of the bin to be packed.
+     *
+     * @param aRoot             - root of the tree
+     * @param aDepth            - the current depth of the tree
+     * @param aPartitionPoint   - the 3R point that the node will be representating and splitting.
+     * @param aMins             - 3R point marking the minimum border of the search area point for which this node will be responsable.
+     * @param aMaxs             - 3R point marking the maximum border of the search area point for which this node will be responsable.
+     * @param aRequestedDepth   - the requested maximum depth of the tree to be generated.
+     */
+    void generateTree(Nodex *aRoot, int aDepth, std::array<double, 3> aPartitionPoint, std::array<double, 3> aMins, std::array<double, 3> aMaxs, int aRequestedDepth)
+    {
+        int axis = aDepth % constants::R;
+        int previousAxis = (aDepth == 0 ? aDepth : (aDepth - 1) % constants::R);
 
-    if(startPoint[cd] < root->partitionPoint_[cd]){
-        // std::cout << "      TURNING LEFT\n";
-        endpointsInKdTree(root->left_, depth+1, startPoint, maxSearchPoint, passedNodes);
+        std::array<double, 3> newPartitionPoint = aPartitionPoint;
+        newPartitionPoint[previousAxis] = (aMins[previousAxis] + aMaxs[previousAxis]) / 2;
 
+        if (aDepth > aRequestedDepth)
+        {
+            nrOfLeaves_ += 1;
+            aRoot->isLeaf_ = 1;
+            aRoot->leafNr_ = nrOfLeaves_;
+            aRoot->partitionPoint_ = newPartitionPoint;
+            return;
+        };
+
+        aRoot->left_ = genNodex(newPartitionPoint, aMins, aMaxs, aDepth);
+        aRoot->right_ = genNodex(newPartitionPoint, aMins, aMaxs, aDepth);
+
+        std::array<double, 3> leftMaxs = aMaxs;
+        leftMaxs[axis] = newPartitionPoint[axis];
+        generateTree(aRoot->left_, aDepth + 1, newPartitionPoint, aMins, leftMaxs, aRequestedDepth);
+
+        std::array<double, 3> rightMins = aMins;
+        rightMins[axis] = newPartitionPoint[axis];
+        generateTree(aRoot->right_, aDepth + 1, newPartitionPoint, rightMins, aMaxs, aRequestedDepth);
+    }
+
+    /**
+     * @brief Print tree to console..
+     *
+     * @param aRoot         - Node whose children will be printed.
+     * @param aDirection    - Direction from which this search came from, ie left or right node.
+     */
+    void printTreeImp(Nodex *aRoot, std::string aDirection)
+    {
+        if (aRoot == NULL)
+        {
+            return;
+        };
+
+        if (!aRoot->myChildren_.empty())
+        {
+            std::cout << "  LEAF " << aRoot->leafNr_ << " "
+                      << "  " << aRoot->partitionPoint_[0] << " " << aRoot->partitionPoint_[1] << " " << aRoot->partitionPoint_[2] << "\n";
+            std::cout << "      CHILDREN:\n";
+            std::cout << "      ";
+            for (auto d : aRoot->myChildren_)
+            {
+                std::cout << d << " ";
+            }
+            std::cout << "\n";
+        }
+
+        printTreeImp(aRoot->left_, "L");
+        printTreeImp(aRoot->right_, "R");
     };
-    if(root->partitionPoint_[cd] < (startPoint[cd]+maxSearchPoint[cd])){
-        // std::cout << "      TURNING RIGHT\n";
-        endpointsInKdTree(root->right_, depth+1, startPoint, maxSearchPoint, passedNodes);
+
+    /**
+     * @brief Delete all nodes in the tree to free memory.
+     *
+     * This method deletes all nodes under the provided aRoot.
+     *
+     * @param aRoot - Node under which all underlying nodes will be deleted.
+     */
+    void deleteAllNodes(Nodex *node)
+    {
+        if (!node)
+        {
+            return;
+        };
+
+        deleteAllNodes(node->left_);
+        deleteAllNodes(node->right_);
+
+        delete node;
+        node = nullptr;
     };
-};
-
-
-bool singlePointSearch(Node* root, std::array<double,3> endPoint, unsigned int depth){
-    if (root == NULL){ return false; };
-    if (arePointsSame(root->endPoint_, endPoint)){ return true; };
-
-    unsigned int cd = depth % k;
-
-    if (endPoint[cd] < root->endPoint_[cd]){
-        return singlePointSearch(root->left_, endPoint, depth + 1);
-    } else {
-        return singlePointSearch(root->right_, endPoint, depth + 1);
-    };
-};
-
-Node* init_tree(){
-    struct Node *root = NULL;  
-    return root;
-};
-
-void printTree(Node* root,int rootID, std::string direction){
-    if(root == NULL){ return; };
-    std::cout << "PARENT " << rootID << " ME " << root->itemSysId_ << " " << direction <<"\n";
-    std::cout << root->partitionPoint_[0] << " " << root->partitionPoint_[1] << " " << root->partitionPoint_[2] << "\n";
-    printTree(root->left_, root->itemSysId_, "L");
-    printTree(root->right_, root->itemSysId_, "R");
 };

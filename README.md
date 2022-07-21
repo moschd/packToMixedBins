@@ -13,6 +13,7 @@ Make a function call to <i>packToBinAlgorhitm</i>.
 | itemDimensionsAfter |  bool  | 1 |
 | jsonPrecision |  int | 5 |
 | gravityStrength |  double | 0.0 |
+| mainSortMethod |  char | VOLUME |
 
 #### incomingJson
 This is the parameter which supplies the JSON.
@@ -26,6 +27,8 @@ This parameter indicates if the dimensions of the items in the response should b
 This parameter controls the decimal precision in the response body.
 #### gravityStrength
 This parameter controls the level of gravity that needs to be taken into account. It is basically surface area expressed in percentage of the item to be placed that should be supported in order to be considered a valid item placement.
+#### mainSortMethod
+This parameter indicates based on which value the items should be sorted before being packed.
 
 ### Body
 ```json

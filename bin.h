@@ -3,7 +3,7 @@
 
 #include "constants.h"
 #include "miscfunctions.h"
-#include "3r-kd-tree-improved.h"
+#include "3r-kd-tree.h"
 
 class Bin
 {
@@ -18,7 +18,7 @@ private:
     std::array<double, 3> topRightCorner_;
 
 public:
-    std::string name;
+    std::string id_;
     double maxWeight_;
     double maxVolume_;
     std::array<double, 3> placedItemsMaxDimensions_;
@@ -28,27 +28,24 @@ public:
     std::vector<int> zFreeItems_;
 
     std::unordered_map<std::array<double, 3>, std::array<double, 3>, itemPositionHashFunction, itemPositionEqualsFunction> intersectPosDimCaching_;
-    Gravity gravityComponent_;
-    // Node* kdTree_;
+    ItemRegister *passedOnMasterItemRegister_;
+    Gravity *passedOnMasterGravity_;
     KdTree *kdTree2_;
-    itemRegister *passedOnMasterItemRegister_; // MasterItemRegister
 
-    Bin(std::string n, double w, double d, double h, double max_w, int numberOfItemsToBePacked, double rGravityStrength, itemRegister *rItemRegister)
+    Bin(std::string aId, double aWidth, double aDepth, double aHeight, double aMaxWeight, Gravity *aGravity, ItemRegister *aItemRegister)
     {
-        name = n;
-        width_ = w;
-        depth_ = d;
-        height_ = h;
-        maxWeight_ = max_w;
-        maxVolume_ = w * d * h;
-        actualVolumeUtil_ = 0;
-        actualWeightUtil_ = 0;
-        passedOnMasterItemRegister_ = rItemRegister;
-        topRightCorner_ = {w, d, h};
-        placedItemsMaxDimensions_ = {0, 0, 0};
+        id_ = aId;
+        width_ = aWidth;
+        depth_ = aDepth;
+        height_ = aHeight;
+        maxVolume_ = width_ * depth_ * height_;
+        topRightCorner_ = {width_, depth_, height_};
 
-        Gravity requestedGravity(rGravityStrength);
-        gravityComponent_ = requestedGravity;
+        maxWeight_ = aMaxWeight;
+        passedOnMasterGravity_ = aGravity;
+        passedOnMasterItemRegister_ = aItemRegister;
+        placedItemsMaxDimensions_ = {0, 0, 0};
+        actualVolumeUtil_, actualWeightUtil_ = 0;
 
         kdTree2_ = new KdTree(6, topRightCorner_);
     };
@@ -141,9 +138,6 @@ public:
         // Add item to the bin
         items_.push_back(it);
 
-        // Add the item to the tree
-        // kdTree_ = kdTree_->addToTree(kdTree_, it, topRightCorner_, {itemOb->ipwf_, itemOb->ipdf_, itemOb->iphf_});
-
         kdTree2_->addItemKeyToLeafHelper(it, {itemOb->ipwf_, itemOb->ipdf_, itemOb->iphf_});
 
         // Update the max placed item dimensions
@@ -215,7 +209,6 @@ public:
                 {
                     if (itemToFit->width_ >= GetIntersectCachePBResult->second[0] && itemToFit->depth_ >= GetIntersectCachePBResult->second[1] && itemToFit->height_ >= GetIntersectCachePBResult->second[2])
                     {
-
                         continue;
                     };
                 };
@@ -240,9 +233,9 @@ public:
 
     bool PlaceItemInBin(int &it)
     {
-        bool gravityFit = gravityComponent_.gravityEnabled_;
-        bool R3ItemIntersection = 0;
-        bool noRotationWillMakeItemFit = 0;
+
+        bool R3ItemIntersection, noRotationWillMakeItemFit = 0;
+        bool gravityFit = passedOnMasterGravity_->gravityEnabled_;
 
         Item *itemBeingPlaced = &passedOnMasterItemRegister_->getItem(it);
         const double itemBeingPlacedXPos = itemBeingPlaced->position_[0];
@@ -252,10 +245,15 @@ public:
         std::vector<int> intersectRiskItemKeys;
         std::vector<Item *> intersectRiskItemPtrs;
 
-        const double IMD = std::max(std::max(itemBeingPlaced->width_, itemBeingPlaced->depth_), itemBeingPlaced->height_);
+        const double itemMaxDimension = std::max(std::max(itemBeingPlaced->width_, itemBeingPlaced->depth_), itemBeingPlaced->height_);
 
-        kdTree2_->getPotentialIntersectingItemKeys(kdTree2_->getRoot(), kdTree2_->getRoot()->myDepth_,
-                                                   itemBeingPlaced->position_, {placedItemsMaxDimensions_[0] + IMD, placedItemsMaxDimensions_[1] + IMD, placedItemsMaxDimensions_[2] + IMD}, intersectRiskItemKeys);
+        kdTree2_->getPotentialIntersectingItemKeys(kdTree2_->getRoot(),
+                                                   kdTree2_->getRoot()->myDepth_,
+                                                   itemBeingPlaced->position_,
+                                                   {placedItemsMaxDimensions_[0] + itemMaxDimension,
+                                                    placedItemsMaxDimensions_[1] + itemMaxDimension,
+                                                    placedItemsMaxDimensions_[2] + itemMaxDimension},
+                                                   intersectRiskItemKeys);
 
         for (int i = intersectRiskItemKeys.size(); i--;)
         {
@@ -350,11 +348,10 @@ public:
                               (itemBeingPlacedYPos + itemBeingPlaced->depth_) <= iis->position_[1]))
                         {
 
-                            // calculate the surface area that this box is covering on the box to be placed
                             totalCoveredSurfaceAreaPercentage += std::max(0.0, std::min(iis->ipwf_, (itemBeingPlacedXPos + itemBeingPlaced->width_)) - std::max(iis->position_[0], itemBeingPlacedXPos)) *
                                                                  std::max(0.0, std::min(iis->ipdf_, (itemBeingPlacedYPos + itemBeingPlaced->depth_)) - std::max(iis->position_[1], itemBeingPlacedYPos)) / (itemBeingPlaced->width_ * itemBeingPlaced->depth_) * 100;
 
-                            gravityFit = totalCoveredSurfaceAreaPercentage >= gravityComponent_.gravityStrengthPercentage_;
+                            gravityFit = totalCoveredSurfaceAreaPercentage >= passedOnMasterGravity_->gravityStrengthPercentage_;
                         };
                     };
                 }

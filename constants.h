@@ -24,6 +24,12 @@ namespace constants
     constexpr int RT_WHD{4};
     constexpr int RT_HWD{5};
 
+    namespace parameter
+    {
+        const int VOLUME = 1;
+        const int WEIGHT = 2;
+    }
+
     namespace json
     {
         namespace inbound

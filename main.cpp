@@ -30,19 +30,21 @@
 extern "C"
 {
     const char *packToBinAlgorhitm(char *incomingJson, bool includeBins = 1, bool includeItems = 1,
-                                   bool itemDimensionsAfter = 0, int jsonPrecision = 5, double gravityStrength = 0.0)
+                                   bool itemDimensionsAfter = 0, int jsonPrecision = 5, double gravityStrength = 0.0, int mainSortMethod = 1)
     {
-   
-        // int main() {
-        //     auto start = std::chrono::high_resolution_clock::now();
-        //     bool includeBins            = 1;
-        //     bool includeItems           = 1;
-        //     bool itemDimensionsAfter    = 0;
-        //     int jsonPrecision           = 5;
-        //     double gravityStrength      = 0.0;
 
-        // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/testjson.json");
-        // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/testjson copy.json");
+        // int main()
+        // {
+        //     auto start = std::chrono::high_resolution_clock::now();
+        //     double gravityStrength = 0.0;
+        //     bool itemDimensionsAfter = 0;
+        //     bool includeItems = 1;
+        //     bool includeBins = 1;
+        //     int mainSortMethod = 1;
+        //     int jsonPrecision = 5;
+
+        // std::ifstream incomingJson("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/testjson.json");
+        // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/testjson copy 2.json");
         // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_1000_items.json");
         // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_2500_items.json");
         // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_5000_items.json");
@@ -51,45 +53,48 @@ extern "C"
         Json::Reader reader;
         Json::Value inboundRoot;
         reader.parse(incomingJson, inboundRoot);
-        Json::Value ijb = inboundRoot[constants::json::inbound::BIN];
-        Json::Value iji = inboundRoot[constants::json::inbound::ITEMS];
+        Json::Value incomingJsonBin = inboundRoot[constants::json::inbound::BIN];
+        Json::Value incomingJsonItems = inboundRoot[constants::json::inbound::ITEMS];
 
-        // Create item register
-        itemRegister masterItemRegister;
+        // Init item register
+        ItemRegister masterItemRegister(mainSortMethod);
+
+        // Init gravity
+        Gravity masterGravity(gravityStrength);
 
         // Init Packer
-        Packer PackingProcessor(ijb[constants::json::packer::TYPE].asString(),
-                                ijb[constants::json::packer::WIDTH].asDouble(),
-                                ijb[constants::json::packer::DEPTH].asDouble(),
-                                ijb[constants::json::packer::HEIGHT].asDouble(),
-                                ijb[constants::json::packer::MAX_WEIGHT].asDouble(),
-                                gravityStrength,
+        Packer PackingProcessor(incomingJsonBin[constants::json::packer::TYPE].asString(),
+                                incomingJsonBin[constants::json::packer::WIDTH].asDouble(),
+                                incomingJsonBin[constants::json::packer::DEPTH].asDouble(),
+                                incomingJsonBin[constants::json::packer::HEIGHT].asDouble(),
+                                incomingJsonBin[constants::json::packer::MAX_WEIGHT].asDouble(),
+                                masterGravity,
                                 masterItemRegister);
 
-        // Create items and add them to the master register
-        for (int x = iji.size(); x--;)
+        // Init items and add them to the master register
+        for (int idx = incomingJsonItems.size(); idx--;)
         {
-            Item i(x,
-                   iji[x][constants::json::item::ID].asString(),
-                   iji[x][constants::json::item::WIDTH].asDouble(),
-                   iji[x][constants::json::item::DEPTH].asDouble(),
-                   iji[x][constants::json::item::HEIGHT].asDouble(),
-                   iji[x][constants::json::item::WEIGHT].asDouble(),
-                   iji[x][constants::json::item::ITEM_CONS_KEY].asString(),
-                   iji[x][constants::json::item::ALLOWED_ROTATIONS].asString());
+            Item i(idx,
+                   incomingJsonItems[idx][constants::json::item::ID].asString(),
+                   incomingJsonItems[idx][constants::json::item::WIDTH].asDouble(),
+                   incomingJsonItems[idx][constants::json::item::DEPTH].asDouble(),
+                   incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble(),
+                   incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
+                   incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
+                   incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString());
 
-            PackingProcessor.masterItemRegister_->fillItemRegisters(i);
+            PackingProcessor.masterItemRegister_->addItem(i);
         };
 
-        // Split items by consolidation key and sort them on volume.
-        PackingProcessor.CreateFinalSortedItemConsKeyVectors();
-        for (auto &sortedItemConsKeyVector : PackingProcessor.GetItemConsKeyVectorsToBePacked())
+        // Split items by consolidation key, start packing for each of them.
+        for (auto &sortedItemConsKeyVector : PackingProcessor.masterItemRegister_->GetSortedItemConsKeyVectors()
+        )
         {
             PackingProcessor.startPacking(sortedItemConsKeyVector);
         };
 
-        // Init the outgoing json builder
-        jsonResponseBuilder outgoingJsonBuilder = jsonResponseBuilder(jsonPrecision, includeBins, includeItems, itemDimensionsAfter);
+        // Init outgoing json builder
+        jsonResponseBuilder outgoingJsonBuilder(jsonPrecision, includeBins, includeItems, itemDimensionsAfter);
         outgoingJsonBuilder.generate(PackingProcessor);
 
         // std::ofstream myfile;

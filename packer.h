@@ -59,31 +59,54 @@ public:
     };
 
     /**
+     * @brief Return an integer representing the estimated number of items that will fit a empty bin.
+     *
+     * This method iterates over the itemKeys vector and makes an estimation of how many of these items will fit into an empty bin.
+     * Estimation is fully based on volume.
+     *
+     * @param aItemsToBePacked  - vector containing itemKeys
+     */
+    int estimatedNumberOfItemsThatWillFitIntoBin(std::vector<int> &aItemsToBePacked)
+    {
+        int estimatedNumberOfItems = 0;
+        double cumulativeItemVolume = 0.0;
+        for (auto itemKey : aItemsToBePacked)
+        {
+            if ((masterItemRegister_->getItem(itemKey).volume_ + cumulativeItemVolume) < requestedBinMaxVolume_)
+            {
+                estimatedNumberOfItems += 1;
+                cumulativeItemVolume += masterItemRegister_->getItem(itemKey).volume_;
+            };
+        };
+        return estimatedNumberOfItems;
+    };
+
+    /**
      * @brief Start to add item(s) into a bin.
      *
      * This method iterates over the item vector and tries to place each item into the bin. If a bin is full it
      * creates a new bin and the process starts over, now the input is the previous bin' unfitted items.
      *
-     * @param itemsToBePacked
+     * @param aItemsToBePacked  - vector containing itemKeys
      */
-    void startPacking(std::vector<int> itemsToBePacked)
+    void startPacking(std::vector<int> aItemsToBePacked)
     {
-        if (itemsToBePacked.empty())
+        if (aItemsToBePacked.empty())
         {
             return;
         };
 
-        Bin new_bin(requestedBinType_ + "-" + std::to_string(bins_.size() + 1),
-                    requestedBinWidth_,
-                    requestedBinDepth_,
-                    requestedBinHeight_,
-                    requestedBinMaxWeight_,
-                    masterGravity_,
-                    masterItemRegister_);
+        bins_.push_back(Bin(requestedBinType_,
+                            (bins_.size() + 1),
+                            requestedBinWidth_,
+                            requestedBinDepth_,
+                            requestedBinHeight_,
+                            requestedBinMaxWeight_,
+                            masterGravity_,
+                            masterItemRegister_,
+                            estimatedNumberOfItemsThatWillFitIntoBin(aItemsToBePacked)));
 
-        bins_.push_back(new_bin);
-
-        for (auto &item_to_pack : itemsToBePacked)
+        for (auto &item_to_pack : aItemsToBePacked)
         {
             Item *itp = &masterItemRegister_->getItem(item_to_pack);
 
@@ -118,8 +141,8 @@ public:
             bins_.back().FindItemPosition(item_to_pack);
         };
 
-        // Delete the created bin when if it contains no items.
-        if (itemsToBePacked.size() == bins_.back().GetUnfittedItems().size())
+        /* Delete the created bin if it contains no items. */
+        if (aItemsToBePacked.size() == bins_.back().GetUnfittedItems().size())
         {
             GetPackedBinVector().pop_back();
             return;

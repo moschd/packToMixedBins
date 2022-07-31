@@ -4,24 +4,6 @@
 #include "bin.h"
 #include "itemregister.h"
 
-void writeMyContentToConsole(Packer &PackingProcessor)
-{
-    for (auto bin : PackingProcessor.GetPackedBinVector())
-    {
-        std::cout << "Content of: " << bin.id_ << "\n";
-
-        bin.kdTree2_->printTreeImpHelper();
-
-        // for(auto itemKey : bin.GetFittedItems()){
-        //     Item item = PackingProcessor.masterItemRegister_->getItem(itemKey);
-        //     std::cout << itemKey << " " << item.id_ << "\n";
-        //     std::cout << "  RT  " <<item.rotationType_ << "\n";
-        //     std::cout << "  D   " << item.width_ << " " << item.depth_ << " " << item.height_ << "\n";
-        //     std::cout << "  P   " << item.position_[0] << " " << item.position_[1] << " " << item.position_[2] << "\n";
-        // };
-    };
-};
-
 class jsonResponseBuilder
 {
 private:
@@ -75,12 +57,22 @@ private:
     Json::Value binToJson(Bin &bin)
     {
         Json::Value mappedBin;
-        mappedBin[constants::json::bin::BIN_NAME] = bin.id_;
+        mappedBin[constants::json::bin::ID] = int(bin.id_);
+        mappedBin[constants::json::bin::TYPE] = bin.type_;
         mappedBin[constants::json::bin::NR_OF_ITEMS] = int(bin.GetFittedItems().size());
+
+        mappedBin[constants::json::bin::MAX_WIDTH] = bin.getWidth();
+        mappedBin[constants::json::bin::MAX_DEPTH] = bin.getDepth();
+        mappedBin[constants::json::bin::MAX_HEIGHT] = bin.getHeight();
+
+        mappedBin[constants::json::bin::MAX_VOLUME] = bin.maxVolume_;
         mappedBin[constants::json::bin::ACTUAL_VOLUME] = bin.GetActVolumeUtil();
         mappedBin[constants::json::bin::ACTUAL_VOLUME_UTIL] = bin.GetActVolumeUtilizationPercentage();
+
+        mappedBin[constants::json::bin::MAX_WEIGHT] = bin.maxWeight_;
         mappedBin[constants::json::bin::ACTUAL_WEIGHT] = bin.GetActWeightUtil();
         mappedBin[constants::json::bin::ACTUAL_WEIGHT_UTIL] = bin.GetActWeightUtilizationPercentage();
+
         return mappedBin;
     };
 
@@ -99,13 +91,13 @@ public:
 
     Json::Value &getMessage() { return outboundRoot_; };
 
-    jsonResponseBuilder(int rPrecision, bool rIncludeBins, bool rIncludeItems, bool rItemDimensionsAfter)
+    jsonResponseBuilder(int aPrecision, bool aIncludeBins, bool aIncludeItems, bool aItemDimensionsAfter)
     {
         indentation_ = "";
-        precision_ = rPrecision;
-        includeBins_ = rIncludeBins;
-        includeItems_ = rIncludeItems;
-        itemDimensionsAfter_ = rItemDimensionsAfter;
+        precision_ = aPrecision;
+        includeBins_ = aIncludeBins;
+        includeItems_ = aIncludeItems;
+        itemDimensionsAfter_ = aItemDimensionsAfter;
 
         configureBuilder();
     };
@@ -127,12 +119,12 @@ public:
             return;
         };
 
-        // Header information
+        /* Header information. */
         outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = int(PackingProcessor.GetPackedBinVector().size());
         outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = PackingProcessor.GetTotalVolumeUtilizationPercentage();
         outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = PackingProcessor.GetTotalWeightUtilizationPercentage();
 
-        // Check for items that did not get packed and include them in the header.
+        /* Check for items that did not get packed and include them in the header. */
         if (!PackingProcessor.GetLastBin().GetUnfittedItems().empty())
         {
             outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS] = Json::arrayValue;
@@ -142,27 +134,20 @@ public:
             };
         };
 
+        for (auto &bi : PackingProcessor.GetPackedBinVector())
+        {
+            /* Free memory again, how to do this in a more structured way? */
+            bi.kdTree2_->deleteAllNodesHelper();
+            delete bi.kdTree2_;
+        }
+
         if (!includeBins_)
         {
             return;
         };
 
-        // Only relevant if bins need to be included in the response.
-        outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::TYPE] = PackingProcessor.requestedBinType_;
-        outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_WIDTH] = PackingProcessor.requestedBinWidth_;
-        outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_DEPTH] = PackingProcessor.requestedBinDepth_;
-        outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_HEIGHT] = PackingProcessor.requestedBinHeight_;
-        outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_WEIGHT] = PackingProcessor.requestedBinMaxWeight_;
-        outboundRoot_[constants::json::outbound::BIN_DETAILS][constants::json::outbound::bindetails::MAX_VOLUME] = PackingProcessor.requestedBinMaxVolume_;
-
-        // writeMyContentToConsole(PackingProcessor);
-
         for (auto &bi : PackingProcessor.GetPackedBinVector())
         {
-            // How to do this in a more structured way?
-            bi.kdTree2_->deleteAllNodesHelper();
-            delete bi.kdTree2_;
-
             Json::Value mappedBin = binToJson(bi);
 
             if (includeItems_)

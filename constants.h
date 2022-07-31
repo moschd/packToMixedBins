@@ -51,16 +51,6 @@ namespace constants
                 const std::string TOTAL_WEIGHT_UTIL = "totalWeightUtil";
                 const std::string UNFITTED_ITEMS = "unfittedItems";
             };
-
-            namespace bindetails
-            {
-                const std::string TYPE = "type";
-                const std::string MAX_WIDTH = "maxWidth";
-                const std::string MAX_DEPTH = "maxDepth";
-                const std::string MAX_HEIGHT = "maxHeight";
-                const std::string MAX_WEIGHT = "maxWeight";
-                const std::string MAX_VOLUME = "maxVolume";
-            };
         };
 
         namespace packer
@@ -91,13 +81,24 @@ namespace constants
 
         namespace bin
         {
-            const std::string BIN_NAME = "binName";
+            const std::string ID = "id";
+            const std::string TYPE = "type";
             const std::string NR_OF_ITEMS = "nrOfItems";
+
+            const std::string MAX_WIDTH = "maxWidth";
+            const std::string MAX_DEPTH = "maxDepth";
+            const std::string MAX_HEIGHT = "maxHeight";
+
+            const std::string MAX_VOLUME = "maxVolume";
             const std::string ACTUAL_VOLUME = "actualVolume";
             const std::string ACTUAL_VOLUME_UTIL = "actualVolumeUtil";
+
+            const std::string MAX_WEIGHT = "maxWeight";
             const std::string ACTUAL_WEIGHT = "actualWeight";
             const std::string ACTUAL_WEIGHT_UTIL = "actualWeightUtil";
+
             const std::string FITTED_ITEMS = "fittedItems";
+
         }
     };
 

@@ -29,8 +29,13 @@
 
 extern "C"
 {
-    const char *packToBinAlgorhitm(char *incomingJson, bool includeBins = 1, bool includeItems = 1,
-                                   bool itemDimensionsAfter = 0, int jsonPrecision = 5, double gravityStrength = 0.0, int mainSortMethod = 1)
+    const char *packToBinAlgorithm(char *incomingJson,
+                                   bool includeBins = 1,
+                                   bool includeItems = 1,
+                                   bool itemDimensionsAfter = 0,
+                                   int responsePrecision = 7,
+                                   double gravityStrength = 0.0,
+                                   int mainSortMethod = 1)
     {
 
         // int main()
@@ -41,13 +46,14 @@ extern "C"
         //     bool includeItems = 1;
         //     bool includeBins = 1;
         //     int mainSortMethod = 1;
-        //     int jsonPrecision = 5;
+        //     int responsePrecision = 7;
+        // std::ifstream incomingJson("/home/moschd/pomaster/packingOptimizerAlgos/packToBin/testfiles/nullutil.json");
 
-        // std::ifstream incomingJson("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/testjson.json");
+        // std::ifstream incomingJson("/home/moschd/pomaster/packingOptimizerAlgos/packToBin/testfiles/testjson.json");
         // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/testjson copy 2.json");
         // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_1000_items.json");
         // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_2500_items.json");
-        // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_5000_items.json");
+        // std::ifstream incomingJson ("/home/moschd/pomaster/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_5000_items.json");
         // std::ifstream incomingJson ("/home/moschd/packingOptimizerAlgos/packToBin/testfiles/cpp_vs_python_10000_items.json");
 
         Json::Reader reader;
@@ -71,7 +77,7 @@ extern "C"
                                 masterGravity,
                                 masterItemRegister);
 
-        // Init items and add them to the master register
+        /* Init items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
         {
             Item i(idx,
@@ -86,29 +92,28 @@ extern "C"
             PackingProcessor.masterItemRegister_->addItem(i);
         };
 
-        // Split items by consolidation key, start packing for each of them.
-        for (auto &sortedItemConsKeyVector : PackingProcessor.masterItemRegister_->GetSortedItemConsKeyVectors()
-        )
+        /* Split items by consolidation key, start packing for each of them. */
+        for (auto &sortedItemConsKeyVector : PackingProcessor.masterItemRegister_->GetSortedItemConsKeyVectors())
         {
             PackingProcessor.startPacking(sortedItemConsKeyVector);
         };
 
-        // Init outgoing json builder
-        jsonResponseBuilder outgoingJsonBuilder(jsonPrecision, includeBins, includeItems, itemDimensionsAfter);
+        /* Init outgoing json builder */
+        jsonResponseBuilder outgoingJsonBuilder(responsePrecision, includeBins, includeItems, itemDimensionsAfter);
         outgoingJsonBuilder.generate(PackingProcessor);
 
         // std::ofstream myfile;
-        // myfile.open ("ex1.txt");
+        // myfile.open("ex1.txt");
         // std::string output = Json::writeString(outgoingJsonBuilder.getBuilder(), outgoingJsonBuilder.getMessage());
         // myfile << output;
         // myfile.close();
-
-        return strdup(Json::writeString(outgoingJsonBuilder.getBuilder(), outgoingJsonBuilder.getMessage()).c_str());
 
         /* Just used when i want to time code execution. */
         // auto stop = std::chrono::high_resolution_clock::now();
         // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         // std::cout << duration.count() << std::endl;
+
+        return strdup(Json::writeString(outgoingJsonBuilder.getBuilder(), outgoingJsonBuilder.getMessage()).c_str());
 
         // return 0;
     };
@@ -116,7 +121,7 @@ extern "C"
 
 extern "C"
 {
-    const void packToBinAlgorhitmFreeMemory(char *outputPtr)
+    const void packToBinAlgorithmFreeMemory(char *outputPtr)
     {
         free(outputPtr);
     };

@@ -11,7 +11,7 @@ Make a function call to <i>packToBinAlgorhitm</i>.
 | includeBins |  bool  | 1 |
 | includeItems |  bool  | 1 |
 | itemDimensionsAfter |  bool  | 1 |
-| jsonPrecision |  int | 5 |
+| responsePrecision |  int | 7 |
 | gravityStrength |  double | 0.0 |
 | mainSortMethod |  int | 1 |
 
@@ -23,7 +23,7 @@ This parameter indicates if the bins should be included in the result. This is u
 This parameter indicates if the items should be included in the result. This is used if you are not interested in the individual item details inside each bin.
 #### itemDimensionsAfter
 This parameter indicates if the dimensions of the items in the response should be adjusted for the way that they are rotated.
-#### jsonPrecision
+#### responsePrecision
 This parameter controls the decimal precision in the response body.
 #### gravityStrength
 This parameter controls the level of gravity that needs to be taken into account. It is basically surface area expressed in percentage of the item to be placed that should be supported in order to be considered a valid item placement.

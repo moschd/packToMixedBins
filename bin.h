@@ -9,8 +9,8 @@ class Bin
 {
 private:
     double width_;
-    double height_;
     double depth_;
+    double height_;
     std::vector<int> items_;
     std::vector<int> unfittedItems_;
     double actualVolumeUtil_;
@@ -18,7 +18,8 @@ private:
     std::array<double, 3> topRightCorner_;
 
 public:
-    std::string id_;
+    int id_;
+    std::string type_;
     double maxWeight_;
     double maxVolume_;
     std::array<double, 3> placedItemsMaxDimensions_;
@@ -32,9 +33,10 @@ public:
     Gravity *passedOnMasterGravity_;
     KdTree *kdTree2_;
 
-    Bin(std::string aId, double aWidth, double aDepth, double aHeight, double aMaxWeight, Gravity *aGravity, ItemRegister *aItemRegister)
+    Bin(std::string aType, int aId, double aWidth, double aDepth, double aHeight, double aMaxWeight, Gravity *aGravity, ItemRegister *aItemRegister, int aEstimatedNumberOfItemFits)
     {
         id_ = aId;
+        type_ = aType;
         width_ = aWidth;
         depth_ = aDepth;
         height_ = aHeight;
@@ -45,9 +47,10 @@ public:
         passedOnMasterGravity_ = aGravity;
         passedOnMasterItemRegister_ = aItemRegister;
         placedItemsMaxDimensions_ = {0, 0, 0};
-        actualVolumeUtil_, actualWeightUtil_ = 0;
+        actualVolumeUtil_ = 0.0;
+        actualWeightUtil_ = 0.0;
 
-        kdTree2_ = new KdTree(6, topRightCorner_);
+        kdTree2_ = new KdTree(aEstimatedNumberOfItemFits, topRightCorner_);
     };
 
     std::vector<int> &GetFittedItems()
@@ -58,7 +61,18 @@ public:
     {
         return unfittedItems_;
     };
-
+    double getWidth()
+    {
+        return width_;
+    };
+    double getDepth()
+    {
+        return depth_;
+    };
+    double getHeight()
+    {
+        return height_;
+    };
     double GetActVolumeUtilizationPercentage()
     {
         return actualVolumeUtil_ / maxVolume_ * 100;
@@ -144,6 +158,7 @@ public:
         updatePlacedMaxItemDimensions(itemOb, axis);
 
         // Increment the bin weight/volume
+
         actualWeightUtil_ += itemOb->weight_;
         actualVolumeUtil_ += itemOb->volume_;
 
@@ -280,11 +295,11 @@ public:
                     continue;
                 };
 
-                // check for Z intersection, if there is intersection store some caching and stop this item iteration.
+                /* check for Z intersection, if there is intersection store some caching and stop this item iteration. */
                 if (!(intersectCandidate->iphf_ <= itemBeingPlacedZPos || intersectCandidate->position_[2] >= (itemBeingPlacedZPos + itemBeingPlaced->height_)))
                 {
 
-                    // checks if point is in cube, if so then no rotation will help fit and the item position is invalid no matter how we rotate
+                    /* checks if point is in cube, if so then no rotation will help fit and the item position is invalid no matter how we rotate */
                     noRotationWillMakeItemFit = (intersectCandidate->position_[0] <= itemBeingPlacedXPos && itemBeingPlacedXPos <= intersectCandidate->ipwf_ &&
                                                  intersectCandidate->position_[1] <= itemBeingPlacedYPos && itemBeingPlacedYPos <= intersectCandidate->ipdf_ &&
                                                  intersectCandidate->position_[2] <= itemBeingPlacedZPos && itemBeingPlacedZPos <= intersectCandidate->iphf_);

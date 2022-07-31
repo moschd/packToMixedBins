@@ -10,16 +10,16 @@ public:
     double width_;
     double depth_;
     double height_;
-    double weight_;
     double original_width_;
     double original_height_;
     double original_depth_;
+    double weight_;
+    double volume_;
+    std::array<double, 3> position_;
+    std::string itemConsolidationKey_;
     std::string allowedRotations_;
     int rotationType_;
-    std::string itemConsolidationKey_;
-    std::array<double, 3> position_;
     std::string rotationTypeDescription_;
-    double volume_;
 
     double ipwf_;
     double ipdf_;
@@ -114,18 +114,6 @@ public:
             rotationTypeDescription_ = "Rotate the box around the z-axis by 90° and then around the x-axis by 90°";
             break;
         };
-    };
-
-    void printMe()
-    {
-        std::cout << id_ << " p: ";
-        for (auto pos : position_)
-        {
-            std::cout << pos << " ";
-        };
-        std::cout << " d: " << width_ << " " << depth_ << " " << height_;
-        std::cout << "Fs: " << ipwf_ << " " << ipdf_ << " " << iphf_;
-        std::cout << "\n";
     };
 };
 

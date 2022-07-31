@@ -7,9 +7,12 @@ struct Nodex
     bool isLeaf_;
     int myDepth_;
     int leafNr_;
-    Nodex *left_, *right_;
+    Nodex *left_;
+    Nodex *right_;
     std::vector<int> myChildren_;
-    std::array<double, 3> partitionPoint_, minSearchDimensions_, maxSearchDimensions_;
+    std::array<double, 3> partitionPoint_;
+    std::array<double, 3> minSearchDimensions_;
+    std::array<double, 3> maxSearchDimensions_;
 };
 
 /**
@@ -31,7 +34,8 @@ Nodex *genNodex(std::array<double, 3> aPartitionPoint, std::array<double, 3> aMi
     branch->myDepth_ = aCurrentDepth;
     branch->minSearchDimensions_ = aMins;
     branch->maxSearchDimensions_ = aMaxs;
-    branch->left_ = branch->right_ = NULL;
+    branch->left_ = NULL;
+    branch->right_ = NULL;
     branch->partitionPoint_ = aPartitionPoint;
     return branch;
 };
@@ -46,9 +50,9 @@ private:
     int nrOfLeaves_;
 
 public:
-    KdTree(int aRequestedDepth, std::array<double, 3> aMaxDimensions)
+    KdTree(int aEstimatedNumberOfItemFits, std::array<double, 3> aMaxDimensions)
     {
-        maxDepth_ = aRequestedDepth;
+        calculateMaxDepth(aEstimatedNumberOfItemFits);
         minDimensions_ = {0, 0, 0};
         maxDimensions_ = aMaxDimensions;
 
@@ -66,10 +70,17 @@ public:
         return treeRoot_;
     };
 
-    void calculateMaxDepth(int aEstimatedRequiredBins, int aNumberOfItemsToBePacked)
+    /**
+     * @brief Calculates the depth of the tree that will be generated.
+     *
+     * This method calculates what would be the desired depth of the tree.
+     * This attempts to make the algorithm more efficient by scaling the tree depending of the estimated number of items that will fit in the bin.
+     *
+     * @param aEstimatedNumberOfItemFits - integer indicating the estimated number of items that will be in the bin when packing has finished.
+     */
+    void calculateMaxDepth(int aEstimatedNumberOfItemFits)
     {
-        // the double is the desired number of items per bin section
-        maxDepth_ = ceil(sqrt((aNumberOfItemsToBePacked / aEstimatedRequiredBins) / 750.0));
+        maxDepth_ = ceil(sqrt(aEstimatedNumberOfItemFits / 125) + 1);
     };
 
     /**

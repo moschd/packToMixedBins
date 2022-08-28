@@ -1,237 +1,194 @@
 #ifndef BIN_H
 #define BIN_H
 
-#include "constants.h"
-#include "miscfunctions.h"
-#include "3r-kd-tree.h"
-
-class Bin
+class Bin : public Rectangle, public CalculationCache
 {
 private:
-    double width_;
-    double depth_;
-    double height_;
     std::vector<int> items_;
     std::vector<int> unfittedItems_;
     double actualVolumeUtil_;
     double actualWeightUtil_;
-    std::array<double, 3> topRightCorner_;
 
 public:
     int id_;
     std::string type_;
     double maxWeight_;
-    double maxVolume_;
     std::array<double, 3> placedItemsMaxDimensions_;
-
     std::vector<int> xFreeItems_;
     std::vector<int> yFreeItems_;
     std::vector<int> zFreeItems_;
+    ItemRegister *masterItemRegister_;
+    Gravity *masterGravity_;
+    KdTree *kdTree_;
 
-    std::unordered_map<std::array<double, 3>, std::array<double, 3>, itemPositionHashFunction, itemPositionEqualsFunction> intersectPosDimCaching_;
-    ItemRegister *passedOnMasterItemRegister_;
-    Gravity *passedOnMasterGravity_;
-    KdTree *kdTree2_;
-
-    Bin(std::string aType, int aId, double aWidth, double aDepth, double aHeight, double aMaxWeight, Gravity *aGravity, ItemRegister *aItemRegister, int aEstimatedNumberOfItemFits)
+    Bin(std::string aType,
+        int aId,
+        double aWidth,
+        double aDepth,
+        double aHeight,
+        double aMaxWeight,
+        Gravity *aGravity,
+        ItemRegister *aItemRegister,
+        int aEstimatedNumberOfItemFits) : Rectangle(aWidth, aDepth, aHeight)
     {
-        id_ = aId;
-        type_ = aType;
-        width_ = aWidth;
-        depth_ = aDepth;
-        height_ = aHeight;
-        maxVolume_ = width_ * depth_ * height_;
-        topRightCorner_ = {width_, depth_, height_};
-
-        maxWeight_ = aMaxWeight;
-        passedOnMasterGravity_ = aGravity;
-        passedOnMasterItemRegister_ = aItemRegister;
-        placedItemsMaxDimensions_ = {0, 0, 0};
-        actualVolumeUtil_ = 0.0;
-        actualWeightUtil_ = 0.0;
-
-        kdTree2_ = new KdTree(aEstimatedNumberOfItemFits, topRightCorner_);
+        Bin::id_ = aId;
+        Bin::type_ = aType;
+        Bin::maxWeight_ = aMaxWeight;
+        Bin::masterGravity_ = aGravity;
+        Bin::masterItemRegister_ = aItemRegister;
+        Bin::placedItemsMaxDimensions_ = {0, 0, 0};
+        Bin::actualVolumeUtil_ = 0.0;
+        Bin::actualWeightUtil_ = 0.0;
+        Bin::kdTree_ = new KdTree(aEstimatedNumberOfItemFits, topRightCorner_);
     };
 
-    std::vector<int> &GetFittedItems()
+    std::vector<int> &getFittedItems()
     {
-        return items_;
+        return Bin::items_;
     };
-    std::vector<int> &GetUnfittedItems()
+    std::vector<int> &getUnfittedItems()
     {
-        return unfittedItems_;
+        return Bin::unfittedItems_;
     };
-    double getWidth()
+
+    double getActVolumeUtilizationPercentage()
     {
-        return width_;
+        return Bin::actualVolumeUtil_ / Rectangle::maxVolume_ * 100;
     };
-    double getDepth()
+    double getActWeightUtilizationPercentage()
     {
-        return depth_;
+        return Bin::actualWeightUtil_ / Bin::maxWeight_ * 100;
     };
-    double getHeight()
+    double getActWeightUtil()
     {
-        return height_;
+        return Bin::actualWeightUtil_;
     };
-    double GetActVolumeUtilizationPercentage()
+    double getActVolumeUtil()
     {
-        return actualVolumeUtil_ / maxVolume_ * 100;
-    };
-    double GetActWeightUtilizationPercentage()
-    {
-        return actualWeightUtil_ / maxWeight_ * 100;
-    };
-    double GetActWeightUtil()
-    {
-        return actualWeightUtil_;
-    };
-    double GetActVolumeUtil()
-    {
-        return actualVolumeUtil_;
+        return Bin::actualVolumeUtil_;
     };
 
     void updatePlacedMaxItemDimensions(Item *it, int axis)
     {
         switch (axis)
         {
-        case constants::AxisWidth:
-            placedItemsMaxDimensions_[0] = std::max(placedItemsMaxDimensions_[0], it->width_);
+        case constants::axis::WIDTH:
+            Bin::placedItemsMaxDimensions_[constants::axis::WIDTH] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::WIDTH], it->Item::width_);
             break;
-        case constants::AxisDepth:
-            placedItemsMaxDimensions_[1] = std::max(placedItemsMaxDimensions_[1], it->depth_);
+        case constants::axis::DEPTH:
+            Bin::placedItemsMaxDimensions_[constants::axis::DEPTH] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::DEPTH], it->Item::depth_);
             break;
-        case constants::AxisHeight:
-            placedItemsMaxDimensions_[2] = std::max(placedItemsMaxDimensions_[2], it->height_);
+        case constants::axis::HEIGHT:
+            Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT], it->Item::height_);
             break;
         };
     };
-    void removeFromXFreeItems(const Item *it)
+
+    void removeFromXFreeItems(Item *itemBeingPlaced)
     {
-        xFreeItems_.erase(
-            std::remove_if(begin(xFreeItems_), end(xFreeItems_), [&](int &itemInBin) -> bool
+        Bin::xFreeItems_.erase(
+            std::remove_if(begin(Bin::xFreeItems_), end(Bin::xFreeItems_), [&](int &itemInBin) -> bool
                            { 
-                    Item* iib = &passedOnMasterItemRegister_->getItem(itemInBin);
-                    return (it->position_[0] == iib->ipwf_    &&
-                            !(it->position_[1] >= iib->ipdf_  && 
-                            it->ipdf_ <= iib->position_[1])   &&
-                            !(it->position_[2] >= iib->iphf_  && 
-                            it->iphf_ <= iib->position_[2])); }),
+                    Item* iib = &Bin::masterItemRegister_->ItemRegister::getItem(itemInBin);
+                    return (itemBeingPlaced->Item::position_[constants::axis::WIDTH] == iib->Item::furthestPointWidth_ &&
+                            Geometry::intersectingY(itemBeingPlaced,iib) && Geometry::intersectingZ(itemBeingPlaced,iib)); }),
             end(xFreeItems_));
     };
-    void removeFromYFreeItems(const Item *it)
+
+    void removeFromYFreeItems(Item *it)
     {
-        yFreeItems_.erase(
-            std::remove_if(begin(yFreeItems_), end(yFreeItems_), [&](int &itemInBin) -> bool
+        Bin::yFreeItems_.erase(
+            std::remove_if(begin(Bin::yFreeItems_), end(Bin::yFreeItems_), [&](int &itemInBin) -> bool
                            { 
-                Item* iib = &passedOnMasterItemRegister_->getItem(itemInBin);
-                return (it->position_[1] == iib->ipdf_    && 
-                        !(it->position_[0] >= iib->ipwf_  && 
-                        it->ipwf_ <= iib->position_[0])   &&
-                        !(it->position_[2] >= iib->iphf_  && 
-                        it->iphf_ <= iib->position_[2])); }),
-            end(yFreeItems_));
+                Item* iib = &masterItemRegister_->ItemRegister::getItem(itemInBin);
+                return (it->Item::position_[constants::axis::DEPTH] == iib->Item::furthestPointDepth_ && 
+                        Geometry::intersectingX(it,iib) && Geometry::intersectingZ(it,iib)); }),
+            end(Bin::yFreeItems_));
     };
-    void removeFromZFreeItems(const Item *it)
+
+    void removeFromZFreeItems(Item *it)
     {
-        zFreeItems_.erase(
-            std::remove_if(begin(zFreeItems_), end(zFreeItems_), [&](int &itemInBin) -> bool
+        Bin::zFreeItems_.erase(
+            std::remove_if(begin(Bin::zFreeItems_), end(Bin::zFreeItems_), [&](int &itemInBin) -> bool
                            { 
-                Item* iib = &passedOnMasterItemRegister_->getItem(itemInBin);
-                return (iib->iphf_ == it->position_[2]        &&
-                        iib->position_[0] <= it->position_[0] && 
-                        it->position_[0] <= iib->ipwf_        &&
-                        iib->position_[1] <= it->position_[1] &&
-                        it->position_[1] <= iib->ipdf_); }),
-            end(zFreeItems_));
+                Item* iib = &masterItemRegister_->ItemRegister::getItem(itemInBin);
+                return (it->Item::position_[constants::axis::HEIGHT] == iib->Item::furthestPointHeight_ &&
+                        Geometry::intersectingX(it,iib) && Geometry::intersectingY(it,iib)); }),
+            end(Bin::zFreeItems_));
     };
 
-    void UpdateWithNewFittedItem(int &it, int axis)
+    void updateWithNewFittedItem(int &it, int binAxis)
     {
-        Item *itemOb = &passedOnMasterItemRegister_->getItem(it);
+        Bin::items_.push_back(it);
+        Item *itemOb = &masterItemRegister_->ItemRegister::getItem(it);
+        Bin::actualWeightUtil_ += itemOb->Item::weight_;
+        Bin::actualVolumeUtil_ += itemOb->Item::maxVolume_;
+        Bin::updatePlacedMaxItemDimensions(itemOb, binAxis);
+        Bin::kdTree_->KdTree::addItemKeyToLeafHelper(it,
+                                                     {itemOb->Item::furthestPointWidth_,
+                                                      itemOb->Item::furthestPointDepth_,
+                                                      itemOb->Item::furthestPointHeight_});
 
-        // Add item to the bin
-        items_.push_back(it);
-
-        kdTree2_->addItemKeyToLeafHelper(it, {itemOb->ipwf_, itemOb->ipdf_, itemOb->iphf_});
-
-        // Update the max placed item dimensions
-        updatePlacedMaxItemDimensions(itemOb, axis);
-
-        // Increment the bin weight/volume
-
-        actualWeightUtil_ += itemOb->weight_;
-        actualVolumeUtil_ += itemOb->volume_;
-
-        // Add item to free item lists
-        xFreeItems_.push_back(it);
-        yFreeItems_.push_back(it);
-
-        // Insert the new item based on sorted height
-        auto hiter = std::upper_bound(zFreeItems_.cbegin(), zFreeItems_.cend(), it, [&](const int i1, const int i2)
-                                      { return passedOnMasterItemRegister_->getItem(i1).iphf_ < passedOnMasterItemRegister_->getItem(i2).iphf_; });
-        zFreeItems_.insert(hiter, it);
-
-        // Remove items from potential items where positions are overlapping
-        removeFromZFreeItems(itemOb);
-        if (axis != constants::AxisHeight)
-        {
-            removeFromXFreeItems(itemOb);
-            removeFromYFreeItems(itemOb);
-        };
+        // Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.
+        auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
+                                      { return masterItemRegister_->ItemRegister::getItem(i1).Item::furthestPointHeight_ < masterItemRegister_->ItemRegister::getItem(i2).Item::furthestPointHeight_; });
+        Bin::xFreeItems_.push_back(it);
+        Bin::yFreeItems_.push_back(it);
+        Bin::zFreeItems_.insert(hiter, it);
+        Bin::removeFromXFreeItems(itemOb);
+        Bin::removeFromZFreeItems(itemOb);
+        Bin::removeFromYFreeItems(itemOb);
     };
 
-    void FindItemPosition(int &itemToFitKey)
+    void findItemPosition(int &itemToFitKey)
     {
         bool fitted = 0;
 
         std::vector<int> itemsWithFreeCorrespondingAxis;
-        Item *itemToFit = &passedOnMasterItemRegister_->getItem(itemToFitKey);
+        Item *itemToFit = &masterItemRegister_->ItemRegister::getItem(itemToFitKey);
 
-        for (const auto axis : constants::AllAxis)
+        for (const auto binAxis : constants::axis::ALL)
         {
-            switch (axis)
+            switch (binAxis)
             {
-            case constants::AxisWidth:
-                itemsWithFreeCorrespondingAxis = xFreeItems_;
+            case constants::axis::WIDTH:
+                itemsWithFreeCorrespondingAxis = Bin::xFreeItems_;
                 break;
-            case constants::AxisDepth:
-                itemsWithFreeCorrespondingAxis = yFreeItems_;
+            case constants::axis::DEPTH:
+                itemsWithFreeCorrespondingAxis = Bin::yFreeItems_;
                 break;
-            case constants::AxisHeight:
-                itemsWithFreeCorrespondingAxis = zFreeItems_;
+            case constants::axis::HEIGHT:
+                itemsWithFreeCorrespondingAxis = Bin::zFreeItems_;
                 break;
             };
 
             for (const auto itemInBinKey : itemsWithFreeCorrespondingAxis)
             {
-                Item *iib = &passedOnMasterItemRegister_->getItem(itemInBinKey);
-                itemToFit->position_ = iib->position_;
+                Item *iib = &masterItemRegister_->ItemRegister::getItem(itemInBinKey);
+                itemToFit->Item::position_ = iib->Item::position_;
 
-                switch (axis)
+                switch (binAxis)
                 {
-                case constants::AxisWidth:
-                    itemToFit->position_[0] += iib->width_;
+                case constants::axis::WIDTH:
+                    itemToFit->Item::position_[constants::axis::WIDTH] += iib->Item::width_;
                     break;
-                case constants::AxisDepth:
-                    itemToFit->position_[1] += iib->depth_;
+                case constants::axis::DEPTH:
+                    itemToFit->Item::position_[constants::axis::DEPTH] += iib->Item::depth_;
                     break;
-                case constants::AxisHeight:
-                    itemToFit->position_[2] += iib->height_;
+                case constants::axis::HEIGHT:
+                    itemToFit->Item::position_[constants::axis::HEIGHT] += iib->Item::height_;
                     break;
                 };
-                const auto &GetIntersectCachePBResult = intersectPosDimCaching_.find(itemToFit->position_);
-                if (GetIntersectCachePBResult != this->intersectPosDimCaching_.end())
+
+                if (CalculationCache::itemPositionCacheHit(itemToFit))
                 {
-                    if (itemToFit->width_ >= GetIntersectCachePBResult->second[0] && itemToFit->depth_ >= GetIntersectCachePBResult->second[1] && itemToFit->height_ >= GetIntersectCachePBResult->second[2])
-                    {
-                        continue;
-                    };
+                    continue;
                 };
 
-                if (this->PlaceItemInBin(itemToFitKey))
+                if (Bin::placeItemInBin(itemToFitKey))
                 {
                     fitted = 1;
-                    this->UpdateWithNewFittedItem(itemToFitKey, axis);
+                    Bin::updateWithNewFittedItem(itemToFitKey, binAxis);
                     break;
                 };
             };
@@ -242,152 +199,95 @@ public:
         };
         if (!fitted)
         {
-            unfittedItems_.push_back(itemToFitKey);
+            Bin::unfittedItems_.push_back(itemToFitKey);
         };
     };
 
-    bool PlaceItemInBin(int &it)
+    /**
+     * @brief Tries to place an item inside a bin.
+     *
+     * This function can be considered the heart of the algorithm.
+     *
+     * @param it
+     * @return true
+     * @return false
+     */
+    bool placeItemInBin(int &it)
     {
+        bool intersectionFound = 0;
+        Item *itemBeingPlaced = &Bin::masterItemRegister_->ItemRegister::getItem(it);
 
-        bool R3ItemIntersection, noRotationWillMakeItemFit = 0;
-        bool gravityFit = passedOnMasterGravity_->gravityEnabled_;
-
-        Item *itemBeingPlaced = &passedOnMasterItemRegister_->getItem(it);
-        const double itemBeingPlacedXPos = itemBeingPlaced->position_[0];
-        const double itemBeingPlacedYPos = itemBeingPlaced->position_[1];
-        const double itemBeingPlacedZPos = itemBeingPlaced->position_[2];
-
-        std::vector<int> intersectRiskItemKeys;
-        std::vector<Item *> intersectRiskItemPtrs;
-
-        const double itemMaxDimension = std::max(std::max(itemBeingPlaced->width_, itemBeingPlaced->depth_), itemBeingPlaced->height_);
-
-        kdTree2_->getPotentialIntersectingItemKeys(kdTree2_->getRoot(),
-                                                   kdTree2_->getRoot()->myDepth_,
-                                                   itemBeingPlaced->position_,
-                                                   {placedItemsMaxDimensions_[0] + itemMaxDimension,
-                                                    placedItemsMaxDimensions_[1] + itemMaxDimension,
-                                                    placedItemsMaxDimensions_[2] + itemMaxDimension},
-                                                   intersectRiskItemKeys);
-
-        for (int i = intersectRiskItemKeys.size(); i--;)
+        /* Loop over items allowed rotation in order to find a fitting place. */
+        for (int stringCharCounter = 0; stringCharCounter < itemBeingPlaced->Item::allowedRotations_.std::string::size(); stringCharCounter++)
         {
-            intersectRiskItemPtrs.push_back(&passedOnMasterItemRegister_->getItem(intersectRiskItemKeys[i]));
-        };
 
-        // iter over item allowed rotations
-        for (int stringCharCounter = 0; stringCharCounter < itemBeingPlaced->allowedRotations_.size(); stringCharCounter++)
-        {
-            itemBeingPlaced->SetNewItemDimensions(itemBeingPlaced->allowedRotations_[stringCharCounter] - '0');
+            /* Rotate item according to current rotation type. */
+            itemBeingPlaced->Item::rotate(itemBeingPlaced->Item::allowedRotations_[stringCharCounter] - '0');
 
-            if (width_ < itemBeingPlacedXPos + itemBeingPlaced->width_ ||
-                depth_ < itemBeingPlacedYPos + itemBeingPlaced->depth_ ||
-                height_ < itemBeingPlacedZPos + itemBeingPlaced->height_)
+            /* Check if item is not exceeding the bin dimensions, if so try a different rotation. */
+            if (Bin::width_ < itemBeingPlaced->Item::furthestPointWidth_ ||
+                Bin::depth_ < itemBeingPlaced->Item::furthestPointDepth_ ||
+                Bin::height_ < itemBeingPlaced->Item::furthestPointHeight_)
             {
                 continue;
             };
 
-            for (auto &intersectCandidate : intersectRiskItemPtrs)
-            {
+            /* Search kdTree to find items which could be intersecting. */
+            std::vector<int> intersectCandidates;
+            Bin::kdTree_->getIntersectCandidates(Bin::kdTree_->KdTree::getRoot(),
+                                                 Bin::kdTree_->KdTree::getRoot()->Nodex::myDepth_,
+                                                 itemBeingPlaced->Item::position_,
+                                                 {Bin::placedItemsMaxDimensions_[constants::axis::WIDTH] + itemBeingPlaced->Item::width_,
+                                                  Bin::placedItemsMaxDimensions_[constants::axis::DEPTH] + itemBeingPlaced->Item::depth_,
+                                                  Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT] + itemBeingPlaced->Item::height_},
+                                                 intersectCandidates);
 
-                if (itemBeingPlacedXPos >= intersectCandidate->ipwf_ || itemBeingPlacedYPos >= intersectCandidate->ipdf_ || itemBeingPlacedXPos + itemBeingPlaced->width_ <= intersectCandidate->position_[0] || itemBeingPlacedYPos + itemBeingPlaced->depth_ <= intersectCandidate->position_[1])
+            /* Iterate over candidates and check for collision. */
+            for (auto intersectCandidateKey : intersectCandidates)
+            {
+                Item *intersectCandidate = &masterItemRegister_->ItemRegister::getItem(intersectCandidateKey);
+
+                /*  Check if X and Y axis are intersecting with a item already placed in the bin. */
+                if (!Geometry::intersectingXY(itemBeingPlaced, intersectCandidate))
                 {
                     continue;
                 };
 
-                /* check for Z intersection, if there is intersection store some caching and stop this item iteration. */
-                if (!(intersectCandidate->iphf_ <= itemBeingPlacedZPos || intersectCandidate->position_[2] >= (itemBeingPlacedZPos + itemBeingPlaced->height_)))
+                /*  X and Y axis were found to be intersecting, check Z axis.
+                    If also intersects then create cache entry and break out of current rotation type loop. */
+                if (Geometry::intersectingZ(itemBeingPlaced, intersectCandidate))
                 {
-
-                    /* checks if point is in cube, if so then no rotation will help fit and the item position is invalid no matter how we rotate */
-                    noRotationWillMakeItemFit = (intersectCandidate->position_[0] <= itemBeingPlacedXPos && itemBeingPlacedXPos <= intersectCandidate->ipwf_ &&
-                                                 intersectCandidate->position_[1] <= itemBeingPlacedYPos && itemBeingPlacedYPos <= intersectCandidate->ipdf_ &&
-                                                 intersectCandidate->position_[2] <= itemBeingPlacedZPos && itemBeingPlacedZPos <= intersectCandidate->iphf_);
-
-                    /* Cache the smallest possible dimensions for this intersection */
-                    const double intersectCacheW = intersectCandidate->position_[0] - itemBeingPlacedXPos;
-                    const double intersectCacheD = intersectCandidate->position_[1] - itemBeingPlacedYPos;
-                    const double intersectCacheH = intersectCandidate->position_[2] - itemBeingPlacedZPos;
-
-                    const auto &GetIntersectCacheResult = intersectPosDimCaching_.find(itemBeingPlaced->position_);
-                    if (GetIntersectCacheResult == intersectPosDimCaching_.end())
-                    {
-                        intersectPosDimCaching_[itemBeingPlaced->position_] = {intersectCacheW, intersectCacheD, intersectCacheH};
-                    }
-                    else
-                    {
-                        intersectPosDimCaching_[itemBeingPlaced->position_] = {
-                            std::min(GetIntersectCacheResult->second[0], intersectCacheW),
-                            std::min(GetIntersectCacheResult->second[1], intersectCacheD),
-                            std::min(GetIntersectCacheResult->second[2], intersectCacheH)};
-                    };
-                    R3ItemIntersection = 1;
-                    goto endIntersectionCheck;
+                    CalculationCache::addIntersection(itemBeingPlaced, intersectCandidate);
+                    intersectionFound = 1;
+                    break;
                 };
             };
 
-        endIntersectionCheck:
-            if (noRotationWillMakeItemFit) // no rotation will help fit the item.
+            /* Current rotation type was found to be intersecting with an already placed item. Try new rotation type. */
+            if (intersectionFound)
             {
-                break;
-            };
-            if (R3ItemIntersection) // intersection found, rotating might help.
-            {
-                R3ItemIntersection = 0;
+                intersectionFound = 0;
                 continue;
             };
 
-            if (!gravityFit) // gravity is enabled.
+            /*  Checks if gravity should be considered while placing this item.
+                This check is applied when an otherwise fitting item is found. */
+            if (Bin::masterGravity_->Gravity::gravityEnabled_) // gravity is enabled.
             {
-                if (0.0 == itemBeingPlacedZPos)
+                if (!Bin::masterGravity_->Gravity::hasSufficientSurfaceSupport(itemBeingPlaced,
+                                                                               Bin::getFittedItems(),
+                                                                               Bin::masterItemRegister_))
                 {
-                    gravityFit = 1;
-                }
-                else
-                {
-                    double totalCoveredSurfaceAreaPercentage = 0.0;
-                    for (auto &itemInSpace : GetFittedItems())
-                    {
-                        Item *iis = &passedOnMasterItemRegister_->getItem(itemInSpace);
-                        if (gravityFit)
-                        {
-                            break;
-                        };
-                        if (iis->iphf_ != itemBeingPlacedZPos)
-                        {
-                            continue;
-                        };
-                        if (!(iis->ipwf_ <= itemBeingPlacedXPos ||
-                              (itemBeingPlacedXPos + itemBeingPlaced->width_) <= iis->position_[0] ||
-                              iis->ipdf_ <= itemBeingPlacedYPos ||
-                              (itemBeingPlacedYPos + itemBeingPlaced->depth_) <= iis->position_[1]))
-                        {
-
-                            totalCoveredSurfaceAreaPercentage += std::max(0.0, std::min(iis->ipwf_, (itemBeingPlacedXPos + itemBeingPlaced->width_)) - std::max(iis->position_[0], itemBeingPlacedXPos)) *
-                                                                 std::max(0.0, std::min(iis->ipdf_, (itemBeingPlacedYPos + itemBeingPlaced->depth_)) - std::max(iis->position_[1], itemBeingPlacedYPos)) / (itemBeingPlaced->width_ * itemBeingPlaced->depth_) * 100;
-
-                            gravityFit = totalCoveredSurfaceAreaPercentage >= passedOnMasterGravity_->gravityStrengthPercentage_;
-                        };
-                    };
-                }
-            };
-            if (!gravityFit)
-            {
-                continue;
+                    continue;
+                };
             };
 
-            /* If this point is reached then fit=true, set used rotation type and return true to place item in bin */
-            itemBeingPlaced->rotationType_ = itemBeingPlaced->allowedRotations_[stringCharCounter] - '0';
-            passedOnMasterItemRegister_->getItem(it).SetRotationTypeDesc();
-            passedOnMasterItemRegister_->getItem(it).SetItemDimensionInfo();
-
+            /* If this point is reached then the item fits in the bin. */
             return 1;
         };
 
-        /* If this point is reached then fit=false, restore item to original dimensions */
-        itemBeingPlaced->SetNewItemDimensions(99);
-        itemBeingPlaced->position_ = constants::START_POSITION;
-
+        /* If this point is reached then the item didnt find a place, restore item to original dimensions. */
+        itemBeingPlaced->Item::reset();
         return 0;
     };
 };

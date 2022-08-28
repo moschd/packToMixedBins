@@ -1,10 +1,7 @@
-#include <jsoncpp/json/json.h>
-#include "packer.h"
-#include "item.h"
-#include "bin.h"
-#include "itemregister.h"
+#ifndef RESPONSE_BUILDER_H
+#define RESPONSE_BUILDER_H
 
-class jsonResponseBuilder
+class ResponseBuilder
 {
 private:
     int precision_;
@@ -17,38 +14,38 @@ private:
 
     void configureBuilder()
     {
-        builder_["indentation"] = indentation_;
-        builder_.settings_["precision"] = precision_;
+        ResponseBuilder::builder_["indentation"] = ResponseBuilder::indentation_;
+        ResponseBuilder::builder_.settings_["precision"] = ResponseBuilder::precision_;
     };
 
     Json::Value itemToJson(const Item &item)
     {
         Json::Value JsonItem;
-        JsonItem[constants::json::item::ID] = item.id_;
-        JsonItem[constants::json::item::WIDTH] = (itemDimensionsAfter_ ? item.width_ : item.original_width_);
-        JsonItem[constants::json::item::DEPTH] = (itemDimensionsAfter_ ? item.depth_ : item.original_depth_);
-        JsonItem[constants::json::item::HEIGHT] = (itemDimensionsAfter_ ? item.height_ : item.original_height_);
-        JsonItem[constants::json::item::WEIGHT] = item.weight_;
-        JsonItem[constants::json::item::VOLUME] = item.volume_;
+        JsonItem[constants::json::item::ID] = item.Item::id_;
+        JsonItem[constants::json::item::WIDTH] = (ResponseBuilder::itemDimensionsAfter_ ? item.Item::width_ : item.Item::original_width_);
+        JsonItem[constants::json::item::DEPTH] = (ResponseBuilder::itemDimensionsAfter_ ? item.Item::depth_ : item.Item::original_depth_);
+        JsonItem[constants::json::item::HEIGHT] = (ResponseBuilder::itemDimensionsAfter_ ? item.Item::height_ : item.Item::original_height_);
+        JsonItem[constants::json::item::WEIGHT] = item.Item::weight_;
+        JsonItem[constants::json::item::VOLUME] = item.Item::maxVolume_;
 
-        if (item.itemConsolidationKey_.size())
+        if (item.Item::itemConsolidationKey_.size())
         {
-            JsonItem[constants::json::item::ITEM_CONS_KEY] = item.itemConsolidationKey_;
+            JsonItem[constants::json::item::ITEM_CONS_KEY] = item.Item::itemConsolidationKey_;
         };
 
-        JsonItem[constants::json::item::ALLOWED_ROTATIONS] = item.allowedRotations_;
-        JsonItem[constants::json::item::X_COORDINATE] = item.position_[0];
-        JsonItem[constants::json::item::Y_COORDINATE] = item.position_[1];
-        JsonItem[constants::json::item::Z_COORDINATE] = item.position_[2];
+        JsonItem[constants::json::item::ALLOWED_ROTATIONS] = item.Item::allowedRotations_;
+        JsonItem[constants::json::item::X_COORDINATE] = item.Item::position_[constants::axis::WIDTH];
+        JsonItem[constants::json::item::Y_COORDINATE] = item.Item::position_[constants::axis::DEPTH];
+        JsonItem[constants::json::item::Z_COORDINATE] = item.Item::position_[constants::axis::HEIGHT];
 
-        if (0 <= item.rotationType_ && item.rotationType_ < 6)
+        if (0 <= item.Item::rotationType_ && item.Item::rotationType_ < 6)
         {
-            JsonItem[constants::json::item::ROTATION_TYPE] = item.rotationType_;
+            JsonItem[constants::json::item::ROTATION_TYPE] = item.Item::rotationType_;
         };
 
-        if (item.rotationTypeDescription_.size())
+        if (item.Item::rotationTypeDescription_.size())
         {
-            JsonItem[constants::json::item::ROTATION_TYPE_DESCRIPTION] = item.rotationTypeDescription_;
+            JsonItem[constants::json::item::ROTATION_TYPE_DESCRIPTION] = item.Item::rotationTypeDescription_;
         };
 
         return JsonItem;
@@ -57,21 +54,21 @@ private:
     Json::Value binToJson(Bin &bin)
     {
         Json::Value mappedBin;
-        mappedBin[constants::json::bin::ID] = int(bin.id_);
-        mappedBin[constants::json::bin::TYPE] = bin.type_;
-        mappedBin[constants::json::bin::NR_OF_ITEMS] = int(bin.GetFittedItems().size());
+        mappedBin[constants::json::bin::ID] = int(bin.Bin::id_);
+        mappedBin[constants::json::bin::TYPE] = bin.Bin::type_;
+        mappedBin[constants::json::bin::NR_OF_ITEMS] = int(bin.Bin::getFittedItems().size());
 
-        mappedBin[constants::json::bin::MAX_WIDTH] = bin.getWidth();
-        mappedBin[constants::json::bin::MAX_DEPTH] = bin.getDepth();
-        mappedBin[constants::json::bin::MAX_HEIGHT] = bin.getHeight();
+        mappedBin[constants::json::bin::MAX_WIDTH] = bin.Bin::width_;
+        mappedBin[constants::json::bin::MAX_DEPTH] = bin.Bin::depth_;
+        mappedBin[constants::json::bin::MAX_HEIGHT] = bin.Bin::height_;
 
-        mappedBin[constants::json::bin::MAX_VOLUME] = bin.maxVolume_;
-        mappedBin[constants::json::bin::ACTUAL_VOLUME] = bin.GetActVolumeUtil();
-        mappedBin[constants::json::bin::ACTUAL_VOLUME_UTIL] = bin.GetActVolumeUtilizationPercentage();
+        mappedBin[constants::json::bin::MAX_VOLUME] = bin.Bin::maxVolume_;
+        mappedBin[constants::json::bin::ACTUAL_VOLUME] = bin.Bin::getActVolumeUtil();
+        mappedBin[constants::json::bin::ACTUAL_VOLUME_UTIL] = bin.Bin::getActVolumeUtilizationPercentage();
 
-        mappedBin[constants::json::bin::MAX_WEIGHT] = bin.maxWeight_;
-        mappedBin[constants::json::bin::ACTUAL_WEIGHT] = bin.GetActWeightUtil();
-        mappedBin[constants::json::bin::ACTUAL_WEIGHT_UTIL] = bin.GetActWeightUtilizationPercentage();
+        mappedBin[constants::json::bin::MAX_WEIGHT] = bin.Bin::maxWeight_;
+        mappedBin[constants::json::bin::ACTUAL_WEIGHT] = bin.Bin::getActWeightUtil();
+        mappedBin[constants::json::bin::ACTUAL_WEIGHT_UTIL] = bin.Bin::getActWeightUtilizationPercentage();
 
         return mappedBin;
     };
@@ -81,25 +78,25 @@ private:
         switch (exceptionType)
         {
         case 10:
-            outboundRoot_[constants::json::outbound::EXCEPTION] = "Every single item exceeds the bin capacity. None of the items could be packed.";
+            ResponseBuilder::outboundRoot_[constants::json::outbound::EXCEPTION] = "Every single item exceeds the bin capacity. None of the items could be packed.";
             break;
         };
     }
 
 public:
-    Json::StreamWriterBuilder &getBuilder() { return builder_; };
+    Json::StreamWriterBuilder &getBuilder() { return ResponseBuilder::builder_; };
 
-    Json::Value &getMessage() { return outboundRoot_; };
+    Json::Value &getMessage() { return ResponseBuilder::outboundRoot_; };
 
-    jsonResponseBuilder(int aPrecision, bool aIncludeBins, bool aIncludeItems, bool aItemDimensionsAfter)
+    ResponseBuilder(int aPrecision, bool aIncludeBins, bool aIncludeItems, bool aItemDimensionsAfter)
     {
-        indentation_ = "";
-        precision_ = aPrecision;
-        includeBins_ = aIncludeBins;
-        includeItems_ = aIncludeItems;
-        itemDimensionsAfter_ = aItemDimensionsAfter;
+        ResponseBuilder::indentation_ = "";
+        ResponseBuilder::precision_ = aPrecision;
+        ResponseBuilder::includeBins_ = aIncludeBins;
+        ResponseBuilder::includeItems_ = aIncludeItems;
+        ResponseBuilder::itemDimensionsAfter_ = aItemDimensionsAfter;
 
-        configureBuilder();
+        ResponseBuilder::configureBuilder();
     };
 
     /**
@@ -113,51 +110,56 @@ public:
     void generate(Packer PackingProcessor)
     {
 
-        if (!PackingProcessor.GetPackedBinVector().size())
+        if (!PackingProcessor.Packer::GetPackedBinVector().size())
         {
-            exceptionJson(10);
+            ResponseBuilder::exceptionJson(10);
             return;
         };
 
         /* Header information. */
-        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = int(PackingProcessor.GetPackedBinVector().size());
-        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = PackingProcessor.GetTotalVolumeUtilizationPercentage();
-        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = PackingProcessor.GetTotalWeightUtilizationPercentage();
+        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = int(PackingProcessor.Packer::GetPackedBinVector().size());
+        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = PackingProcessor.Packer::GetTotalVolumeUtilizationPercentage();
+        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = PackingProcessor.Packer::GetTotalWeightUtilizationPercentage();
 
         /* Check for items that did not get packed and include them in the header. */
-        if (!PackingProcessor.GetLastBin().GetUnfittedItems().empty())
+        if (!PackingProcessor.Packer::GetLastBin().Bin::getUnfittedItems().empty())
         {
             outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS] = Json::arrayValue;
-            for (auto &it : PackingProcessor.GetLastBin().GetUnfittedItems())
+            for (auto &it : PackingProcessor.Packer::GetLastBin().Bin::getUnfittedItems())
             {
-                outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(itemToJson(PackingProcessor.masterItemRegister_->getItem(it)));
+                outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(
+                    ResponseBuilder::itemToJson(
+                        PackingProcessor.Packer::masterItemRegister_->ItemRegister::getItem(it)));
             };
         };
 
-        for (auto &bi : PackingProcessor.GetPackedBinVector())
+        for (auto &bi : PackingProcessor.Packer::GetPackedBinVector())
         {
             /* Free memory again, how to do this in a more structured way? */
-            bi.kdTree2_->deleteAllNodesHelper();
-            delete bi.kdTree2_;
+            bi.Bin::kdTree_->KdTree::deleteAllNodesHelper();
+            delete bi.Bin::kdTree_;
         }
 
-        if (!includeBins_)
+        if (!ResponseBuilder::includeBins_)
         {
             return;
         };
 
-        for (auto &bi : PackingProcessor.GetPackedBinVector())
+        for (auto &bi : PackingProcessor.Packer::GetPackedBinVector())
         {
-            Json::Value mappedBin = binToJson(bi);
+            Json::Value mappedBin = ResponseBuilder::binToJson(bi);
 
-            if (includeItems_)
+            if (ResponseBuilder::includeItems_)
             {
-                for (auto &it : bi.GetFittedItems())
+                for (auto &it : bi.Bin::getFittedItems())
                 {
-                    mappedBin[constants::json::bin::FITTED_ITEMS].append(itemToJson(PackingProcessor.masterItemRegister_->getItem(it)));
+                    mappedBin[constants::json::bin::FITTED_ITEMS].append(
+                        ResponseBuilder::itemToJson(PackingProcessor.Packer::masterItemRegister_->ItemRegister::getItem(it)));
                 };
             };
-            outboundRoot_[constants::json::outbound::PACKED_BINS].append(mappedBin);
+            ResponseBuilder::outboundRoot_[constants::json::outbound::PACKED_BINS].append(mappedBin);
         };
     };
 };
+
+#endif

@@ -1,33 +1,46 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <array>
-#include <regex>
-
-// namespace to hold constants
 namespace constants
 {
-
-    constexpr int AxisWidth{0};
-    constexpr int AxisDepth{1};
-    constexpr int AxisHeight{2};
-
-    constexpr std::array<int, 3> AllAxis = {AxisWidth, AxisDepth, AxisHeight};
     constexpr std::array<double, 3> START_POSITION = {0, 0, 0};
 
-    constexpr int R{constants::AllAxis.size()};
+    namespace rotation
+    {
+        namespace type
+        {
+            constexpr const unsigned int WDH{0}; // {width_, depth_, height_};
+            constexpr const unsigned int DWH{1}; // {depth_, width_, height_};
+            constexpr const unsigned int HDW{2}; // {height_, depth_, width_};
+            constexpr const unsigned int DHW{3}; // {depth_, height_, width_};
+            constexpr const unsigned int WHD{4}; // {width_, height_, depth_};
+            constexpr const unsigned int HWD{5}; // {height_, width_, depth_};
+        }
+        namespace description
+        {
+            constexpr const std::array<char[76], 6> text = {"No box rotation",
+                                                            "Rotate the box around the z-axis by 90°",
+                                                            "Rotate the box around the x-axis by 90°",
+                                                            "Rotate the box around the x-axis by 90° and then around the z-axis by 90°",
+                                                            "Rotate the box around the y-axis by 90°",
+                                                            "Rotate the box around the z-axis by 90° and then around the x-axis by 90°"};
+        }
+    }
 
-    constexpr int RT_WDH{0};
-    constexpr int RT_DWH{1};
-    constexpr int RT_HDW{2};
-    constexpr int RT_DHW{3};
-    constexpr int RT_WHD{4};
-    constexpr int RT_HWD{5};
+    namespace axis
+    {
+        constexpr const unsigned int WIDTH{0};
+        constexpr const unsigned int DEPTH{1};
+        constexpr const unsigned int HEIGHT{2};
+        constexpr const std::array<int, 3> ALL = {WIDTH, DEPTH, HEIGHT};
+    }
+
+    constexpr const unsigned int R{constants::axis::ALL.size()};
 
     namespace parameter
     {
-        const int VOLUME = 1;
-        const int WEIGHT = 2;
+        constexpr const unsigned int VOLUME = 1;
+        constexpr const unsigned int WEIGHT = 2;
     }
 
     namespace json
@@ -40,7 +53,6 @@ namespace constants
 
         namespace outbound
         {
-            const std::string BIN_DETAILS = "binDetails";
             const std::string PACKED_BINS = "packedBins";
             const std::string EXCEPTION = "exception";
 
@@ -84,23 +96,17 @@ namespace constants
             const std::string ID = "id";
             const std::string TYPE = "type";
             const std::string NR_OF_ITEMS = "nrOfItems";
-
             const std::string MAX_WIDTH = "maxWidth";
             const std::string MAX_DEPTH = "maxDepth";
             const std::string MAX_HEIGHT = "maxHeight";
-
             const std::string MAX_VOLUME = "maxVolume";
             const std::string ACTUAL_VOLUME = "actualVolume";
             const std::string ACTUAL_VOLUME_UTIL = "actualVolumeUtil";
-
             const std::string MAX_WEIGHT = "maxWeight";
             const std::string ACTUAL_WEIGHT = "actualWeight";
             const std::string ACTUAL_WEIGHT_UTIL = "actualWeightUtil";
-
             const std::string FITTED_ITEMS = "fittedItems";
-
         }
     };
-
 }
 #endif

@@ -1,5 +1,6 @@
 #ifndef PACKER_H
 #define PACKER_H
+
 class Packer
 {
 private:
@@ -16,46 +17,51 @@ public:
     ItemRegister *masterItemRegister_;
     Gravity *masterGravity_;
 
-    Packer(std::string aBinType, double aBinWidth, double aBinDepth, double aBinHeight, double aBinMaxWeight,
-           Gravity &aGravity, ItemRegister &aItemRegister)
+    Packer(std::string aBinType,
+           double aBinWidth,
+           double aBinDepth,
+           double aBinHeight,
+           double aBinMaxWeight,
+           Gravity &aGravity,
+           ItemRegister &aItemRegister)
     {
-        requestedBinType_ = aBinType;
-        requestedBinWidth_ = aBinWidth;
-        requestedBinDepth_ = aBinDepth;
-        requestedBinHeight_ = aBinHeight;
-        requestedBinMaxWeight_ = aBinMaxWeight;
-        requestedBinMaxVolume_ = (aBinWidth * aBinHeight * aBinDepth);
-        masterGravity_ = &aGravity;
-        masterItemRegister_ = &aItemRegister;
+        Packer::requestedBinType_ = aBinType;
+        Packer::requestedBinWidth_ = aBinWidth;
+        Packer::requestedBinDepth_ = aBinDepth;
+        Packer::requestedBinHeight_ = aBinHeight;
+        Packer::requestedBinMaxWeight_ = aBinMaxWeight;
+        Packer::requestedBinMaxVolume_ = (aBinWidth * aBinHeight * aBinDepth);
+        Packer::masterGravity_ = &aGravity;
+        Packer::masterItemRegister_ = &aItemRegister;
     };
 
     Bin &GetLastBin()
     {
-        return bins_.back();
+        return Packer::bins_.back();
     };
     std::vector<Bin> &GetPackedBinVector()
     {
-        return bins_;
+        return Packer::bins_;
     };
 
     double GetTotalVolumeUtilizationPercentage()
     {
         double actualVolumeUtil = 0;
-        for (auto &b : bins_)
+        for (auto &b : Packer::bins_)
         {
-            actualVolumeUtil += b.GetActVolumeUtil();
+            actualVolumeUtil += b.Bin::getActVolumeUtil();
         };
-        return std::max(0.0, actualVolumeUtil / (requestedBinWidth_ * requestedBinDepth_ * requestedBinHeight_ * bins_.size()) * 100);
+        return std::max(0.0, actualVolumeUtil / (Packer::requestedBinWidth_ * Packer::requestedBinDepth_ * Packer::requestedBinHeight_ * Packer::bins_.size()) * 100);
     };
 
     double GetTotalWeightUtilizationPercentage()
     {
         double actualWeightUtil = 0;
-        for (auto &b : bins_)
+        for (auto &b : Packer::bins_)
         {
-            actualWeightUtil += b.GetActWeightUtil();
+            actualWeightUtil += b.Bin::getActWeightUtil();
         };
-        return std::max(0.0, actualWeightUtil / (requestedBinMaxWeight_ * bins_.size()) * 100);
+        return std::max(0.0, actualWeightUtil / (Packer::requestedBinMaxWeight_ * Packer::bins_.size()) * 100);
     };
 
     /**
@@ -72,10 +78,10 @@ public:
         double cumulativeItemVolume = 0.0;
         for (auto itemKey : aItemsToBePacked)
         {
-            if ((masterItemRegister_->getItem(itemKey).volume_ + cumulativeItemVolume) < requestedBinMaxVolume_)
+            if ((Packer::masterItemRegister_->ItemRegister::getItem(itemKey).Item::maxVolume_ + cumulativeItemVolume) < Packer::requestedBinMaxVolume_)
             {
                 estimatedNumberOfItems += 1;
-                cumulativeItemVolume += masterItemRegister_->getItem(itemKey).volume_;
+                cumulativeItemVolume += Packer::masterItemRegister_->ItemRegister::getItem(itemKey).Item::maxVolume_;
             };
         };
         return estimatedNumberOfItems;
@@ -96,59 +102,59 @@ public:
             return;
         };
 
-        bins_.push_back(Bin(requestedBinType_,
-                            (bins_.size() + 1),
-                            requestedBinWidth_,
-                            requestedBinDepth_,
-                            requestedBinHeight_,
-                            requestedBinMaxWeight_,
-                            masterGravity_,
-                            masterItemRegister_,
-                            estimatedNumberOfItemsThatWillFitIntoBin(aItemsToBePacked)));
+        Packer::bins_.push_back(Bin(Packer::requestedBinType_,
+                                    (Packer::bins_.size() + 1),
+                                    Packer::requestedBinWidth_,
+                                    Packer::requestedBinDepth_,
+                                    Packer::requestedBinHeight_,
+                                    Packer::requestedBinMaxWeight_,
+                                    Packer::masterGravity_,
+                                    Packer::masterItemRegister_,
+                                    Packer::estimatedNumberOfItemsThatWillFitIntoBin(aItemsToBePacked)));
 
         for (auto &item_to_pack : aItemsToBePacked)
         {
-            Item *itp = &masterItemRegister_->getItem(item_to_pack);
+            Item *itp = &Packer::masterItemRegister_->ItemRegister::getItem(item_to_pack);
 
             /* Check if item would exceed weight or volume limit. */
-            if ((bins_.back().GetActVolumeUtil() + itp->volume_) > bins_.back().maxVolume_ ||
-                (bins_.back().GetActWeightUtil() + itp->weight_) > bins_.back().maxWeight_)
+            if ((Packer::bins_.back().Bin::getActVolumeUtil() + itp->Item::maxVolume_) > Packer::bins_.back().Bin::maxVolume_ ||
+                (Packer::bins_.back().Bin::getActWeightUtil() + itp->Item::weight_) > Packer::bins_.back().Bin::maxWeight_)
             {
-                bins_.back().GetUnfittedItems().push_back(itp->transientSysId_);
+                Packer::bins_.back().Bin::getUnfittedItems().push_back(itp->Item::transientSysId_);
                 continue;
             };
 
             /* Check if item would be the first item in the bin, if so take shortcut. */
-            if (bins_.back().GetFittedItems().empty())
+            if (Packer::bins_.back().Bin::getFittedItems().empty())
             {
-                if (bins_.back().PlaceItemInBin(item_to_pack))
+                if (Packer::bins_.back().Bin::placeItemInBin(item_to_pack))
                 {
-                    bins_.back().UpdateWithNewFittedItem(item_to_pack, 0);
+                    Packer::bins_.back().Bin::updateWithNewFittedItem(item_to_pack, 0);
                     continue;
                 };
             };
 
             /* Check if item is the same as previous unfitted item. */
-            if (!bins_.back().GetUnfittedItems().empty() &&
-                masterItemRegister_->getItem(bins_.back().GetUnfittedItems().back()).width_ == itp->width_ &&
-                masterItemRegister_->getItem(bins_.back().GetUnfittedItems().back()).height_ == itp->height_ &&
-                masterItemRegister_->getItem(bins_.back().GetUnfittedItems().back()).depth_ == itp->depth_)
+            if (!Packer::bins_.back().Bin::getUnfittedItems().empty() &&
+                Packer::masterItemRegister_->ItemRegister::getItem(Packer::bins_.back().Bin::getUnfittedItems().back()).Item::width_ == itp->Item::width_ &&
+                Packer::masterItemRegister_->ItemRegister::getItem(Packer::bins_.back().Bin::getUnfittedItems().back()).Item::height_ == itp->Item::height_ &&
+                Packer::masterItemRegister_->ItemRegister::getItem(Packer::bins_.back().Bin::getUnfittedItems().back()).Item::depth_ == itp->Item::depth_)
             {
-                bins_.back().GetUnfittedItems().push_back(itp->transientSysId_);
+                Packer::bins_.back().Bin::getUnfittedItems().push_back(itp->Item::transientSysId_);
                 continue;
             };
 
-            bins_.back().FindItemPosition(item_to_pack);
+            Packer::bins_.back().Bin::findItemPosition(item_to_pack);
         };
 
         /* Delete the created bin if it contains no items. */
-        if (aItemsToBePacked.size() == bins_.back().GetUnfittedItems().size())
+        if (aItemsToBePacked.size() == Packer::bins_.back().Bin::getUnfittedItems().size())
         {
-            GetPackedBinVector().pop_back();
+            Packer::GetPackedBinVector().pop_back();
             return;
         };
 
-        startPacking(bins_.back().GetUnfittedItems());
+        Packer::startPacking(bins_.back().Bin::getUnfittedItems());
     };
 };
 

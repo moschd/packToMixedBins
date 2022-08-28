@@ -1,11 +1,6 @@
 #ifndef ITEM_REGISTER_H
 #define ITEM_REGISTER_H
 
-#include <vector>
-#include "item.h"
-#include "miscfunctions.h"
-#include <unordered_map>
-
 struct ItemRegister
 {
 private:
@@ -16,30 +11,24 @@ private:
 public:
     ItemRegister(int aMainSortMethod)
     {
-        setMainSortMethod(aMainSortMethod);
+        ItemRegister::setMainSortMethod(aMainSortMethod);
     }
 
     void addItem(Item &item)
     {
-        completeItemVector_.push_back(item);
-        completeItemMap_.insert({item.transientSysId_, item});
+        ItemRegister::completeItemVector_.push_back(item);
+        ItemRegister::completeItemMap_.insert({item.Item::transientSysId_, item});
     };
 
-    std::vector<Item> &getCompleteItemVector()
+    std::vector<Item> &getAllItems()
     {
-        return completeItemVector_;
+        return ItemRegister::completeItemVector_;
     }
 
     Item &getItem(int key)
     {
-        return completeItemMap_.at(key);
+        return ItemRegister::completeItemMap_.at(key);
     }
-
-    void updateItemDetails(int key)
-    {
-        completeItemMap_.at(key).SetRotationTypeDesc();
-        completeItemMap_.at(key).SetItemDimensionInfo();
-    };
 
     /**
      * @brief Set the main sort method for the packer.
@@ -52,11 +41,11 @@ public:
     {
         if (aMainSortMethod == constants::parameter::WEIGHT)
         {
-            mainSortMethod_ = constants::parameter::WEIGHT;
+            ItemRegister::mainSortMethod_ = constants::parameter::WEIGHT;
         }
         else
         {
-            mainSortMethod_ = constants::parameter::VOLUME;
+            ItemRegister::mainSortMethod_ = constants::parameter::VOLUME;
         };
     }
 
@@ -68,27 +57,27 @@ public:
      */
     std::vector<std::vector<int>> GetSortedItemConsKeyVectors()
     {
-        if (mainSortMethod_ == constants::parameter::WEIGHT)
+        if (ItemRegister::mainSortMethod_ == constants::parameter::WEIGHT)
         {
-            std::sort(getCompleteItemVector().begin(), getCompleteItemVector().end(), consKeyAndWeightSorter());
+            std::sort(ItemRegister::getAllItems().begin(), ItemRegister::getAllItems().end(), consKeyAndWeightSorter());
         }
         else
         {
-            std::sort(getCompleteItemVector().begin(), getCompleteItemVector().end(), consKeyAndVolumeSorter());
+            std::sort(ItemRegister::getAllItems().begin(), ItemRegister::getAllItems().end(), consKeyAndVolumeSorter());
         }
 
-        std::vector<std::vector<int>> FinalSortedItemConsKeyVectors = {std::vector<int>{getCompleteItemVector()[0].transientSysId_}};
+        std::vector<std::vector<int>> FinalSortedItemConsKeyVectors = {std::vector<int>{ItemRegister::getAllItems()[0].Item::transientSysId_}};
 
-        for (int idx = 1; idx < getCompleteItemVector().size(); idx++)
+        for (int idx = 1; idx < ItemRegister::getAllItems().size(); idx++)
         {
-            if (getCompleteItemVector()[idx].itemConsolidationKey_ ==
-                getItem(FinalSortedItemConsKeyVectors.back().back()).itemConsolidationKey_)
+            if (ItemRegister::getAllItems()[idx].itemConsolidationKey_ ==
+                ItemRegister::getItem(FinalSortedItemConsKeyVectors.back().back()).Item::itemConsolidationKey_)
             {
-                FinalSortedItemConsKeyVectors.back().push_back(getCompleteItemVector()[idx].transientSysId_);
+                FinalSortedItemConsKeyVectors.back().push_back(ItemRegister::getAllItems()[idx].Item::transientSysId_);
             }
             else
             {
-                FinalSortedItemConsKeyVectors.push_back(std::vector<int>{getCompleteItemVector()[idx].transientSysId_});
+                FinalSortedItemConsKeyVectors.push_back(std::vector<int>{ItemRegister::getAllItems()[idx].Item::transientSysId_});
             };
         };
         return FinalSortedItemConsKeyVectors;

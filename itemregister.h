@@ -4,17 +4,18 @@
 struct ItemRegister
 {
 private:
+
+    int mainSortMethod_;
     std::vector<Item> completeItemVector_;
     std::unordered_map<int, Item> completeItemMap_;
-    int mainSortMethod_;
 
 public:
-    ItemRegister(int aMainSortMethod)
+    ItemRegister(const int aMainSortMethod)
     {
         ItemRegister::setMainSortMethod(aMainSortMethod);
     }
 
-    void addItem(Item &item)
+    inline void addItem(const Item &item)
     {
         ItemRegister::completeItemVector_.push_back(item);
         ItemRegister::completeItemMap_.insert({item.Item::transientSysId_, item});
@@ -25,7 +26,12 @@ public:
         return ItemRegister::completeItemVector_;
     }
 
-    Item &getItem(int key)
+    inline Item &getItem(const int key)
+    {
+        return ItemRegister::completeItemMap_.at(key);
+    }
+
+    const inline Item &getConstItem(const int key) const
     {
         return ItemRegister::completeItemMap_.at(key);
     }
@@ -37,7 +43,7 @@ public:
      *
      * @param aMainSortMethod   - integer to determine which sort method should be set
      */
-    void setMainSortMethod(int aMainSortMethod)
+    void setMainSortMethod(const int aMainSortMethod)
     {
         if (aMainSortMethod == constants::parameter::WEIGHT)
         {
@@ -55,7 +61,7 @@ public:
      * Create separete vector for each distinct itemConsKey, the items within each vector are sorted according to the mainSortMethod argument.
      * Returns a vector of vectors, each inner vector contains itemKeys.
      */
-    std::vector<std::vector<int>> GetSortedItemConsKeyVectors()
+    const std::vector<std::vector<int>> GetSortedItemConsKeyVectors()
     {
         if (ItemRegister::mainSortMethod_ == constants::parameter::WEIGHT)
         {

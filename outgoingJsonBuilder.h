@@ -18,7 +18,7 @@ private:
         ResponseBuilder::builder_.settings_["precision"] = ResponseBuilder::precision_;
     };
 
-    Json::Value itemToJson(const Item &item)
+    const Json::Value itemToJson(const Item &item) const
     {
         Json::Value JsonItem;
         JsonItem[constants::json::item::ID] = item.Item::id_;
@@ -51,7 +51,7 @@ private:
         return JsonItem;
     };
 
-    Json::Value binToJson(Bin &bin)
+    const Json::Value binToJson(const Bin &bin) const
     {
         Json::Value mappedBin;
         mappedBin[constants::json::bin::ID] = int(bin.Bin::id_);
@@ -73,7 +73,7 @@ private:
         return mappedBin;
     };
 
-    void exceptionJson(int exceptionType)
+    void exceptionJson(const int exceptionType)
     {
         switch (exceptionType)
         {
@@ -84,18 +84,16 @@ private:
     }
 
 public:
-    Json::StreamWriterBuilder &getBuilder() { return ResponseBuilder::builder_; };
+    const Json::StreamWriterBuilder &getBuilder() const { return ResponseBuilder::builder_; };
 
-    Json::Value &getMessage() { return ResponseBuilder::outboundRoot_; };
+    const Json::Value &getMessage() const { return ResponseBuilder::outboundRoot_; };
 
-    ResponseBuilder(int aPrecision, bool aIncludeBins, bool aIncludeItems, bool aItemDimensionsAfter)
+    ResponseBuilder(int aPrecision, bool aIncludeBins, bool aIncludeItems, bool aItemDimensionsAfter) : indentation_(""),
+                                                                                                        precision_(aPrecision),
+                                                                                                        includeBins_(aIncludeBins),
+                                                                                                        includeItems_(aIncludeItems),
+                                                                                                        itemDimensionsAfter_(aItemDimensionsAfter)
     {
-        ResponseBuilder::indentation_ = "";
-        ResponseBuilder::precision_ = aPrecision;
-        ResponseBuilder::includeBins_ = aIncludeBins;
-        ResponseBuilder::includeItems_ = aIncludeItems;
-        ResponseBuilder::itemDimensionsAfter_ = aItemDimensionsAfter;
-
         ResponseBuilder::configureBuilder();
     };
 
@@ -110,14 +108,14 @@ public:
     void generate(Packer PackingProcessor)
     {
 
-        if (!PackingProcessor.Packer::GetPackedBinVector().size())
+        if (!PackingProcessor.Packer::getPackedBinVector().size())
         {
             ResponseBuilder::exceptionJson(10);
             return;
         };
 
         /* Header information. */
-        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = int(PackingProcessor.Packer::GetPackedBinVector().size());
+        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = int(PackingProcessor.Packer::getPackedBinVector().size());
         outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = PackingProcessor.Packer::GetTotalVolumeUtilizationPercentage();
         outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = PackingProcessor.Packer::GetTotalWeightUtilizationPercentage();
 
@@ -129,11 +127,11 @@ public:
             {
                 outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(
                     ResponseBuilder::itemToJson(
-                        PackingProcessor.Packer::masterItemRegister_->ItemRegister::getItem(it)));
+                        PackingProcessor.Packer::masterItemRegister_->ItemRegister::getConstItem(it)));
             };
         };
 
-        for (auto &bi : PackingProcessor.Packer::GetPackedBinVector())
+        for (auto &bi : PackingProcessor.Packer::getPackedBinVector())
         {
             /* Free memory again, how to do this in a more structured way? */
             bi.Bin::kdTree_->KdTree::deleteAllNodesHelper();
@@ -145,16 +143,16 @@ public:
             return;
         };
 
-        for (auto &bi : PackingProcessor.Packer::GetPackedBinVector())
+        for (const auto &bin : PackingProcessor.Packer::getPackedBinVector())
         {
-            Json::Value mappedBin = ResponseBuilder::binToJson(bi);
+            Json::Value mappedBin = ResponseBuilder::binToJson(bin);
 
             if (ResponseBuilder::includeItems_)
             {
-                for (auto &it : bi.Bin::getFittedItems())
+                for (const auto &item : bin.Bin::getFittedItems())
                 {
                     mappedBin[constants::json::bin::FITTED_ITEMS].append(
-                        ResponseBuilder::itemToJson(PackingProcessor.Packer::masterItemRegister_->ItemRegister::getItem(it)));
+                        ResponseBuilder::itemToJson(PackingProcessor.Packer::masterItemRegister_->ItemRegister::getConstItem(item)));
                 };
             };
             ResponseBuilder::outboundRoot_[constants::json::outbound::PACKED_BINS].append(mappedBin);

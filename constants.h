@@ -16,15 +16,6 @@ namespace constants
             constexpr const unsigned int WHD{4}; // {width_, height_, depth_};
             constexpr const unsigned int HWD{5}; // {height_, width_, depth_};
         }
-        namespace description
-        {
-            constexpr const std::array<char[76], 6> text = {"No box rotation",
-                                                            "Rotate the box around the z-axis by 90°",
-                                                            "Rotate the box around the x-axis by 90°",
-                                                            "Rotate the box around the x-axis by 90° and then around the z-axis by 90°",
-                                                            "Rotate the box around the y-axis by 90°",
-                                                            "Rotate the box around the z-axis by 90° and then around the x-axis by 90°"};
-        }
     }
 
     namespace axis

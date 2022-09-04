@@ -1,7 +1,7 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-class Item : public Rectangle
+class Item : public RectangularCuboid
 {
 private:
     /**
@@ -48,9 +48,6 @@ private:
 
     void setRotationTypeDesc()
     {
-
-        // Item::rotationTypeDescription_ = constants::rotation::description::text[Item::rotationType_];
-
         switch (Item::rotationType_)
         {
         case constants::rotation::type::WDH:
@@ -109,21 +106,21 @@ public:
          double aHeight,
          double aWeight,
          std::string aItemConsKey,
-         std::string aAllowedRotations) : Rectangle(aWidth,
-                                                    aDepth,
-                                                    aHeight)
+         std::string aAllowedRotations) : transientSysId_(aSystemId),
+                                          position_(constants::START_POSITION),
+                                          original_width_(aWidth),
+                                          original_depth_(aDepth),
+                                          original_height_(aHeight),
+                                          weight_(aWeight),
+                                          itemConsolidationKey_(aItemConsKey),
+                                          rotationType_(constants::rotation::type::WDH),
+                                          rotationTypeDescription_(""),
+                                          RectangularCuboid(aWidth,
+                                                            aDepth,
+                                                            aHeight)
     {
-        Item::transientSysId_ = aSystemId;
-        Item::position_ = constants::START_POSITION;
-        Item::id_ = aItemId.size() ? aItemId : "NA";
-        Item::original_width_ = aWidth;
-        Item::original_depth_ = aDepth;
-        Item::original_height_ = aHeight;
-        Item::weight_ = aWeight;
-        Item::itemConsolidationKey_ = aItemConsKey;
-        Item::allowedRotations_ = aAllowedRotations.size() ? aAllowedRotations : "012345";
-        Item::rotationType_ = constants::rotation::type::WDH;
-        Item::rotationTypeDescription_ = "";
+        id_ = aItemId.size() ? aItemId : "NA";
+        allowedRotations_ = aAllowedRotations.size() ? aAllowedRotations : "012345";
     };
 
     /**
@@ -131,7 +128,7 @@ public:
      *
      * @param aRotationType
      */
-    void rotate(int aRotationType)
+    inline void rotate(int aRotationType)
     {
         Item::rotationType_ = aRotationType;
         Item::setRotationTypeDesc();

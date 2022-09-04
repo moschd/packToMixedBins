@@ -12,22 +12,20 @@
 
 class Gravity
 {
-public:
-    bool gravityEnabled_;
+private:
     double gravityStrengthPercentage_;
 
-    Gravity()
-    {
-        Gravity::gravityStrengthPercentage_ = 0.0;
-    }
+public:
+    bool gravityEnabled_;
 
-    Gravity(double aGravityStrengthPercentage)
+    Gravity(double aGravityStrengthPercentage) : gravityStrengthPercentage_(aGravityStrengthPercentage - 0.1)
     {
-        Gravity::gravityStrengthPercentage_ = aGravityStrengthPercentage - 0.1;
-        Gravity::gravityEnabled_ = (aGravityStrengthPercentage > 0.0 ? 1 : 0);
+        Gravity::gravityEnabled_ = (gravityStrengthPercentage_ > 0.0 ? 1 : 0);
     };
 
-    bool hasSufficientSurfaceSupport(Item *itemBeingPlaced, std::vector<int> itemsInBin, ItemRegister *myItems)
+    const bool hasSufficientSurfaceSupport(const Item *itemBeingPlaced,
+                                           const std::vector<int> itemsInBin,
+                                           const ItemRegister *myItems) const
     {
         bool gravityFit = 0;
         double totalCoveredSurfaceAreaPercentage = 0.0;
@@ -37,9 +35,9 @@ public:
             gravityFit = 1;
         };
 
-        for (auto &itemInSpaceKey : itemsInBin)
+        for (auto const &itemInSpaceKey : itemsInBin)
         {
-            Item *itemInSpace = &myItems->ItemRegister::getItem(itemInSpaceKey);
+            const Item *itemInSpace = &myItems->ItemRegister::getConstItem(itemInSpaceKey);
             if (gravityFit)
             {
                 break;

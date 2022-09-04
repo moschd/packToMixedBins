@@ -23,25 +23,30 @@ public:
            double aBinHeight,
            double aBinMaxWeight,
            Gravity &aGravity,
-           ItemRegister &aItemRegister)
+           ItemRegister &aItemRegister) : requestedBinType_(aBinType),
+                                          requestedBinWidth_(aBinWidth),
+                                          requestedBinDepth_(aBinDepth),
+                                          requestedBinHeight_(aBinHeight),
+                                          requestedBinMaxWeight_(aBinMaxWeight),
+                                          masterGravity_(&aGravity),
+                                          masterItemRegister_(&aItemRegister)
+
     {
-        Packer::requestedBinType_ = aBinType;
-        Packer::requestedBinWidth_ = aBinWidth;
-        Packer::requestedBinDepth_ = aBinDepth;
-        Packer::requestedBinHeight_ = aBinHeight;
-        Packer::requestedBinMaxWeight_ = aBinMaxWeight;
-        Packer::requestedBinMaxVolume_ = (aBinWidth * aBinHeight * aBinDepth);
-        Packer::masterGravity_ = &aGravity;
-        Packer::masterItemRegister_ = &aItemRegister;
+        Packer::requestedBinMaxVolume_ = (requestedBinWidth_ * requestedBinDepth_ * requestedBinHeight_);
     };
 
-    Bin &GetLastBin()
+    const Bin &GetLastBin() const
     {
         return Packer::bins_.back();
     };
-    std::vector<Bin> &GetPackedBinVector()
+    const std::vector<Bin> &getPackedBinVector() const
     {
         return Packer::bins_;
+    };
+
+    void deleteLastBin()
+    {
+        Packer::bins_.pop_back();
     };
 
     double GetTotalVolumeUtilizationPercentage()
@@ -62,6 +67,11 @@ public:
             actualWeightUtil += b.Bin::getActWeightUtil();
         };
         return std::max(0.0, actualWeightUtil / (Packer::requestedBinMaxWeight_ * Packer::bins_.size()) * 100);
+    };
+
+    void addUnfittedItem(int itemKey)
+    {
+        Packer::bins_.back().Bin::addUnfittedItem(itemKey);
     };
 
     /**
@@ -120,7 +130,7 @@ public:
             if ((Packer::bins_.back().Bin::getActVolumeUtil() + itp->Item::maxVolume_) > Packer::bins_.back().Bin::maxVolume_ ||
                 (Packer::bins_.back().Bin::getActWeightUtil() + itp->Item::weight_) > Packer::bins_.back().Bin::maxWeight_)
             {
-                Packer::bins_.back().Bin::getUnfittedItems().push_back(itp->Item::transientSysId_);
+                Packer::addUnfittedItem(itp->Item::transientSysId_);
                 continue;
             };
 
@@ -140,7 +150,7 @@ public:
                 Packer::masterItemRegister_->ItemRegister::getItem(Packer::bins_.back().Bin::getUnfittedItems().back()).Item::height_ == itp->Item::height_ &&
                 Packer::masterItemRegister_->ItemRegister::getItem(Packer::bins_.back().Bin::getUnfittedItems().back()).Item::depth_ == itp->Item::depth_)
             {
-                Packer::bins_.back().Bin::getUnfittedItems().push_back(itp->Item::transientSysId_);
+                Packer::addUnfittedItem(itp->Item::transientSysId_);
                 continue;
             };
 
@@ -150,7 +160,7 @@ public:
         /* Delete the created bin if it contains no items. */
         if (aItemsToBePacked.size() == Packer::bins_.back().Bin::getUnfittedItems().size())
         {
-            Packer::GetPackedBinVector().pop_back();
+            Packer::deleteLastBin();
             return;
         };
 

@@ -7,7 +7,7 @@
  */
 class CalculationCache
 {
-public:
+private:
     struct itemPositionHash
     {
         size_t operator()(const std::array<double, 3> &itemPosition) const
@@ -18,12 +18,9 @@ public:
             return (h1 ^ (h2 << 1)) ^ (h3 << 2);
         }
     };
-
-    // std::unordered_map<std::array<double, 3>, double, itemPositionHash> intersectionLimits;
     __gnu_pbds::gp_hash_table<std::array<double, 3>, double, itemPositionHash> intersectionLimits;
 
-    CalculationCache(){};
-
+public:
     /**
      * @brief Adds item to intersect cache.
      *
@@ -33,7 +30,7 @@ public:
      * @param aItemBeingPlaced
      * @param aItemAlreadyPlaced
      */
-    void addIntersection(const Item *aItemBeingPlaced, const Item *aItemAlreadyPlaced)
+    inline void addIntersection(const Item *aItemBeingPlaced, const Item *aItemAlreadyPlaced)
     {
         const double smallestDistance = Geometry::nearestBoundary(aItemBeingPlaced, aItemAlreadyPlaced);
         const auto &resultIterator = CalculationCache::intersectionLimits.find(aItemBeingPlaced->position_);
@@ -55,7 +52,7 @@ public:
      * @return true
      * @return false
      */
-    bool itemPositionCacheHit(const Item *aItemToBeFound)
+    inline const bool itemPositionCacheHit(const Item *aItemToBeFound) const
     {
         bool hit = 0;
         const auto resultIterator = CalculationCache::intersectionLimits.find(aItemToBeFound->Item::position_);

@@ -3,7 +3,7 @@
 
 struct consKeyAndVolumeSorter
 {
-  inline bool operator()(const Item &one, const Item &two)
+  inline const bool operator()(const Item &one, const Item &two) const
   {
     return one.Item::itemConsolidationKey_ < two.Item::itemConsolidationKey_ ||
            (one.Item::itemConsolidationKey_ == two.Item::itemConsolidationKey_ &&
@@ -13,7 +13,7 @@ struct consKeyAndVolumeSorter
 
 struct consKeyAndWeightSorter
 {
-  inline bool operator()(const Item &one, const Item &two)
+  inline const bool operator()(const Item &one, const Item &two) const
   {
     return one.Item::itemConsolidationKey_ < two.Item::itemConsolidationKey_ ||
            (one.Item::itemConsolidationKey_ == two.Item::itemConsolidationKey_ &&

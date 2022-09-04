@@ -1,7 +1,7 @@
 #ifndef BIN_H
 #define BIN_H
 
-class Bin : public Rectangle, public CalculationCache
+class Bin : public RectangularCuboid, public CalculationCache
 {
 private:
     std::vector<int> items_;
@@ -29,46 +29,55 @@ public:
         double aMaxWeight,
         Gravity *aGravity,
         ItemRegister *aItemRegister,
-        int aEstimatedNumberOfItemFits) : Rectangle(aWidth, aDepth, aHeight)
+        int aEstimatedNumberOfItemFits) : id_(aId),
+                                          type_(aType),
+                                          maxWeight_(aMaxWeight),
+                                          actualVolumeUtil_(0.0),
+                                          actualWeightUtil_(0.0),
+                                          masterGravity_(aGravity),
+                                          masterItemRegister_(aItemRegister),
+                                          placedItemsMaxDimensions_(constants::START_POSITION),
+                                          RectangularCuboid(aWidth, aDepth, aHeight)
     {
-        Bin::id_ = aId;
-        Bin::type_ = aType;
-        Bin::maxWeight_ = aMaxWeight;
-        Bin::masterGravity_ = aGravity;
-        Bin::masterItemRegister_ = aItemRegister;
-        Bin::placedItemsMaxDimensions_ = {0, 0, 0};
-        Bin::actualVolumeUtil_ = 0.0;
-        Bin::actualWeightUtil_ = 0.0;
         Bin::kdTree_ = new KdTree(aEstimatedNumberOfItemFits, topRightCorner_);
+        Bin::items_.reserve(aEstimatedNumberOfItemFits);
+        Bin::xFreeItems_.reserve(aEstimatedNumberOfItemFits);
+        Bin::yFreeItems_.reserve(aEstimatedNumberOfItemFits);
+        Bin::zFreeItems_.reserve(aEstimatedNumberOfItemFits);
     };
 
-    std::vector<int> &getFittedItems()
+    const std::vector<int> &getFittedItems() const
     {
         return Bin::items_;
     };
-    std::vector<int> &getUnfittedItems()
+    const std::vector<int> &getUnfittedItems() const
     {
         return Bin::unfittedItems_;
     };
 
-    double getActVolumeUtilizationPercentage()
+    void addUnfittedItem(int itemKey)
     {
-        return Bin::actualVolumeUtil_ / Rectangle::maxVolume_ * 100;
+        return Bin::unfittedItems_.push_back(itemKey);
     };
-    double getActWeightUtilizationPercentage()
+
+    const double getActVolumeUtilizationPercentage() const
+    {
+        return Bin::actualVolumeUtil_ / RectangularCuboid::maxVolume_ * 100;
+    };
+    const double getActWeightUtilizationPercentage() const
     {
         return Bin::actualWeightUtil_ / Bin::maxWeight_ * 100;
     };
-    double getActWeightUtil()
+    const double getActWeightUtil() const
     {
         return Bin::actualWeightUtil_;
     };
-    double getActVolumeUtil()
+    const double getActVolumeUtil() const
     {
         return Bin::actualVolumeUtil_;
     };
 
-    void updatePlacedMaxItemDimensions(Item *it, int axis)
+    void updatePlacedMaxItemDimensions(const Item *it, const int axis)
     {
         switch (axis)
         {
@@ -84,43 +93,43 @@ public:
         };
     };
 
-    void removeFromXFreeItems(Item *itemBeingPlaced)
+    void removeFromXFreeItems(const Item *itemBeingPlaced)
     {
         Bin::xFreeItems_.erase(
-            std::remove_if(begin(Bin::xFreeItems_), end(Bin::xFreeItems_), [&](int &itemInBin) -> bool
+            std::remove_if(begin(Bin::xFreeItems_), end(Bin::xFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                    Item* iib = &Bin::masterItemRegister_->ItemRegister::getItem(itemInBin);
-                    return (itemBeingPlaced->Item::position_[constants::axis::WIDTH] == iib->Item::furthestPointWidth_ &&
-                            Geometry::intersectingY(itemBeingPlaced,iib) && Geometry::intersectingZ(itemBeingPlaced,iib)); }),
+                    const Item* itemInBin = &Bin::masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                    return (itemBeingPlaced->Item::position_[constants::axis::WIDTH] == itemInBin->Item::furthestPointWidth_ &&
+                            Geometry::intersectingY(itemBeingPlaced,itemInBin) && Geometry::intersectingZ(itemBeingPlaced,itemInBin)); }),
             end(xFreeItems_));
     };
 
-    void removeFromYFreeItems(Item *it)
+    void removeFromYFreeItems(const Item *itemBeingPlaced)
     {
         Bin::yFreeItems_.erase(
-            std::remove_if(begin(Bin::yFreeItems_), end(Bin::yFreeItems_), [&](int &itemInBin) -> bool
+            std::remove_if(begin(Bin::yFreeItems_), end(Bin::yFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                Item* iib = &masterItemRegister_->ItemRegister::getItem(itemInBin);
-                return (it->Item::position_[constants::axis::DEPTH] == iib->Item::furthestPointDepth_ && 
-                        Geometry::intersectingX(it,iib) && Geometry::intersectingZ(it,iib)); }),
+                const Item* itemInBin = &masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                return (itemBeingPlaced->Item::position_[constants::axis::DEPTH] == itemInBin->Item::furthestPointDepth_ && 
+                        Geometry::intersectingX(itemBeingPlaced,itemInBin) && Geometry::intersectingZ(itemBeingPlaced,itemInBin)); }),
             end(Bin::yFreeItems_));
     };
 
-    void removeFromZFreeItems(Item *it)
+    void removeFromZFreeItems(const Item *itemBeingPlaced)
     {
         Bin::zFreeItems_.erase(
-            std::remove_if(begin(Bin::zFreeItems_), end(Bin::zFreeItems_), [&](int &itemInBin) -> bool
+            std::remove_if(begin(Bin::zFreeItems_), end(Bin::zFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                Item* iib = &masterItemRegister_->ItemRegister::getItem(itemInBin);
-                return (it->Item::position_[constants::axis::HEIGHT] == iib->Item::furthestPointHeight_ &&
-                        Geometry::intersectingX(it,iib) && Geometry::intersectingY(it,iib)); }),
+                const Item* itemInBin = &masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                return (itemBeingPlaced->Item::position_[constants::axis::HEIGHT] == itemInBin->Item::furthestPointHeight_ &&
+                        Geometry::intersectingX(itemBeingPlaced,itemInBin) && Geometry::intersectingY(itemBeingPlaced,itemInBin)); }),
             end(Bin::zFreeItems_));
     };
 
-    void updateWithNewFittedItem(int &it, int binAxis)
+    void updateWithNewFittedItem(const int &it, const int binAxis)
     {
         Bin::items_.push_back(it);
-        Item *itemOb = &masterItemRegister_->ItemRegister::getItem(it);
+        const Item *itemOb = &masterItemRegister_->ItemRegister::getConstItem(it);
         Bin::actualWeightUtil_ += itemOb->Item::weight_;
         Bin::actualVolumeUtil_ += itemOb->Item::maxVolume_;
         Bin::updatePlacedMaxItemDimensions(itemOb, binAxis);
@@ -130,8 +139,8 @@ public:
                                                       itemOb->Item::furthestPointHeight_});
 
         // Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.
-        auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
-                                      { return masterItemRegister_->ItemRegister::getItem(i1).Item::furthestPointHeight_ < masterItemRegister_->ItemRegister::getItem(i2).Item::furthestPointHeight_; });
+        const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
+                                            { return masterItemRegister_->ItemRegister::getConstItem(i1).Item::furthestPointHeight_ < masterItemRegister_->ItemRegister::getConstItem(i2).Item::furthestPointHeight_; });
         Bin::xFreeItems_.push_back(it);
         Bin::yFreeItems_.push_back(it);
         Bin::zFreeItems_.insert(hiter, it);
@@ -140,7 +149,7 @@ public:
         Bin::removeFromYFreeItems(itemOb);
     };
 
-    void findItemPosition(int &itemToFitKey)
+    void findItemPosition(const int &itemToFitKey)
     {
         bool fitted = 0;
 
@@ -164,19 +173,19 @@ public:
 
             for (const auto itemInBinKey : itemsWithFreeCorrespondingAxis)
             {
-                Item *iib = &masterItemRegister_->ItemRegister::getItem(itemInBinKey);
-                itemToFit->Item::position_ = iib->Item::position_;
+                const Item *itemInBin = &masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                itemToFit->Item::position_ = itemInBin->Item::position_;
 
                 switch (binAxis)
                 {
                 case constants::axis::WIDTH:
-                    itemToFit->Item::position_[constants::axis::WIDTH] += iib->Item::width_;
+                    itemToFit->Item::position_[constants::axis::WIDTH] += itemInBin->Item::width_;
                     break;
                 case constants::axis::DEPTH:
-                    itemToFit->Item::position_[constants::axis::DEPTH] += iib->Item::depth_;
+                    itemToFit->Item::position_[constants::axis::DEPTH] += itemInBin->Item::depth_;
                     break;
                 case constants::axis::HEIGHT:
-                    itemToFit->Item::position_[constants::axis::HEIGHT] += iib->Item::height_;
+                    itemToFit->Item::position_[constants::axis::HEIGHT] += itemInBin->Item::height_;
                     break;
                 };
 
@@ -212,13 +221,15 @@ public:
      * @return true
      * @return false
      */
-    bool placeItemInBin(int &it)
+    const bool placeItemInBin(const int &it)
     {
         bool intersectionFound = 0;
         Item *itemBeingPlaced = &Bin::masterItemRegister_->ItemRegister::getItem(it);
 
         /* Loop over items allowed rotation in order to find a fitting place. */
-        for (int stringCharCounter = 0; stringCharCounter < itemBeingPlaced->Item::allowedRotations_.std::string::size(); stringCharCounter++)
+        for (int stringCharCounter = 0;
+             stringCharCounter < itemBeingPlaced->Item::allowedRotations_.std::string::size();
+             stringCharCounter++)
         {
 
             /* Rotate item according to current rotation type. */
@@ -235,7 +246,7 @@ public:
             /* Search kdTree to find items which could be intersecting. */
             std::vector<int> intersectCandidates;
             Bin::kdTree_->getIntersectCandidates(Bin::kdTree_->KdTree::getRoot(),
-                                                 Bin::kdTree_->KdTree::getRoot()->Nodex::myDepth_,
+                                                 Bin::kdTree_->KdTree::getRoot()->Node::myDepth_,
                                                  itemBeingPlaced->Item::position_,
                                                  {Bin::placedItemsMaxDimensions_[constants::axis::WIDTH] + itemBeingPlaced->Item::width_,
                                                   Bin::placedItemsMaxDimensions_[constants::axis::DEPTH] + itemBeingPlaced->Item::depth_,

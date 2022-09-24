@@ -1,5 +1,6 @@
 #ifndef CALCULATION_CACHE_H
 #define CALCULATION_CACHE_H
+
 /**
  * @brief Cache manager to help with space management and speed up calculation.
  *
@@ -48,19 +49,17 @@ public:
     /**
      * @brief Checks if item is valid or if intersecting items have been found already.
      *
+     * Short circuit boolean return to prevent additional assignment and if statement.
+     *
      * @param aItemToBeFound
      * @return true
      * @return false
      */
     inline const bool itemPositionCacheHit(const Item *aItemToBeFound) const
     {
-        bool hit = 0;
         const auto resultIterator = CalculationCache::intersectionLimits.find(aItemToBeFound->Item::position_);
-        if (resultIterator != CalculationCache::intersectionLimits.end())
-        {
-            hit = aItemToBeFound->smallestDimension_ >= resultIterator->second;
-        };
-        return hit;
+        return resultIterator != CalculationCache::intersectionLimits.end() &&
+               aItemToBeFound->smallestDimension_ >= resultIterator->second;
     };
 };
 #endif

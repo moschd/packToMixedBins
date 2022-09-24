@@ -72,7 +72,7 @@ private:
      *
      * This method creates a kd-tree of a certain depth.
      * The nodes in this tree each contain cartesian coordinates indicating a 3R point in a space.
-     * Used for 3R space partisioning of the bin to be packed.
+     * Used for 3R space partitioning of the bin to be packed.
      *
      * @param aRoot             - root of the tree
      * @param aDepth            - the current depth of the tree
@@ -150,12 +150,14 @@ private:
     };
 
     /**
-     * @brief Print tree to console..
+     * @brief Removes an item key from the tree.
      *
-     * @param aRoot         - Node whose children will be printed.
-     * @param aDirection    - Direction from which this search came from, ie left or right node.
+     * TODO implement proper searching, dont need to search all leaves...
+     *
+     * @param aRoot         - Node from where search starts.
+     * @param aItemKey      - itemKey to be removed.
      */
-    void printTreeImp(const Node *aRoot, const std::string aDirection) const
+    void removeKeyFromLeaf(Node *aRoot, const unsigned int aItemKey) const
     {
         if (aRoot == NULL)
         {
@@ -164,10 +166,37 @@ private:
 
         if (!aRoot->Node::myChildren_.empty())
         {
-            std::cout << "  LEAF "
-                      << "  " << aRoot->Node::partitionPoint_[0] << " " << aRoot->Node::partitionPoint_[1] << " " << aRoot->Node::partitionPoint_[2] << "\n";
-            std::cout << "      CHILDREN:\n";
-            std::cout << "      ";
+            std::vector<int>::iterator itemKeyIterator = std::find(aRoot->Node::myChildren_.begin(), aRoot->Node::myChildren_.end(), aItemKey);
+            if (itemKeyIterator != aRoot->Node::myChildren_.end())
+            {
+                aRoot->Node::myChildren_.erase(itemKeyIterator);
+            };
+        }
+        KdTree::removeKeyFromLeaf(aRoot->Node::left_, aItemKey);
+        KdTree::removeKeyFromLeaf(aRoot->Node::right_, aItemKey);
+    };
+
+    /**
+     * @brief Print tree to console..
+     *
+     * @param aRoot         - Node whose children will be printed.
+     */
+    void printTreeImp(const Node *aRoot) const
+    {
+        if (aRoot == NULL)
+        {
+            return;
+        };
+
+        if (!aRoot->Node::myChildren_.empty())
+        {
+            std::cout << "LEAF "
+                      << aRoot->Node::partitionPoint_[0] << " "
+                      << aRoot->Node::partitionPoint_[1] << " "
+                      << aRoot->Node::partitionPoint_[2] << "\n";
+
+            std::cout << "  CHILDREN:\n";
+            std::cout << "  ";
             for (auto d : aRoot->Node::myChildren_)
             {
                 std::cout << d << " ";
@@ -175,9 +204,10 @@ private:
             std::cout << "\n";
         }
 
-        KdTree::printTreeImp(aRoot->Node::left_, "L");
-        KdTree::printTreeImp(aRoot->Node::right_, "R");
+        KdTree::printTreeImp(aRoot->Node::left_);
+        KdTree::printTreeImp(aRoot->Node::right_);
     };
+
     /**
      * @brief Delete all nodes in the tree to free memory.
      *
@@ -307,7 +337,7 @@ public:
      */
     void printTreeImpHelper() const
     {
-        KdTree::printTreeImp(KdTree::treeRoot_, "X");
+        KdTree::printTreeImp(KdTree::treeRoot_);
     };
 
     /**
@@ -317,6 +347,16 @@ public:
     void deleteAllNodesHelper()
     {
         KdTree::deleteAllNodes(KdTree::treeRoot_);
+    }
+
+    /**
+     * @brief Removes an itemKey from the tree.
+     *
+     * @param aItemKey
+     */
+    void removeKeyFromLeafHelper(const int aItemKey)
+    {
+        KdTree::removeKeyFromLeaf(KdTree::treeRoot_, aItemKey);
     }
 };
 

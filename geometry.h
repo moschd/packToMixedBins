@@ -5,29 +5,30 @@ namespace Geometry
 {
 
     template <class T>
-    inline const bool intersectingX(const T itemOne, const T itemTwo)
+    inline const bool intersectingX(const T cuboidOne, const T cuboidTwo)
     {
-        return itemOne->furthestPointWidth_ > itemTwo->position_[constants::axis::WIDTH] &&
-               itemOne->position_[constants::axis::WIDTH] < itemTwo->furthestPointWidth_;
+        return cuboidOne->furthestPointWidth_ > cuboidTwo->position_[constants::axis::WIDTH] &&
+               cuboidOne->position_[constants::axis::WIDTH] < cuboidTwo->furthestPointWidth_;
     }
 
     template <class T>
-    inline const bool intersectingY(const T itemOne, const T itemTwo)
+    inline const bool intersectingY(const T cuboidOne, const T cuboidTwo)
     {
-        return itemOne->furthestPointDepth_ > itemTwo->position_[constants::axis::DEPTH] &&
-               itemOne->position_[constants::axis::DEPTH] < itemTwo->furthestPointDepth_;
-    }
-    template <class T>
-    inline const bool intersectingZ(const T itemOne, const T itemTwo)
-    {
-        return itemOne->furthestPointHeight_ > itemTwo->position_[constants::axis::HEIGHT] &&
-               itemOne->position_[constants::axis::HEIGHT] < itemTwo->furthestPointHeight_;
+        return cuboidOne->furthestPointDepth_ > cuboidTwo->position_[constants::axis::DEPTH] &&
+               cuboidOne->position_[constants::axis::DEPTH] < cuboidTwo->furthestPointDepth_;
     }
 
     template <class T>
-    inline const bool intersectingXY(const T itemOne, const T itemTwo)
+    inline const bool intersectingZ(const T cuboidOne, const T cuboidTwo)
     {
-        return intersectingX(itemOne, itemTwo) && intersectingY(itemOne, itemTwo);
+        return cuboidOne->furthestPointHeight_ > cuboidTwo->position_[constants::axis::HEIGHT] &&
+               cuboidOne->position_[constants::axis::HEIGHT] < cuboidTwo->furthestPointHeight_;
+    }
+
+    template <class T>
+    inline const bool intersectingXY(const T cuboidOne, const T cuboidTwo)
+    {
+        return intersectingX(cuboidOne, cuboidTwo) && intersectingY(cuboidOne, cuboidTwo);
     }
 
     template <class T>
@@ -36,6 +37,26 @@ namespace Geometry
         return std::min(std::min(objectOne->position_[constants::axis::WIDTH] - objectTwo->position_[constants::axis::WIDTH],
                                  objectOne->position_[constants::axis::DEPTH] - objectTwo->position_[constants::axis::DEPTH]),
                         objectOne->position_[constants::axis::HEIGHT] - objectTwo->position_[constants::axis::HEIGHT]);
+    }
+
+    template <class T>
+    inline const bool xIntersectCylinderCuboid(const T cylinder, const T cuboid)
+    {
+        double closestX = std::clamp(cylinder->position_[constants::axis::WIDTH], cuboid->position_[constants::axis::WIDTH], cuboid->furthestPointWidth_);
+        return cylinder->radius_ < (cylinder->position_[constants::axis::WIDTH] - closestX);
+    };
+
+    template <class T>
+    inline const bool yIntersectCylinderCuboid(const T cylinder, const T cuboid)
+    {
+        double closestY = std::clamp(cylinder->position[constants::axis::DEPTH], cuboid->position_[constants::axis::DEPTH], cuboid->furthestPointDepth_);
+        return cylinder->radius_ < (cylinder->position[constants::axis::DEPTH] - closestY);
+    };
+
+    template <class T>
+    inline const bool xyIntersectCylinderCuboid(const T cylinder, const T cuboid)
+    {
+        return intersectingX(cylinder, cuboid) && intersectingY(cylinder, cuboid);
     }
 }
 #endif

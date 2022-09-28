@@ -39,10 +39,9 @@
         JSON
 */
 
-#define COMPILE_TO_SO 1
+#define COMPILE_TO_SO 0
 
 #if COMPILE_TO_SO
-
 extern "C"
 {
     char *packToBinAlgorithm(char *result,
@@ -62,9 +61,7 @@ int main()
     const bool includeItems = 1;
     const bool includeBins = 1;
     const int responsePrecision = 7;
-
     std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/5000_items.json");
-    std::cout << (__cplusplus < 201703) << " " << CYLINDER_SUPPORT << "\n";
 #endif
 
         Json::Reader reader;

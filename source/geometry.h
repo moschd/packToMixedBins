@@ -39,6 +39,7 @@ namespace Geometry
                         objectOne->position_[constants::axis::HEIGHT] - objectTwo->position_[constants::axis::HEIGHT]);
     }
 
+#if CYLINDER_SUPPORT
     template <class T>
     inline const bool xIntersectCylinderCuboid(const T cylinder, const T cuboid)
     {
@@ -58,5 +59,6 @@ namespace Geometry
     {
         return intersectingX(cylinder, cuboid) && intersectingY(cylinder, cuboid);
     }
+#endif
 }
 #endif

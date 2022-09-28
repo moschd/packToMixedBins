@@ -1,43 +1,23 @@
-1206  g++ -o first first.cpp -l jsoncpp
 
-g++ -o first first.cpp -l jsoncpp
-
-g++ -shared -O3 -o libPackToBinAlgo.so.0 packtobin/main.cpp -fPIC -l jsoncpp
-g++ -shared -ffast-math -fno-exceptions -fno-rtti -O3 -o libPackToBinAlgo.so.0 packtobin/main.cpp packtobin/dist/jsoncpp.cpp-fPIC
 
 g++ -ffast-math -fno-exceptions -fno-rtti -O3 -o main packtobin/main.cpp packtobin/dist/jsoncpp.cpp
 
 
+
+
+Compile to .so:
+g++ source/main.cpp -shared -ffast-math -fno-exceptions -fno-rtti -fPIC -O3 -o libPackToBinAlgo.so.0 -l jsoncpp
+
+Compile for local test:
+g++ source/main.cpp -ffast-math -fno-exceptions -fno-rtti -O3 -o main -l jsoncpp
+
+## Profling
  g++ -o first -pg first.cpp -pg -l jsoncpp
  ./first
  gprof first > profile.txt
 
 
-
-234288
-Pallet-1 size: 2491
-0 size: 798 start: 0 0 0  end: 10 10 20 
-1 size: 598 start: 0 10 0  end: 10 20 20 
-2 size: 812 start: 10 0 0  end: 20 10 20 
-3 size: 583 start: 10 10 0  end: 20 20 20 
-PB BIN CACHE: 703
-
-
-1633408
-Pallet-1 size: 5000 MaxWeight: 1.5e+07
-0 size: 1086 start: 0 0 0  end: 8 8 8 
-1 size: 673 start: 0 0 8  end: 8 8 15 
-2 size: 927 start: 0 8 0  end: 8 15 8 
-3 size: 657 start: 0 8 8  end: 8 15 15 
-4 size: 1076 start: 8 0 0  end: 15 8 8 
-5 size: 583 start: 8 0 8  end: 15 8 15 
-6 size: 952 start: 8 8 0  end: 15 15 8 
-7 size: 529 start: 8 8 8  end: 15 15 15 
-VM: 42304; RSS: 37140
-
-
-g++ -ffast-math -fno-exceptions -fno-rtti -O3 -o main packtobin/main.cpp -l jsoncpp
-
+## compile flags
 -ffast-math
 some calculation optimization
 

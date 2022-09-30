@@ -15,6 +15,7 @@ private:
     Gravity *masterGravity_;
     ItemRegister *masterItemRegister_;
 
+
 public:
     int id_;
     std::string type_;

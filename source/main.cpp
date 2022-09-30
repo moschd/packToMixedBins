@@ -39,7 +39,7 @@
         JSON
 */
 
-#define COMPILE_TO_SO 0
+#define COMPILE_TO_SO 1
 
 #if COMPILE_TO_SO
 extern "C"

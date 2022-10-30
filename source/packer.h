@@ -7,28 +7,6 @@ private:
     std::vector<Bin> bins_;
     int estimatedTotalRequiredBins_;
 
-    /**
-     * @brief Set the bin utilization distribution method that will be used for this packer once the packing process is finished.
-     *
-     */
-    void setDistributeMethod()
-    {
-        std::transform(Packer::distribute_.begin(), Packer::distribute_.end(), Packer::distribute_.begin(), ::toupper);
-
-        if (Packer::distribute_ == constants::distributor::type::WEIGHT)
-        {
-            Packer::distribute_ = constants::distributor::type::WEIGHT;
-        }
-        else if (Packer::distribute_ == constants::distributor::type::VOLUME)
-        {
-            Packer::distribute_ = constants::distributor::type::VOLUME;
-        }
-        else
-        {
-            Packer::distribute_ = "";
-        }
-    }
-
 public:
     std::string requestedBinType_;
     double requestedBinWidth_;
@@ -59,7 +37,10 @@ public:
 
     {
         Packer::requestedBinMaxVolume_ = (requestedBinWidth_ * requestedBinDepth_ * requestedBinHeight_);
+
+#if DISTRIUBTE_SUPPORT
         Packer::setDistributeMethod();
+#endif
     };
 
     /**
@@ -70,23 +51,6 @@ public:
     const std::vector<PackingCluster> getClusters() const
     {
         return Packer::clusters_;
-    }
-
-    /**
-     * @brief Set packing cluster.
-     *
-     * Used when a cluster has been modified by the distributor.
-     *
-     */
-    void setCluster(int aClusterId, PackingCluster *aCluster)
-    {
-        for (auto &cluster : clusters_)
-        {
-            if (cluster.id_ == aClusterId)
-            {
-                cluster = *aCluster;
-            };
-        };
     }
 
     /**
@@ -162,17 +126,6 @@ public:
     };
 
     /**
-     * @brief Requests to have its items distributed among the available bins.
-     *
-     * @return true
-     * @return false
-     */
-    inline const bool requestsDistribution() const
-    {
-        return !Packer::distribute_.empty();
-    };
-
-    /**
      * @brief Start packing, create a new cluster per item vector to be packed.
      * This currently means a cluster per item consolidation id but could be interesting to extend this.
      *
@@ -196,6 +149,14 @@ public:
                                   *Packer::masterGravity_,
                                   *Packer::masterItemRegister_);
 
+        if (Packer::clusters_.empty())
+        {
+            newCluster.setBinIdCounter(1);
+        }
+        else
+        {
+            newCluster.setBinIdCounter(Packer::clusters_.back().getLastCreatedBin().id_ + 1);
+        }
         newCluster.startPacking(aItemsToBePacked);
 
         Packer::clusters_.push_back(newCluster);
@@ -216,7 +177,60 @@ public:
                 delete bin.Bin::kdTree_;
             };
         };
-    }
+    };
+
+#if DISTRIBUTOR_SUPPORT
+
+    /**
+     * @brief Set the bin utilization distribution method that will be used for this packer once the packing process is finished.
+     *
+     */
+    void setDistributeMethod()
+    {
+        std::transform(Packer::distribute_.begin(), Packer::distribute_.end(), Packer::distribute_.begin(), ::toupper);
+
+        if (Packer::distribute_ == constants::distributor::type::WEIGHT)
+        {
+            Packer::distribute_ = constants::distributor::type::WEIGHT;
+        }
+        else if (Packer::distribute_ == constants::distributor::type::VOLUME)
+        {
+            Packer::distribute_ = constants::distributor::type::VOLUME;
+        }
+        else
+        {
+            Packer::distribute_ = "";
+        }
+    };
+
+    /**
+     * @brief Requests to have its items distributed among the available bins.
+     *
+     * @return true
+     * @return false
+     */
+    inline const bool requestsDistribution() const
+    {
+        return !Packer::distribute_.empty();
+    };
+
+    /**
+     * @brief Set packing cluster.
+     *
+     * Used when a cluster has been modified by the distributor.
+     *
+     */
+    void setCluster(int aClusterId, PackingCluster *aCluster)
+    {
+        for (auto &cluster : clusters_)
+        {
+            if (cluster.id_ == aClusterId)
+            {
+                cluster = *aCluster;
+            };
+        };
+    };
+#endif
 };
 
 #endif

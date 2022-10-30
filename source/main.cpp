@@ -1,3 +1,20 @@
+#define CYLINDER_SUPPORT 0
+/*
+Always set to 0, cylinders are not supported (yet).
+*/
+
+#define DISTRIBUTOR_SUPPORT 0
+/*
+# DISTRIBUTOR_SUPPORT
+Setting this to true enables parameter distributeItems.
+This will add additional methods to several classes and adds the distributor.h import.
+*/
+
+#define COMPILE_TO_SO 0
+/*
+Compile to a shared object file.
+*/
+
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
@@ -20,13 +37,10 @@
 #include "packingCluster.h"
 #include "packer.h"
 #include "binSortMethods.h"
-#include "distributor.h"
 #include "outgoingJsonBuilder.h"
 
-#if __cplusplus < 201703
-#define CYLINDER_SUPPORT 0
-#else
-#define CYLINDER_SUPPORT 1
+#if DISTRIBUTOR_SUPPORT
+#include "distributor.h"
 #endif
 
 /*
@@ -38,8 +52,6 @@
     Output:
         JSON
 */
-
-#define COMPILE_TO_SO 1
 
 #if COMPILE_TO_SO
 extern "C"
@@ -105,6 +117,7 @@ int main()
             packingProcessor.startPacking(sortedItemConsKeyVector);
         };
 
+#if DISTRIBUTOR_SUPPORT
         /* Check if item ditribution is requested */
         if (packingProcessor.requestsDistribution())
         {
@@ -117,6 +130,7 @@ int main()
                 };
             };
         };
+#endif
 
         // /* Initialize outgoing json builder */
         ResponseBuilder outgoingJsonBuilder(responsePrecision, includeBins, includeItems, itemDimensionsAfter);

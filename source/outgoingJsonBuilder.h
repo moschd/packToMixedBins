@@ -35,22 +35,11 @@ private:
         JsonItem[constants::json::item::ROTATION_TYPE] = item.Item::rotationType_;
         JsonItem[constants::json::item::ROTATION_TYPE_DESCRIPTION] = item.Item::rotationTypeDescription_;
 
-        if (item.isShape(constants::shape::CYLINDER))
-        {
-            JsonItem[constants::json::item::DIAMETER] = item.Item::diameter_;
-            std::array<double, 3> centerPostition = item.Item::getCenter();
-            JsonItem[constants::json::item::X_COORDINATE] = centerPostition[constants::axis::WIDTH];
-            JsonItem[constants::json::item::Y_COORDINATE] = centerPostition[constants::axis::DEPTH];
-            JsonItem[constants::json::item::Z_COORDINATE] = centerPostition[constants::axis::HEIGHT];
-        }
-        else
-        {
-            JsonItem[constants::json::item::WIDTH] = (ResponseBuilder::itemDimensionsAfter_ ? item.Item::width_ : item.Item::original_width_);
-            JsonItem[constants::json::item::DEPTH] = (ResponseBuilder::itemDimensionsAfter_ ? item.Item::depth_ : item.Item::original_depth_);
-            JsonItem[constants::json::item::X_COORDINATE] = item.Item::position_[constants::axis::WIDTH];
-            JsonItem[constants::json::item::Y_COORDINATE] = item.Item::position_[constants::axis::DEPTH];
-            JsonItem[constants::json::item::Z_COORDINATE] = item.Item::position_[constants::axis::HEIGHT];
-        }
+        JsonItem[constants::json::item::WIDTH] = (ResponseBuilder::itemDimensionsAfter_ ? item.Item::width_ : item.Item::original_width_);
+        JsonItem[constants::json::item::DEPTH] = (ResponseBuilder::itemDimensionsAfter_ ? item.Item::depth_ : item.Item::original_depth_);
+        JsonItem[constants::json::item::X_COORDINATE] = item.Item::position_[constants::axis::WIDTH];
+        JsonItem[constants::json::item::Y_COORDINATE] = item.Item::position_[constants::axis::DEPTH];
+        JsonItem[constants::json::item::Z_COORDINATE] = item.Item::position_[constants::axis::HEIGHT];
 
         if (ResponseBuilder::hasValue(item.Item::itemConsolidationKey_))
         {

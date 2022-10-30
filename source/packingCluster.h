@@ -13,12 +13,13 @@ private:
     double requestedBinMaxWeight_;
     double requestedBinMaxVolume_;
     Gravity *masterGravity_;
+    int binIdCounter_;
 
     /**
      * @brief Checks if the item is the same as the most recent unfitted item.
      *
      * Return false if no item is unfitted yet.
-     * Return true if items are of the same shape, have the same dimensions, and have the same allowed rotations.
+     * Return true if items have the same dimensions, and have the same allowed rotations.
      *
      * @param aItemToCheck
      * @return true
@@ -26,33 +27,47 @@ private:
      */
     const bool equalsPreviousUnfittedItem(const Item *aItemToCheck) const
     {
-        bool isTheSame = 0;
-
         if (PackingCluster::bins_.back().Bin::getUnfittedItems().empty())
         {
-            return isTheSame;
+            return 0;
         };
 
         const Item *lastUnfittedItem = &PackingCluster::masterItemRegister_->ItemRegister::getConstItem(PackingCluster::bins_.back().Bin::getUnfittedItems().back());
-
-        if (lastUnfittedItem->isShape(constants::shape::CUBOID) && aItemToCheck->isShape(constants::shape::CUBOID) &&
-            lastUnfittedItem->Item::width_ == aItemToCheck->Item::width_ &&
-            lastUnfittedItem->Item::depth_ == aItemToCheck->Item::depth_ &&
-            lastUnfittedItem->Item::height_ == aItemToCheck->Item::height_ &&
-            lastUnfittedItem->Item::allowedRotations_ == aItemToCheck->Item::allowedRotations_)
-        {
-            isTheSame = 1;
-        }
-        else if (lastUnfittedItem->isShape(constants::shape::CYLINDER) && aItemToCheck->isShape(constants::shape::CYLINDER) &&
-                 lastUnfittedItem->Item::diameter_ == aItemToCheck->Item::diameter_ &&
-                 lastUnfittedItem->Item::height_ == aItemToCheck->Item::height_ &&
-                 lastUnfittedItem->Item::allowedRotations_ == aItemToCheck->Item::allowedRotations_)
-        {
-            isTheSame = 1;
-        };
-
-        return isTheSame;
+        return (lastUnfittedItem->Item::width_ == aItemToCheck->Item::width_ &&
+                lastUnfittedItem->Item::depth_ == aItemToCheck->Item::depth_ &&
+                lastUnfittedItem->Item::height_ == aItemToCheck->Item::height_ &&
+                lastUnfittedItem->Item::allowedRotations_ == aItemToCheck->Item::allowedRotations_);
     };
+
+    /**
+     * @brief Function to be used when placing the first item inside a bin.
+     *
+     * @param aItemToPack
+     * @return const bool
+     */
+    const bool fitFirstItem(const Item *aItemToPack)
+    {
+        if (PackingCluster::bins_.back().Bin::placeItemInBin(aItemToPack->transientSysId_))
+        {
+            PackingCluster::bins_.back().Bin::updateWithNewFittedItem(aItemToPack->transientSysId_, 0);
+            return 1;
+        }
+        return 0;
+    };
+
+    /**
+     * @brief Checks if adding the item would exceed the bins limits.
+     *
+     * @param aItemToPack
+     * @return true
+     * @return false
+     */
+    const bool wouldExceedLimit(const Item *aItemToPack)
+    {
+        const Bin lastBin = PackingCluster::getLastCreatedBin();
+        return (lastBin.getActVolumeUtil() + aItemToPack->Item::volume_) > lastBin.volume_ ||
+               (lastBin.getActWeightUtil() + aItemToPack->Item::weight_) > lastBin.maxWeight_;
+    }
 
 public:
     int id_;
@@ -109,15 +124,25 @@ public:
     };
 
     /**
-     * @brief Get all last bin.
+     * @brief Set the current bin id
+     *
+     * Used to keep track of the current counter when multiple packing clusters are created.
+     *
+     * @param aInteger
+     */
+    void setBinIdCounter(unsigned int aInteger)
+    {
+        PackingCluster::binIdCounter_ = aInteger;
+    };
+
+    /**
+     * @brief Get last bin.
      *
      * @return const std::vector<Bin>&
      */
-    const std::vector<Bin> &getLastCreatedBin() const
+    const Bin &getLastCreatedBin() const
     {
-        const int numberOfBins = PackingCluster::bins_.size();
-
-        return PackingCluster::bins_;
+        return PackingCluster::bins_.back();
     };
 
     /**
@@ -130,23 +155,21 @@ public:
     };
 
     /**
-     * @brief Set all bins.
+     * @brief Add to last bin' unfitted items.
      *
-     * Used when updating bins that have been processed by the distributor.
-     *
-     * @return double
+     * @param aItem
      */
-    void setBins(std::vector<Bin> aBins)
+    void addLastBinUnfittedItem(const Item *aItem)
     {
-        PackingCluster::bins_ = aBins;
+        PackingCluster::bins_.back().Bin::addUnfittedItem(aItem->transientSysId_);
     };
 
-    void addUnfittedItem(int itemKey)
-    {
-        PackingCluster::bins_.back().Bin::addUnfittedItem(itemKey);
-    };
-
-    double getTotalVolumeUtilizationPercentage()
+    /**
+     * @brief Get the total volume util of the whole cluster.
+     *
+     * @return const double
+     */
+    const double getTotalVolumeUtilizationPercentage() const
     {
         double actualVolumeUtil = 0;
         for (auto &b : PackingCluster::bins_)
@@ -156,7 +179,12 @@ public:
         return std::max(0.0, actualVolumeUtil / (PackingCluster::requestedBinWidth_ * PackingCluster::requestedBinDepth_ * PackingCluster::requestedBinHeight_ * PackingCluster::bins_.size()) * 100);
     };
 
-    double getTotalWeightUtilizationPercentage()
+    /**
+     * @brief Get the total weight util of the whole cluster.
+     *
+     * @return const double
+     */
+    const double getTotalWeightUtilizationPercentage() const
     {
         double actualWeightUtil = 0;
         for (auto &b : PackingCluster::bins_)
@@ -165,17 +193,17 @@ public:
         };
         return std::max(0.0, actualWeightUtil / (PackingCluster::requestedBinMaxWeight_ * PackingCluster::bins_.size()) * 100);
     };
+
     /**
      * @brief Return an integer representing the estimated number of items that will fit a empty bin.
      *
-     * This method iterates over the itemKeys vector and makes an estimation of how many of these items will fit into an empty bin.
      * Estimation is fully based on volume.
      *
      * Used to reserve memory and help calibrate the pre-generated tree depth.
      *
      * @param aItemsToBePacked  - vector containing itemKeys
      */
-    int estimatedNumberOfItemsThatWillFitIntoBin(std::vector<int> &aItemsToBePacked)
+    const int estimatedNumberOfItemsThatWillFitIntoBin(const std::vector<int> &aItemsToBePacked) const
     {
         int estimatedNumberOfItems = 0;
         double cumulativeItemVolume = 0.0;
@@ -198,7 +226,7 @@ public:
      *
      * @param aItemsToBePacked  - vector containing itemKeys
      */
-    void startPacking(std::vector<int> aItemsToBePacked)
+    void startPacking(const std::vector<int> aItemsToBePacked)
     {
         if (aItemsToBePacked.empty())
         {
@@ -206,7 +234,7 @@ public:
         };
 
         PackingCluster::bins_.push_back(Bin(PackingCluster::requestedBinType_,
-                                            (PackingCluster::bins_.size() + 1),
+                                            (PackingCluster::binIdCounter_),
                                             PackingCluster::requestedBinWidth_,
                                             PackingCluster::requestedBinDepth_,
                                             PackingCluster::requestedBinHeight_,
@@ -217,45 +245,50 @@ public:
 
         for (auto &itemToPackKey : aItemsToBePacked)
         {
-            Item *itemToPack = &PackingCluster::masterItemRegister_->ItemRegister::getItem(itemToPackKey);
+            const Item *itemToPack = &PackingCluster::masterItemRegister_->ItemRegister::getItem(itemToPackKey);
 
-            /* Check if item would exceed weight or volume limit. */
-            if ((PackingCluster::bins_.back().Bin::getActVolumeUtil() + itemToPack->Item::volume_) > PackingCluster::bins_.back().Bin::volume_ ||
-                (PackingCluster::bins_.back().Bin::getActWeightUtil() + itemToPack->Item::weight_) > PackingCluster::bins_.back().Bin::maxWeight_)
+            if (PackingCluster::wouldExceedLimit(itemToPack) || PackingCluster::equalsPreviousUnfittedItem(itemToPack))
             {
-                PackingCluster::addUnfittedItem(itemToPack->Item::transientSysId_);
+                PackingCluster::addLastBinUnfittedItem(itemToPack);
                 continue;
-            };
+            }
 
             /* Check if item would be the first item in the bin, if so take shortcut. */
-            if (PackingCluster::bins_.back().Bin::getFittedItems().empty())
+            if (PackingCluster::getLastCreatedBin().Bin::getFittedItems().empty())
             {
-                if (PackingCluster::bins_.back().Bin::placeItemInBin(itemToPackKey))
+                if (PackingCluster::fitFirstItem(itemToPack))
                 {
-                    PackingCluster::bins_.back().Bin::updateWithNewFittedItem(itemToPackKey, 0);
                     continue;
                 };
             };
-
-            /* Check if item is the same as previous unfitted item. */
-            if (PackingCluster::equalsPreviousUnfittedItem(itemToPack))
-            {
-                PackingCluster::addUnfittedItem(itemToPack->Item::transientSysId_);
-                continue;
-            }
 
             PackingCluster::bins_.back().Bin::findItemPosition(itemToPackKey);
         };
 
         /* Delete the created bin if it contains no items. */
-        if (aItemsToBePacked.size() == PackingCluster::bins_.back().Bin::getUnfittedItems().size())
+        if (PackingCluster::getLastCreatedBin().Bin::getFittedItems().empty())
         {
             PackingCluster::deleteLastBin();
             return;
-        };
+        }
 
+        PackingCluster::binIdCounter_ += 1;
         PackingCluster::startPacking(PackingCluster::bins_.back().Bin::getUnfittedItems());
     };
+
+#if DISTRIBUTOR_SUPPORT
+    /**
+     * @brief Set all bins.
+     *
+     * Used when updating bins that have been processed by the distributor.
+     *
+     * @return double
+     */
+    void setBins(std::vector<Bin> aBins)
+    {
+        PackingCluster::bins_ = aBins;
+    };
+#endif
 };
 
 #endif

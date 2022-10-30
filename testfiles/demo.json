@@ -1,0 +1,77 @@
+{
+	"bin": {
+		"type": "Pallet",
+		"maxWeight": 1500,
+		"width": 0.6,
+		"height": 1,
+		"depth": 0.6
+	},
+	"items": [
+		{
+			"id": "ITEM01",
+			"diameter": 0.40,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM011",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM012",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM013",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM012",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM013",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM013",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM012",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM013",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM013",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		},
+		{
+			"id": "ITEM012",
+			"diameter": 0.15,
+			"height": 0.20,
+			"weight": 10
+		}
+	]
+}

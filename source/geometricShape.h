@@ -14,67 +14,6 @@ class GeometricShape
 {
 
 private:
-    /**
-     * @brief Set the shape of the object based on attributes.
-     *
-     */
-    void setShape()
-    {
-        if (GeometricShape::diameter_ != 0.0)
-        {
-            GeometricShape::shape_ = constants::shape::CYLINDER;
-        }
-        else
-        {
-            GeometricShape::shape_ = constants::shape::CUBOID;
-        }
-    }
-
-    /**
-     * @brief Set class attributes for cuboid shape.
-     *
-     */
-    void setCuboidShapeAttributes()
-    {
-        GeometricShape::radius_ = 0.0;
-        GeometricShape::diameter_ = 0.0;
-        GeometricShape::volume_ = width_ * depth_ * height_;
-        GeometricShape::smallestDimension_ = std::min(std::min(GeometricShape::width_, GeometricShape::depth_), GeometricShape::height_);
-        GeometricShape::allowedRotations_ = GeometricShape::allowedRotations_.size() == 0 ? "012345" : GeometricShape::allowedRotations_;
-    };
-
-    /**
-     * @brief Set class attributes for cylinder shape.
-     *
-     */
-    void setCylinderShapeAttributes()
-    {
-        GeometricShape::width_ = GeometricShape::diameter_;
-        GeometricShape::depth_ = GeometricShape::diameter_;
-        GeometricShape::original_width_ = GeometricShape::diameter_;
-        GeometricShape::original_depth_ = GeometricShape::diameter_;
-        GeometricShape::radius_ = GeometricShape::diameter_ / 2;
-        GeometricShape::volume_ = M_PI * pow(GeometricShape::radius_, 2) * GeometricShape::height_;
-        GeometricShape::smallestDimension_ = std::min(GeometricShape::diameter_, GeometricShape::height_);
-        GeometricShape::allowedRotations_ = "0";
-    };
-
-    /**
-     * @brief Set attributes according to shape.
-     *
-     */
-    void setShapeSpecificAttributes()
-    {
-        if (GeometricShape::isShape(constants::shape::CUBOID))
-        {
-            GeometricShape::setCuboidShapeAttributes();
-        }
-        else if (GeometricShape::isShape(constants::shape::CYLINDER))
-        {
-            GeometricShape::setCylinderShapeAttributes();
-        }
-    }
-
 public:
     std::string shape_;
     double width_;
@@ -111,8 +50,10 @@ public:
                                                          rotationType_(constants::rotation::type::WDH),
                                                          rotationTypeDescription_("")
     {
-        setShape();
-        setShapeSpecificAttributes();
+        GeometricShape::shape_ = constants::shape::CUBOID;
+        GeometricShape::volume_ = width_ * depth_ * height_;
+        GeometricShape::smallestDimension_ = std::min(std::min(GeometricShape::width_, GeometricShape::depth_), GeometricShape::height_);
+        GeometricShape::allowedRotations_ = GeometricShape::allowedRotations_.size() == 0 ? "012345" : GeometricShape::allowedRotations_;
     };
 
     /**
@@ -213,6 +154,7 @@ public:
         GeometricShape::furthestPointHeight_ = GeometricShape::position_[constants::axis::HEIGHT] + GeometricShape::height_;
     };
 
+#if CYLINDER_SUPPORT
     /**
      * @brief Return the XY center of a cylinder shaped object.
      *
@@ -247,5 +189,6 @@ public:
         };
         return cornerPosition;
     };
+#endif
 };
 #endif

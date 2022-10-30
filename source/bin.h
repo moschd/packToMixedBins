@@ -15,7 +15,6 @@ private:
     Gravity *masterGravity_;
     ItemRegister *masterItemRegister_;
 
-
 public:
     int id_;
     std::string type_;
@@ -47,74 +46,43 @@ public:
         Bin::zFreeItems_.reserve(aEstimatedNumberOfItemFits);
     };
 
-    /**
-     * @brief Set the fitted items, used by distributor.
-     *
-     * @param aFittedItems
-     */
-    void setFittedItems(std::vector<int> aFittedItems)
-    {
-        Bin::items_ = aFittedItems;
-    };
-
-    /**
-     * @brief Reset the xyz free item vectors to simulate a re-pack and evalute all items correctly again.
-     *
-     */
-    void resetFreeItemVectors()
-    {
-        Bin::xFreeItems_ = Bin::items_;
-        Bin::yFreeItems_ = Bin::items_;
-        Bin::zFreeItems_ = Bin::items_;
-    };
-
-    /**
-     * @brief Set the unfitted items, used by distributor.
-     *
-     * @param aUnfittedItems
-     */
-    void setUnfittedItems(std::vector<int> aUnfittedItems)
-    {
-        Bin::unfittedItems_ = aUnfittedItems;
-    };
-
     const std::vector<int> &getFittedItems() const
     {
         return Bin::items_;
     };
-
-    void deleteItemFromFittedItems(const unsigned int aItemKey)
-    {
-        std::vector<int>::iterator itemIterator = std::find(Bin::items_.begin(), Bin::items_.end(), aItemKey);
-        if (itemIterator != Bin::items_.end())
-        {
-            Bin::items_.erase(itemIterator);
-            Bin::refreshAttributes(aItemKey);
-        };
-    }
 
     const std::vector<int> &getUnfittedItems() const
     {
         return Bin::unfittedItems_;
     };
 
-    void addUnfittedItem(int itemKey)
+    /**
+     * @brief Reset the item to inital values and add to unfitted items.
+     *
+     * @param itemKey
+     */
+    void addUnfittedItem(const int itemKey)
     {
-        return Bin::unfittedItems_.push_back(itemKey);
+        Item *itemBeingPlaced = &Bin::masterItemRegister_->ItemRegister::getItem(itemKey);
+        itemBeingPlaced->reset();
+        Bin::unfittedItems_.push_back(itemKey);
     };
 
     const double getActVolumeUtilizationPercentage() const
     {
         return Bin::actualVolumeUtil_ / GeometricShape::volume_ * 100;
     };
+
     const double getActWeightUtilizationPercentage() const
     {
         return Bin::actualWeightUtil_ / Bin::maxWeight_ * 100;
     };
+
     const double getActWeightUtil() const
     {
         return Bin::actualWeightUtil_;
     };
+
     const double getActVolumeUtil() const
     {
         return Bin::actualVolumeUtil_;
@@ -250,11 +218,6 @@ public:
                 {
                     fitted = 1;
                 }
-                // else if (itemInBin->isShape(constants::shape::CYLINDER))
-                // {
-                //     itemToFit->Item::position_ = itemInBin->Item::getCornerSpace(constants::axis::cylinder::XY);
-                //     fitted = Bin::placeItemInBin(itemToFitKey);
-                // };
 
                 if (fitted)
                 {
@@ -269,7 +232,7 @@ public:
         };
         if (!fitted)
         {
-            Bin::unfittedItems_.push_back(itemToFitKey);
+            Bin::addUnfittedItem(itemToFitKey);
         };
     };
 
@@ -312,11 +275,6 @@ public:
                                                   Bin::placedItemsMaxDimensions_[constants::axis::DEPTH] + itemBeingPlaced->Item::depth_,
                                                   Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT] + itemBeingPlaced->Item::height_},
                                                  intersectCandidates);
-
-            /* otherwise the cylinder will intersect with itself. */
-            // std::vector<int>::iterator position = std::find(intersectCandidates.begin(), intersectCandidates.end(), aItemKeyToIgnore);
-            // if (position != intersectCandidates.end())
-            //     intersectCandidates.erase(position);
 
             /* Iterate over candidates and check for collision. */
             for (auto intersectCandidateKey : intersectCandidates)
@@ -362,11 +320,57 @@ public:
             return 1;
         };
 
-        /* If this point is reached then the item didnt find a place, restore item to original dimensions. */
-        itemBeingPlaced->Item::reset();
+        /* If this point is reached then the item didnt find a place. */
         return 0;
     };
 
+#if DISTRIBUTOR_SUPPORT
+
+    /**
+     * @brief Set the fitted items.
+     *
+     * @param aFittedItems
+     */
+    void setFittedItems(std::vector<int> aFittedItems)
+    {
+        Bin::items_ = aFittedItems;
+    };
+
+    /**
+     * @brief Reset the xyz free item vectors to simulate a re-pack and evalute all items correctly again.
+     *
+     */
+    void resetFreeItemVectors()
+    {
+        Bin::xFreeItems_ = Bin::items_;
+        Bin::yFreeItems_ = Bin::items_;
+        Bin::zFreeItems_ = Bin::items_;
+    };
+
+    /**
+     * @brief Set the unfitted items.
+     *
+     * @param aUnfittedItems
+     */
+    void setUnfittedItems(std::vector<int> aUnfittedItems)
+    {
+        Bin::unfittedItems_ = aUnfittedItems;
+    };
+
+    /**
+     * @brief Delete from bin when item is being redistributed.
+     *
+     * @param aItemKey
+     */
+    void deleteItemFromFittedItems(const unsigned int aItemKey)
+    {
+        std::vector<int>::iterator itemIterator = std::find(Bin::items_.begin(), Bin::items_.end(), aItemKey);
+        if (itemIterator != Bin::items_.end())
+        {
+            Bin::items_.erase(itemIterator);
+            Bin::refreshAttributes(aItemKey);
+        };
+    }
     /**
      * @brief Recalculate some of the attributes of the bin.
      *
@@ -408,6 +412,7 @@ public:
         Bin::actualVolumeUtil_ = newActualVolumeUtil;
         Bin::actualWeightUtil_ = newActualWeightUtil;
     };
+#endif
 };
 
 #endif

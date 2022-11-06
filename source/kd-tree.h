@@ -15,7 +15,7 @@ struct Node
     Node(const std::array<double, 3> aPartitionPoint,
          const std::array<double, 3> aMins,
          const std::array<double, 3> aMaxs,
-         const int aCurrentDepth) : isLeaf_(0),
+         const int aCurrentDepth) : isLeaf_(false),
                                     left_(NULL),
                                     right_(NULL),
                                     myDepth_(aCurrentDepth),

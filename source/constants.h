@@ -74,7 +74,7 @@ namespace constants
                 const std::string MAX_WEIGHT = "maxWeight";
                 const std::string SORT_METHOD = "sortMethod";
                 const std::string GRAVITY_STRENGTH = "gravityStrength";
-                const std::string DISTRIBUTE = "distributeItems";
+                const std::string DISTRIBUTE_ITEMS = "distributeItems";
             };
 
             namespace item

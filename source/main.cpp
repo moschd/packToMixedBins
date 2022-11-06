@@ -1,16 +1,9 @@
-#define CYLINDER_SUPPORT 0
+#define CYLINDER_SUPPORT false
 /*
 Always set to 0, cylinders are not supported (yet).
 */
 
-#define DISTRIBUTOR_SUPPORT 0
-/*
-# DISTRIBUTOR_SUPPORT
-Setting this to true enables parameter distributeItems.
-This will add additional methods to several classes and adds the distributor.h import.
-*/
-
-#define COMPILE_TO_SO 0
+#define COMPILE_TO_SO true
 /*
 Compile to a shared object file.
 */
@@ -31,17 +24,14 @@ Compile to a shared object file.
 #include "item.h"
 #include "itemSortMethods.h"
 #include "itemregister.h"
-#include "calculationCache.h"
+#include "requestedBin.h"
+#include "binCalculationCache.h"
 #include "gravity.h"
 #include "bin.h"
 #include "packingCluster.h"
 #include "packer.h"
 #include "binSortMethods.h"
 #include "outgoingJsonBuilder.h"
-
-#if DISTRIBUTOR_SUPPORT
-#include "distributor.h"
-#endif
 
 /*
     ----------------------------------------------------
@@ -59,9 +49,9 @@ extern "C"
     char *packToBinAlgorithm(char *result,
                              const int bufferSize,
                              const char *incomingJson,
-                             const bool includeBins = 1,
-                             const bool includeItems = 1,
-                             const bool itemDimensionsAfter = 0,
+                             const bool includeBins = true,
+                             const bool includeItems = true,
+                             const bool itemDimensionsAfter = false,
                              const int responsePrecision = 7)
     {
 
@@ -69,11 +59,11 @@ extern "C"
 int main()
 {
     auto start = std::chrono::high_resolution_clock::now();
-    const bool itemDimensionsAfter = 0;
-    const bool includeItems = 1;
-    const bool includeBins = 1;
+    const bool includeBins = true;
+    const bool includeItems = false;
+    const bool itemDimensionsAfter = false;
     const int responsePrecision = 7;
-    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/5000_items.json");
+    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/demo2.json");
 #endif
 
         Json::Reader reader;
@@ -84,15 +74,19 @@ int main()
         const Json::Value incomingJsonItems = inboundRoot[constants::json::inbound::item::ITEMS];
 
         ItemRegister masterItemRegister(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString());
+
         Gravity masterGravity(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
-        Packer packingProcessor(incomingJsonBin[constants::json::inbound::bin::TYPE].asString(),
-                                incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble(),
-                                incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble(),
-                                incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble(),
-                                incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble(),
+
+        RequestedBin requestedBin(incomingJsonBin[constants::json::inbound::bin::TYPE].asString(),
+                                  incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble(),
+                                  incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble(),
+                                  incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble(),
+                                  incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble());
+
+        Packer packingProcessor(requestedBin,
                                 masterGravity,
                                 masterItemRegister,
-                                incomingJsonBin[constants::json::inbound::bin::DISTRIBUTE].asString());
+                                incomingJsonBin[constants::json::inbound::bin::DISTRIBUTE_ITEMS].asBool());
 
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
@@ -114,23 +108,8 @@ int main()
         /* Split items by consolidation key and start packing. */
         for (auto &sortedItemConsKeyVector : packingProcessor.masterItemRegister_->getAllSortedItemConsKeyVectors())
         {
-            packingProcessor.startPacking(sortedItemConsKeyVector);
+            packingProcessor.startPackingCluster(sortedItemConsKeyVector);
         };
-
-#if DISTRIBUTOR_SUPPORT
-        /* Check if item ditribution is requested */
-        if (packingProcessor.requestsDistribution())
-        {
-            for (auto cluster : packingProcessor.getClusters())
-            {
-                if (cluster.getPackedBins().size() > 1)
-                {
-                    Distributor distributor(&cluster, packingProcessor.distribute_);
-                    packingProcessor.setCluster(cluster.id_, distributor.packedCluster_);
-                };
-            };
-        };
-#endif
 
         // /* Initialize outgoing json builder */
         ResponseBuilder outgoingJsonBuilder(responsePrecision, includeBins, includeItems, itemDimensionsAfter);

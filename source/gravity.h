@@ -53,7 +53,7 @@ public:
 
     Gravity(double aGravityStrengthPercentage) : gravityStrength_(aGravityStrengthPercentage - 0.1)
     {
-        Gravity::highLevelGravityEnabled_ = (gravityStrength_ > 0.0 ? 1 : 0);
+        Gravity::highLevelGravityEnabled_ = (gravityStrength_ > 0.0 ? true : false);
     };
 
     /**

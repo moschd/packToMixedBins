@@ -5,15 +5,10 @@ class PackingCluster
 {
 private:
     std::vector<Bin> bins_;
-    int estimatedTotalRequiredBins_;
-    std::string requestedBinType_;
-    double requestedBinWidth_;
-    double requestedBinDepth_;
-    double requestedBinHeight_;
-    double requestedBinMaxWeight_;
-    double requestedBinMaxVolume_;
+    RequestedBin *requestedBin_;
     Gravity *masterGravity_;
     int binIdCounter_;
+    bool distributeItems_;
 
     /**
      * @brief Checks if the item is the same as the most recent unfitted item.
@@ -29,7 +24,7 @@ private:
     {
         if (PackingCluster::bins_.back().Bin::getUnfittedItems().empty())
         {
-            return 0;
+            return false;
         };
 
         const Item *lastUnfittedItem = &PackingCluster::masterItemRegister_->ItemRegister::getConstItem(PackingCluster::bins_.back().Bin::getUnfittedItems().back());
@@ -49,10 +44,10 @@ private:
     {
         if (PackingCluster::bins_.back().Bin::placeItemInBin(aItemToPack->transientSysId_))
         {
-            PackingCluster::bins_.back().Bin::updateWithNewFittedItem(aItemToPack->transientSysId_, 0);
-            return 1;
+            PackingCluster::bins_.back().Bin::updateWithFittedItemHelper(aItemToPack->transientSysId_, 0);
+            return true;
         }
-        return 0;
+        return false;
     };
 
     /**
@@ -62,40 +57,69 @@ private:
      * @return true
      * @return false
      */
-    const bool wouldExceedLimit(const Item *aItemToPack)
+    const bool wouldExceedLimit(const Item *aItemToPack) const
+    {
+        return PackingCluster::wouldExceedPhysicalLimit(aItemToPack); //|| PackingCluster::exceedsSelfImposedLimit();
+    };
+
+    /**
+     * @brief Checks if adding the item would exceed the bins physical limits.
+     *
+     * @param aItemToPack
+     * @return true
+     * @return false
+     */
+    const bool wouldExceedPhysicalLimit(const Item *aItemToPack) const
     {
         const Bin lastBin = PackingCluster::getLastCreatedBin();
-        return (lastBin.getActVolumeUtil() + aItemToPack->Item::volume_) > lastBin.volume_ ||
-               (lastBin.getActWeightUtil() + aItemToPack->Item::weight_) > lastBin.maxWeight_;
+        return (lastBin.getActVolumeUtil() + aItemToPack->Item::volume_) > requestedBin_->getMaxVolume() ||
+               (lastBin.getActWeightUtil() + aItemToPack->Item::weight_) > requestedBin_->getMaxWeight();
+    }
+
+    /**
+     * @brief Checks if the bin has exceeded packingCluster' self imposed distribute item limits.
+     *
+     * Check the dimension with the highest utilization threshold.
+     * Only relevant if distributeItems = true.
+     *
+     * @return true
+     * @return false
+     */
+    const bool exceedsSelfImposedLimit() const
+    {
+
+        if (!PackingCluster::distributeItems_)
+        {
+            return false;
+        }
+
+        const Bin lastBin = PackingCluster::getLastCreatedBin();
+        if (PackingCluster::requestedBin_->getEstAvgVolumeUtil() < PackingCluster::requestedBin_->getEstAvgWeightUtil())
+        {
+            return PackingCluster::requestedBin_->getEstAvgWeightUtil() < lastBin.getActWeightUtilizationPercentage();
+        }
+        else
+        {
+            return PackingCluster::requestedBin_->getEstAvgVolumeUtil() < lastBin.getActVolumeUtilizationPercentage();
+        }
     }
 
 public:
     int id_;
-    std::string consolidationId_;
     ItemRegister *masterItemRegister_;
 
     PackingCluster(unsigned int aId,
-                   std::string aConsolidationId,
-                   std::string aBinType,
-                   double aBinWidth,
-                   double aBinDepth,
-                   double aBinHeight,
-                   double aBinMaxWeight,
-                   double aBinMaxVolume,
+                   RequestedBin &aRequestedBin,
                    Gravity &aGravity,
-                   ItemRegister &aItemRegister) : id_(aId),
-                                                  consolidationId_(aConsolidationId),
-                                                  requestedBinType_(aBinType),
-                                                  requestedBinWidth_(aBinWidth),
-                                                  requestedBinDepth_(aBinDepth),
-                                                  requestedBinHeight_(aBinHeight),
-                                                  requestedBinMaxWeight_(aBinMaxWeight),
-                                                  requestedBinMaxVolume_(aBinMaxVolume),
-                                                  masterGravity_(&aGravity),
-                                                  masterItemRegister_(&aItemRegister){};
+                   ItemRegister &aItemRegister,
+                   bool aDistributeItems) : id_(aId),
+                                            requestedBin_(&aRequestedBin),
+                                            masterGravity_(&aGravity),
+                                            masterItemRegister_(&aItemRegister),
+                                            distributeItems_(aDistributeItems){};
 
     /**
-     * @brief Get the last created bin object based on Id_.
+     * @brief Get bin by id.
      *
      * @return const Bin&
      */
@@ -165,57 +189,48 @@ public:
     };
 
     /**
-     * @brief Get the total volume util of the whole cluster.
-     *
-     * @return const double
-     */
-    const double getTotalVolumeUtilizationPercentage() const
-    {
-        double actualVolumeUtil = 0;
-        for (auto &b : PackingCluster::bins_)
-        {
-            actualVolumeUtil += b.Bin::getActVolumeUtil();
-        };
-        return std::max(0.0, actualVolumeUtil / (PackingCluster::requestedBinWidth_ * PackingCluster::requestedBinDepth_ * PackingCluster::requestedBinHeight_ * PackingCluster::bins_.size()) * 100);
-    };
-
-    /**
-     * @brief Get the total weight util of the whole cluster.
-     *
-     * @return const double
-     */
-    const double getTotalWeightUtilizationPercentage() const
-    {
-        double actualWeightUtil = 0;
-        for (auto &b : PackingCluster::bins_)
-        {
-            actualWeightUtil += b.Bin::getActWeightUtil();
-        };
-        return std::max(0.0, actualWeightUtil / (PackingCluster::requestedBinMaxWeight_ * PackingCluster::bins_.size()) * 100);
-    };
-
-    /**
      * @brief Return an integer representing the estimated number of items that will fit a empty bin.
-     *
-     * Estimation is fully based on volume.
      *
      * Used to reserve memory and help calibrate the pre-generated tree depth.
      *
      * @param aItemsToBePacked  - vector containing itemKeys
      */
-    const int estimatedNumberOfItemsThatWillFitIntoBin(const std::vector<int> &aItemsToBePacked) const
+    const int estNrOfItemsInBin(const std::vector<int> &aItemsToBePacked) const
     {
-        int estimatedNumberOfItems = 0;
-        double cumulativeItemVolume = 0.0;
+        int volumeEstimatedNumberOfItems = 0;
+        int weightEstimatedNumberOfItems = 0;
+        double volumeCumulativeValue = 0.0;
+        double weightCumulativeValue = 0.0;
+
         for (auto itemKey : aItemsToBePacked)
         {
-            if ((PackingCluster::masterItemRegister_->ItemRegister::getItem(itemKey).Item::volume_ + cumulativeItemVolume) < PackingCluster::requestedBinMaxVolume_)
+            const Item *itemToCheck = &PackingCluster::masterItemRegister_->ItemRegister::getConstItem(itemKey);
+
+            if ((itemToCheck->volume_ + volumeCumulativeValue) < PackingCluster::requestedBin_->getMaxVolume())
             {
-                estimatedNumberOfItems += 1;
-                cumulativeItemVolume += PackingCluster::masterItemRegister_->ItemRegister::getItem(itemKey).Item::volume_;
+                volumeEstimatedNumberOfItems += 1;
+                volumeCumulativeValue += itemToCheck->volume_;
+            };
+
+            if ((itemToCheck->weight_ + weightCumulativeValue) < PackingCluster::requestedBin_->getMaxWeight())
+            {
+                weightEstimatedNumberOfItems += 1;
+                weightCumulativeValue += itemToCheck->weight_;
             };
         };
-        return estimatedNumberOfItems;
+
+        return std::min(volumeEstimatedNumberOfItems, weightEstimatedNumberOfItems);
+    };
+
+    /**
+     * @brief Prepare the cluster for packing bins.
+     *
+     * @param aItemsToBePacked
+     */
+    void startPacking(const std::vector<int> aItemsToBePacked)
+    {
+        PackingCluster::requestedBin_->setEstimatedAverages(aItemsToBePacked, *PackingCluster::masterItemRegister_);
+        PackingCluster::startPackingBins(aItemsToBePacked);
     };
 
     /**
@@ -226,26 +241,22 @@ public:
      *
      * @param aItemsToBePacked  - vector containing itemKeys
      */
-    void startPacking(const std::vector<int> aItemsToBePacked)
+    void startPackingBins(const std::vector<int> aItemsToBePacked)
     {
         if (aItemsToBePacked.empty())
         {
             return;
         };
 
-        PackingCluster::bins_.push_back(Bin(PackingCluster::requestedBinType_,
-                                            (PackingCluster::binIdCounter_),
-                                            PackingCluster::requestedBinWidth_,
-                                            PackingCluster::requestedBinDepth_,
-                                            PackingCluster::requestedBinHeight_,
-                                            PackingCluster::requestedBinMaxWeight_,
+        PackingCluster::bins_.push_back(Bin(PackingCluster::binIdCounter_,
+                                            PackingCluster::requestedBin_,
                                             PackingCluster::masterGravity_,
                                             PackingCluster::masterItemRegister_,
-                                            PackingCluster::estimatedNumberOfItemsThatWillFitIntoBin(aItemsToBePacked)));
+                                            PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
 
         for (auto &itemToPackKey : aItemsToBePacked)
         {
-            const Item *itemToPack = &PackingCluster::masterItemRegister_->ItemRegister::getItem(itemToPackKey);
+            const Item *itemToPack = &PackingCluster::masterItemRegister_->ItemRegister::getConstItem(itemToPackKey);
 
             if (PackingCluster::wouldExceedLimit(itemToPack) || PackingCluster::equalsPreviousUnfittedItem(itemToPack))
             {
@@ -273,22 +284,8 @@ public:
         }
 
         PackingCluster::binIdCounter_ += 1;
-        PackingCluster::startPacking(PackingCluster::bins_.back().Bin::getUnfittedItems());
+        PackingCluster::startPackingBins(PackingCluster::bins_.back().Bin::getUnfittedItems());
     };
-
-#if DISTRIBUTOR_SUPPORT
-    /**
-     * @brief Set all bins.
-     *
-     * Used when updating bins that have been processed by the distributor.
-     *
-     * @return double
-     */
-    void setBins(std::vector<Bin> aBins)
-    {
-        PackingCluster::bins_ = aBins;
-    };
-#endif
 };
 
 #endif

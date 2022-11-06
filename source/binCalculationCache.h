@@ -1,12 +1,12 @@
-#ifndef CALCULATION_CACHE_H
-#define CALCULATION_CACHE_H
+#ifndef BIN_CALCULATION_CACHE_H
+#define BIN_CALCULATION_CACHE_H
 
 /**
  * @brief Cache manager to help with space management and speed up calculation.
  *
  *
  */
-class CalculationCache
+class BinCalculationCache
 {
 private:
     struct itemPositionHash
@@ -34,15 +34,15 @@ public:
     inline void addIntersection(const Item *aItemBeingPlaced, const Item *aItemAlreadyPlaced)
     {
         const double smallestDistance = Geometry::nearestBoundary(aItemBeingPlaced, aItemAlreadyPlaced);
-        const auto &resultIterator = CalculationCache::intersectionLimits.find(aItemBeingPlaced->position_);
+        const auto &resultIterator = BinCalculationCache::intersectionLimits.find(aItemBeingPlaced->position_);
 
         if (resultIterator == intersectionLimits.end())
         {
-            CalculationCache::intersectionLimits[aItemBeingPlaced->Item::position_] = smallestDistance;
+            BinCalculationCache::intersectionLimits[aItemBeingPlaced->Item::position_] = smallestDistance;
         }
         else
         {
-            CalculationCache::intersectionLimits[aItemBeingPlaced->Item::position_] = std::min(resultIterator->second, smallestDistance);
+            BinCalculationCache::intersectionLimits[aItemBeingPlaced->Item::position_] = std::min(resultIterator->second, smallestDistance);
         };
     };
 
@@ -57,8 +57,8 @@ public:
      */
     inline const bool itemPositionCacheHit(const Item *aItemToBeFound) const
     {
-        const auto resultIterator = CalculationCache::intersectionLimits.find(aItemToBeFound->Item::position_);
-        return resultIterator != CalculationCache::intersectionLimits.end() &&
+        const auto resultIterator = BinCalculationCache::intersectionLimits.find(aItemToBeFound->Item::position_);
+        return resultIterator != BinCalculationCache::intersectionLimits.end() &&
                aItemToBeFound->smallestDimension_ >= resultIterator->second;
     };
 };

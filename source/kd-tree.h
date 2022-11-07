@@ -150,33 +150,6 @@ private:
     };
 
     /**
-     * @brief Removes an item key from the tree.
-     *
-     * TODO implement proper searching, dont need to search all leaves...
-     *
-     * @param aRoot         - Node from where search starts.
-     * @param aItemKey      - itemKey to be removed.
-     */
-    void removeKeyFromLeaf(Node *aRoot, const unsigned int aItemKey) const
-    {
-        if (aRoot == NULL)
-        {
-            return;
-        };
-
-        if (!aRoot->Node::myChildren_.empty())
-        {
-            std::vector<int>::iterator itemKeyIterator = std::find(aRoot->Node::myChildren_.begin(), aRoot->Node::myChildren_.end(), aItemKey);
-            if (itemKeyIterator != aRoot->Node::myChildren_.end())
-            {
-                aRoot->Node::myChildren_.erase(itemKeyIterator);
-            };
-        }
-        KdTree::removeKeyFromLeaf(aRoot->Node::left_, aItemKey);
-        KdTree::removeKeyFromLeaf(aRoot->Node::right_, aItemKey);
-    };
-
-    /**
      * @brief Print tree to console..
      *
      * @param aRoot         - Node whose children will be printed.
@@ -347,16 +320,6 @@ public:
     void deleteAllNodesHelper()
     {
         KdTree::deleteAllNodes(KdTree::treeRoot_);
-    }
-
-    /**
-     * @brief Removes an itemKey from the tree.
-     *
-     * @param aItemKey
-     */
-    void removeKeyFromLeafHelper(const int aItemKey)
-    {
-        KdTree::removeKeyFromLeaf(KdTree::treeRoot_, aItemKey);
     }
 };
 

@@ -94,7 +94,7 @@ public:
                             const std::vector<int> aItemsInBin,
                             const ItemRegister *aMyItems) const
     {
-        bool gravityFit = 0;
+        bool gravityFit = false;
         double supportedSurfaceAreaPercentage = 0.0;
 
         if (aItemBeingPlaced->Item::position_[constants::axis::HEIGHT] == constants::START_POSITION[constants::axis::HEIGHT])

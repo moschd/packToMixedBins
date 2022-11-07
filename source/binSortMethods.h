@@ -5,7 +5,7 @@ struct binVolumeUtilSorter
 {
   inline const bool operator()(const Bin &one, const Bin &two) const
   {
-    return (one.getActVolumeUtilizationPercentage() < two.getActVolumeUtilizationPercentage());
+    return (one.getActVolumeUtilPercentage() < two.getActVolumeUtilPercentage());
   }
 };
 
@@ -13,7 +13,7 @@ struct binWeightUtilSorter
 {
   inline const bool operator()(const Bin &one, const Bin &two) const
   {
-    return (one.getActWeightUtilizationPercentage() < two.getActWeightUtilizationPercentage());
+    return (one.getActWeightUtilPercentage() < two.getActWeightUtilPercentage());
   }
 };
 

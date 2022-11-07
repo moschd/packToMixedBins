@@ -12,15 +12,14 @@ private:
     std::array<double, 3> placedItemsMaxDimensions_;
     double actualVolumeUtil_;
     double actualWeightUtil_;
-    Gravity *masterGravity_;
-    ItemRegister *masterItemRegister_;
+    PackingContext *context_;
 
     void removeFromXFreeItems(const Item *itemBeingPlaced)
     {
         Bin::xFreeItems_.erase(
             std::remove_if(begin(Bin::xFreeItems_), end(Bin::xFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                    const Item* itemInBin = &Bin::masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                    const Item* itemInBin = &Bin::context_->getItem(itemInBinKey);
                     return (
                             itemBeingPlaced->Item::position_[constants::axis::WIDTH] == itemInBin->Item::furthestPointWidth_ &&
                             Geometry::intersectingY(itemBeingPlaced,itemInBin) && Geometry::intersectingZ(itemBeingPlaced,itemInBin)); }),
@@ -32,7 +31,7 @@ private:
         Bin::yFreeItems_.erase(
             std::remove_if(begin(Bin::yFreeItems_), end(Bin::yFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                const Item* itemInBin = &masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                const Item* itemInBin = &context_->getItem(itemInBinKey);
                 return (
                         itemBeingPlaced->Item::position_[constants::axis::DEPTH] == itemInBin->Item::furthestPointDepth_ && 
                         Geometry::intersectingX(itemBeingPlaced,itemInBin) && Geometry::intersectingZ(itemBeingPlaced,itemInBin)); }),
@@ -44,7 +43,7 @@ private:
         Bin::zFreeItems_.erase(
             std::remove_if(begin(Bin::zFreeItems_), end(Bin::zFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                const Item* itemInBin = &masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                const Item* itemInBin = &context_->getItem(itemInBinKey);
                 return (
                         itemBeingPlaced->Item::position_[constants::axis::HEIGHT] == itemInBin->Item::furthestPointHeight_ &&
                         Geometry::intersectingX(itemBeingPlaced,itemInBin) && Geometry::intersectingY(itemBeingPlaced,itemInBin)); }),
@@ -87,7 +86,7 @@ private:
     void updateWithFittedItem(const int &it, const int binAxis)
     {
         Bin::items_.push_back(it);
-        const Item *itemOb = &masterItemRegister_->ItemRegister::getConstItem(it);
+        const Item *itemOb = &context_->getItem(it);
         Bin::actualWeightUtil_ += itemOb->Item::weight_;
         Bin::actualVolumeUtil_ += itemOb->Item::volume_;
 
@@ -99,7 +98,7 @@ private:
 
         // Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.
         const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
-                                            { return masterItemRegister_->ItemRegister::getConstItem(i1).Item::furthestPointHeight_ < masterItemRegister_->ItemRegister::getConstItem(i2).Item::furthestPointHeight_; });
+                                            { return context_->getItem(i1).Item::furthestPointHeight_ < context_->getItem(i2).Item::furthestPointHeight_; });
         Bin::xFreeItems_.push_back(it);
         Bin::yFreeItems_.push_back(it);
         Bin::zFreeItems_.insert(hiter, it);
@@ -115,18 +114,17 @@ public:
     KdTree *kdTree_;
 
     Bin(int aId,
-        RequestedBin *aRequestedBin,
-        Gravity *aGravity,
-        ItemRegister *aItemRegister,
+        PackingContext *aContext,
         int aEstimatedNumberOfItemFits) : id_(aId),
-                                          type_(aRequestedBin->getType()),
-                                          maxWeight_(aRequestedBin->getMaxWeight()),
+                                          type_(aContext->getRequestedBin()->getType()),
+                                          maxWeight_(aContext->getRequestedBin()->getMaxWeight()),
                                           actualVolumeUtil_(0.0),
                                           actualWeightUtil_(0.0),
-                                          masterGravity_(aGravity),
-                                          masterItemRegister_(aItemRegister),
+                                          context_(aContext),
                                           placedItemsMaxDimensions_(constants::START_POSITION),
-                                          GeometricShape(aRequestedBin->getWidth(), aRequestedBin->getDepth(), aRequestedBin->getHeight())
+                                          GeometricShape(aContext->getRequestedBin()->getWidth(),
+                                                         aContext->getRequestedBin()->getDepth(),
+                                                         aContext->getRequestedBin()->getHeight())
     {
 
         Bin::kdTree_ = new KdTree(aEstimatedNumberOfItemFits, {width_, depth_, height_});
@@ -153,17 +151,17 @@ public:
      */
     void addUnfittedItem(const int itemKey)
     {
-        Item *itemBeingPlaced = &Bin::masterItemRegister_->ItemRegister::getItem(itemKey);
+        Item *itemBeingPlaced = &Bin::context_->getModifiableItem(itemKey);
         itemBeingPlaced->reset();
         Bin::unfittedItems_.push_back(itemKey);
     };
 
-    const double getActVolumeUtilizationPercentage() const
+    const double getActVolumeUtilPercentage() const
     {
         return Bin::actualVolumeUtil_ / GeometricShape::volume_ * 100;
     };
 
-    const double getActWeightUtilizationPercentage() const
+    const double getActWeightUtilPercentage() const
     {
         return Bin::actualWeightUtil_ / Bin::maxWeight_ * 100;
     };
@@ -199,7 +197,7 @@ public:
         bool fitted = false;
 
         std::vector<int> itemsWithFreeCorrespondingAxis;
-        Item *itemToFit = &masterItemRegister_->ItemRegister::getItem(itemToFitKey);
+        Item *itemToFit = &Bin::context_->getModifiableItem(itemToFitKey);
 
         for (const auto binAxis : constants::axis::ALL)
         {
@@ -218,7 +216,7 @@ public:
 
             for (const auto itemInBinKey : itemsWithFreeCorrespondingAxis)
             {
-                const Item *itemInBin = &masterItemRegister_->ItemRegister::getConstItem(itemInBinKey);
+                const Item *itemInBin = &Bin::context_->getItem(itemInBinKey);
                 itemToFit->Item::position_ = itemInBin->Item::position_;
 
                 switch (binAxis)
@@ -264,8 +262,6 @@ public:
     /**
      * @brief Tries to place an item inside a bin.
      *
-     * This function can be considered the heart of the algorithm.
-     *
      * @param it
      * @return true
      * @return false
@@ -273,7 +269,7 @@ public:
     const bool placeItemInBin(const unsigned int aItemBeingPlacedKey)
     {
         bool intersectionFound = false;
-        Item *itemBeingPlaced = &Bin::masterItemRegister_->ItemRegister::getItem(aItemBeingPlacedKey);
+        Item *itemBeingPlaced = &Bin::context_->getModifiableItem(aItemBeingPlacedKey);
 
         /* Loop over items allowed rotation in order to find a fitting place. */
         for (int stringCharCounter = 0;
@@ -304,7 +300,7 @@ public:
             /* Iterate over candidates and check for collision. */
             for (auto intersectCandidateKey : intersectCandidates)
             {
-                Item *intersectCandidate = &masterItemRegister_->ItemRegister::getItem(intersectCandidateKey);
+                const Item *intersectCandidate = &Bin::context_->getItem(intersectCandidateKey);
 
                 /*  Check if X and Y axis are intersecting with a item already placed in the bin. */
                 if (!Geometry::intersectingXY(itemBeingPlaced, intersectCandidate))
@@ -331,14 +327,9 @@ public:
 
             /*  Checks if gravity should be considered while placing this item.
             This check is applied when an otherwise fitting item is found. */
-            if (Bin::masterGravity_->Gravity::gravityEnabled(itemBeingPlaced))
+            if (!Bin::context_->itemObeysGravity(itemBeingPlaced, Bin::getFittedItems()))
             {
-                if (!Bin::masterGravity_->Gravity::obeysGravity(itemBeingPlaced,
-                                                                Bin::getFittedItems(),
-                                                                Bin::masterItemRegister_))
-                {
-                    continue;
-                };
+                continue;
             };
 
             /* If this point is reached then the item fits in the bin. */

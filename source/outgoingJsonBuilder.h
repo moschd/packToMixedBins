@@ -59,10 +59,10 @@ private:
         mappedBin[constants::json::outbound::bin::MAX_HEIGHT] = bin.Bin::height_;
         mappedBin[constants::json::outbound::bin::MAX_VOLUME] = bin.Bin::volume_;
         mappedBin[constants::json::outbound::bin::ACTUAL_VOLUME] = bin.Bin::getActVolumeUtil();
-        mappedBin[constants::json::outbound::bin::ACTUAL_VOLUME_UTIL] = bin.Bin::getActVolumeUtilizationPercentage();
+        mappedBin[constants::json::outbound::bin::ACTUAL_VOLUME_UTIL] = bin.Bin::getActVolumeUtilPercentage();
         mappedBin[constants::json::outbound::bin::MAX_WEIGHT] = bin.Bin::maxWeight_;
         mappedBin[constants::json::outbound::bin::ACTUAL_WEIGHT] = bin.Bin::getActWeightUtil();
-        mappedBin[constants::json::outbound::bin::ACTUAL_WEIGHT_UTIL] = bin.Bin::getActWeightUtilizationPercentage();
+        mappedBin[constants::json::outbound::bin::ACTUAL_WEIGHT_UTIL] = bin.Bin::getActWeightUtilPercentage();
 
         return mappedBin;
     };
@@ -128,7 +128,7 @@ public:
             {
                 outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(
                     ResponseBuilder::itemToJson(
-                        packedPacker.Packer::masterItemRegister_->ItemRegister::getConstItem(it)));
+                        packedPacker.Packer::getContext()->getItem(it)));
             };
         };
 
@@ -150,7 +150,7 @@ public:
                     for (const auto &item : bin.Bin::getFittedItems())
                     {
                         mappedBin[constants::json::outbound::bin::FITTED_ITEMS].append(
-                            ResponseBuilder::itemToJson(packedPacker.Packer::masterItemRegister_->ItemRegister::getConstItem(item)));
+                            ResponseBuilder::itemToJson(packedPacker.Packer::getContext()->getItem(item)));
                     };
                 };
                 ResponseBuilder::outboundRoot_[constants::json::outbound::PACKED_BINS].append(mappedBin);

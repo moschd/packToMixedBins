@@ -4,29 +4,42 @@
 class Packer
 {
 private:
-    std::vector<Bin> bins_;
+    PackingContext *context_;
+    std::vector<PackingCluster> clusters_;
 
 public:
-    RequestedBin *requestedBin_;
-    ItemRegister *masterItemRegister_;
-    Gravity *masterGravity_;
-    std::vector<PackingCluster> clusters_;
     bool distributeItems_;
 
-    Packer(RequestedBin &aRequestedBin,
-           Gravity &aGravity,
-           ItemRegister &aItemRegister,
-           bool aDistributeItems) : requestedBin_(&aRequestedBin),
-                                    masterGravity_(&aGravity),
-                                    masterItemRegister_(&aItemRegister),
+    Packer(PackingContext &aContext,
+           bool aDistributeItems) : context_(&aContext),
                                     distributeItems_(aDistributeItems){};
+
+    /**
+     * @brief Get context.
+     *
+     * @return const PackingContext*
+     */
+    const PackingContext *getContext() const
+    {
+        return Packer::context_;
+    }
+
+    /**
+     * @brief Modify context.
+     *
+     * @return const PackingContext*
+     */
+    PackingContext *getModifiableContext() const
+    {
+        return Packer::context_;
+    }
 
     /**
      * @brief Get packing clusters.
      *
      * @return const std::vector<PackingCluster>
      */
-    const std::vector<PackingCluster> getClusters() const
+    const std::vector<PackingCluster> &getClusters() const
     {
         return Packer::clusters_;
     }
@@ -47,27 +60,6 @@ public:
     }
 
     /**
-     * @brief Get bin object based on id_.
-     *
-     * @return const Bin&
-     */
-    const Bin &getBinById(const int binToGet) const
-    {
-        for (auto &cluster : clusters_)
-        {
-            for (auto &bin : cluster.PackingCluster::getPackedBins())
-            {
-                if (bin.id_ == binToGet)
-                {
-                    return bin;
-                }
-            };
-        };
-        /* default, should never happen. */
-        return Packer::clusters_.back().PackingCluster::getPackedBins().back();
-    };
-
-    /**
      * @brief Get the total volume utilization across bins.
      *
      * @return const double
@@ -79,7 +71,7 @@ public:
         {
             for (auto &bin : cluster.getPackedBins())
             {
-                runningUtilSum += bin.getActVolumeUtilizationPercentage();
+                runningUtilSum += bin.getActVolumeUtilPercentage();
             };
         };
         return runningUtilSum / Packer::getNumberOfBins();
@@ -97,7 +89,7 @@ public:
         {
             for (auto &bin : cluster.getPackedBins())
             {
-                runningUtilSum += bin.getActWeightUtilizationPercentage();
+                runningUtilSum += bin.getActWeightUtilPercentage();
             };
         };
         return runningUtilSum / Packer::getNumberOfBins();
@@ -116,11 +108,7 @@ public:
             return;
         };
 
-        PackingCluster newCluster((Packer::clusters_.size() + 1),
-                                  *Packer::requestedBin_,
-                                  *Packer::masterGravity_,
-                                  *Packer::masterItemRegister_,
-                                  Packer::distributeItems_);
+        PackingCluster newCluster(Packer::clusters_.size() + 1, *Packer::context_, Packer::distributeItems_);
 
         Packer::clusters_.empty() ? newCluster.setBinIdCounter(1)
                                   : newCluster.setBinIdCounter(Packer::clusters_.back().getLastCreatedBin().id_ + 1);

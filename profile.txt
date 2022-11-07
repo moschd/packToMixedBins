@@ -651,8 +651,8 @@ Each sample counts as 0.01 seconds.
   0.00      1.34     0.00        2     0.00     0.00  __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >::__normal_iterator(std::vector<int, std::allocator<int> > const* const&)
   0.00      1.34     0.00        2     0.00     0.00  bool __gnu_cxx::operator!=<PackingCluster*, std::vector<PackingCluster, std::allocator<PackingCluster> > >(__gnu_cxx::__normal_iterator<PackingCluster*, std::vector<PackingCluster, std::allocator<PackingCluster> > > const&, __gnu_cxx::__normal_iterator<PackingCluster*, std::vector<PackingCluster, std::allocator<PackingCluster> > > const&)
   0.00      1.34     0.00        2     0.00     0.00  bool __gnu_cxx::operator!=<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >(__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > > const&, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > > const&)
-  0.00      1.34     0.00        2     0.00     0.00  Bin::getActVolumeUtilizationPercentage() const
-  0.00      1.34     0.00        2     0.00     0.00  Bin::getActWeightUtilizationPercentage() const
+  0.00      1.34     0.00        2     0.00     0.00  Bin::getActVolumeUtilPercentage() const
+  0.00      1.34     0.00        2     0.00     0.00  Bin::getActWeightUtilPercentage() const
   0.00      1.34     0.00        2     0.00     0.00  Packer::getClusters() const
   0.00      1.34     0.00        2     0.00     0.00  __gnu_cxx::new_allocator<std::vector<int, std::allocator<int> > >::max_size() const
   0.00      1.34     0.00        2     0.00     0.00  __gnu_cxx::__normal_iterator<char*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::base() const
@@ -4817,11 +4817,11 @@ index % time    self  children    called     name
 -----------------------------------------------
                 0.00    0.00       1/2           Packer::getTotalVolumeUtilPercentage() const [798]
                 0.00    0.00       1/2           ResponseBuilder::binToJson(Bin const&) const [797]
-[697]    0.0    0.00    0.00       2         Bin::getActVolumeUtilizationPercentage() const [697]
+[697]    0.0    0.00    0.00       2         Bin::getActVolumeUtilPercentage() const [697]
 -----------------------------------------------
                 0.00    0.00       1/2           Packer::getTotalWeightUtilPercentage() const [799]
                 0.00    0.00       1/2           ResponseBuilder::binToJson(Bin const&) const [797]
-[698]    0.0    0.00    0.00       2         Bin::getActWeightUtilizationPercentage() const [698]
+[698]    0.0    0.00    0.00       2         Bin::getActWeightUtilPercentage() const [698]
 -----------------------------------------------
                 0.00    0.00       1/2           std::allocator_traits<std::allocator<std::vector<int, std::allocator<int> > > >::max_size(std::allocator<std::vector<int, std::allocator<int> > > const&) [864]
                 0.00    0.00       1/2           __gnu_cxx::new_allocator<std::vector<int, std::allocator<int> > >::allocate(unsigned long, void const*) [783]
@@ -5221,9 +5221,9 @@ index % time    self  children    called     name
                 0.00    0.00       1/355271      std::vector<int, std::allocator<int> >::size() const [309]
                 0.00    0.00       1/4995        Bin::getFittedItems() const [476]
                 0.00    0.00       1/4993        Bin::getActVolumeUtil() const [484]
-                0.00    0.00       1/2           Bin::getActVolumeUtilizationPercentage() const [697]
+                0.00    0.00       1/2           Bin::getActVolumeUtilPercentage() const [697]
                 0.00    0.00       1/4993        Bin::getActWeightUtil() const [485]
-                0.00    0.00       1/2           Bin::getActWeightUtilizationPercentage() const [698]
+                0.00    0.00       1/2           Bin::getActWeightUtilPercentage() const [698]
 -----------------------------------------------
                 0.00    0.00       1/1           ResponseBuilder::generate(Packer) [98]
 [798]    0.0    0.00    0.00       1         Packer::getTotalVolumeUtilPercentage() const [798]
@@ -5236,7 +5236,7 @@ index % time    self  children    called     name
                 0.00    0.00       1/10          std::vector<Bin, std::allocator<Bin> >::begin() const [613]
                 0.00    0.00       1/14987       std::vector<Bin, std::allocator<Bin> >::end() const [402]
                 0.00    0.00       1/14986       __gnu_cxx::__normal_iterator<Bin const*, std::vector<Bin, std::allocator<Bin> > >::operator*() const [403]
-                0.00    0.00       1/2           Bin::getActVolumeUtilizationPercentage() const [697]
+                0.00    0.00       1/2           Bin::getActVolumeUtilPercentage() const [697]
                 0.00    0.00       1/8           __gnu_cxx::__normal_iterator<Bin const*, std::vector<Bin, std::allocator<Bin> > >::operator++() [633]
                 0.00    0.00       1/11          __gnu_cxx::__normal_iterator<PackingCluster const*, std::vector<PackingCluster, std::allocator<PackingCluster> > >::operator++() [608]
                 0.00    0.00       1/4           Packer::getNumberOfBins() const [669]
@@ -5252,7 +5252,7 @@ index % time    self  children    called     name
                 0.00    0.00       1/10          std::vector<Bin, std::allocator<Bin> >::begin() const [613]
                 0.00    0.00       1/14987       std::vector<Bin, std::allocator<Bin> >::end() const [402]
                 0.00    0.00       1/14986       __gnu_cxx::__normal_iterator<Bin const*, std::vector<Bin, std::allocator<Bin> > >::operator*() const [403]
-                0.00    0.00       1/2           Bin::getActWeightUtilizationPercentage() const [698]
+                0.00    0.00       1/2           Bin::getActWeightUtilPercentage() const [698]
                 0.00    0.00       1/8           __gnu_cxx::__normal_iterator<Bin const*, std::vector<Bin, std::allocator<Bin> > >::operator++() [633]
                 0.00    0.00       1/11          __gnu_cxx::__normal_iterator<PackingCluster const*, std::vector<PackingCluster, std::allocator<PackingCluster> > >::operator++() [608]
                 0.00    0.00       1/4           Packer::getNumberOfBins() const [669]
@@ -6228,7 +6228,7 @@ Index by function name
  [484] Bin::getActVolumeUtil() const [867] std::deque<Json::Reader::ErrorInfo, std::allocator<Json::Reader::ErrorInfo> >::_M_destroy_data(std::_Deque_iterator<Json::Reader::ErrorInfo, Json::Reader::ErrorInfo&, Json::Reader::ErrorInfo*>, std::_Deque_iterator<Json::Reader::ErrorInfo, Json::Reader::ErrorInfo&, Json::Reader::ErrorInfo*>, std::allocator<Json::Reader::ErrorInfo> const&) [15] bool std::operator==<double, 3ul>(std::array<double, 3ul> const&, std::array<double, 3ul> const&)
  [485] Bin::getActWeightUtil() const [868] std::deque<Json::Reader::ErrorInfo, std::allocator<Json::Reader::ErrorInfo> >::_M_destroy_data_aux(std::_Deque_iterator<Json::Reader::ErrorInfo, Json::Reader::ErrorInfo&, Json::Reader::ErrorInfo*>, std::_Deque_iterator<Json::Reader::ErrorInfo, Json::Reader::ErrorInfo&, Json::Reader::ErrorInfo*>) [349] bool std::operator< <char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
  [477] Bin::getUnfittedItems() const [869] std::deque<Json::Reader::ErrorInfo, std::allocator<Json::Reader::ErrorInfo> >::end() [37] Bin::removeFromXFreeItems(Item const*)::{lambda(int&)#1}::operator()(int&) const
- [697] Bin::getActVolumeUtilizationPercentage() const [870] std::deque<Json::Reader::ErrorInfo, std::allocator<Json::Reader::ErrorInfo> >::begin() [68] Bin::removeFromYFreeItems(Item const*)::{lambda(int&)#1}::operator()(int&) const
- [698] Bin::getActWeightUtilizationPercentage() const [871] std::deque<Json::Reader::ErrorInfo, std::allocator<Json::Reader::ErrorInfo> >::~deque() [46] Bin::removeFromZFreeItems(Item const*)::{lambda(int&)#1}::operator()(int&) const
+ [697] Bin::getActVolumeUtilPercentage() const [870] std::deque<Json::Reader::ErrorInfo, std::allocator<Json::Reader::ErrorInfo> >::begin() [68] Bin::removeFromYFreeItems(Item const*)::{lambda(int&)#1}::operator()(int&) const
+ [698] Bin::getActWeightUtilPercentage() const [871] std::deque<Json::Reader::ErrorInfo, std::allocator<Json::Reader::ErrorInfo> >::~deque() [46] Bin::removeFromZFreeItems(Item const*)::{lambda(int&)#1}::operator()(int&) const
   [86] KdTree::getIntersectCandidates(Node const*, unsigned int, std::array<double, 3ul> const&, std::array<double, 3ul>, std::vector<int, std::allocator<int> >&) const [872] std::deque<Json::Value*, std::allocator<Json::Value*> >::_M_destroy_data(std::_Deque_iterator<Json::Value*, Json::Value*&, Json::Value**>, std::_Deque_iterator<Json::Value*, Json::Value*&, Json::Value**>, std::allocator<Json::Value*> const&) [156] Bin::updateWithNewFittedItem(int const&, int)::{lambda(int, int)#1}::operator()(int, int) const
  [384] KdTree::getRoot() const [873] std::deque<Json::Value*, std::allocator<Json::Value*> >::end() [144] operator new(unsigned long, void*)

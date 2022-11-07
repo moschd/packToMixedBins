@@ -23,10 +23,8 @@ Compile to a shared object file.
 #include "geometricShape.h"
 #include "item.h"
 #include "itemSortMethods.h"
-#include "itemregister.h"
-#include "requestedBin.h"
+#include "packingContext.h"
 #include "binCalculationCache.h"
-#include "gravity.h"
 #include "bin.h"
 #include "packingCluster.h"
 #include "packer.h"
@@ -60,7 +58,7 @@ int main()
 {
     auto start = std::chrono::high_resolution_clock::now();
     const bool includeBins = true;
-    const bool includeItems = false;
+    const bool includeItems = true;
     const bool itemDimensionsAfter = false;
     const int responsePrecision = 7;
     std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/demo2.json");
@@ -73,7 +71,7 @@ int main()
         const Json::Value incomingJsonBin = inboundRoot[constants::json::inbound::bin::BIN];
         const Json::Value incomingJsonItems = inboundRoot[constants::json::inbound::item::ITEMS];
 
-        ItemRegister masterItemRegister(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString());
+        ItemRegister itemRegister(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString());
 
         Gravity masterGravity(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
 
@@ -83,10 +81,9 @@ int main()
                                   incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble(),
                                   incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble());
 
-        Packer packingProcessor(requestedBin,
-                                masterGravity,
-                                masterItemRegister,
-                                incomingJsonBin[constants::json::inbound::bin::DISTRIBUTE_ITEMS].asBool());
+        PackingContext context(masterGravity, itemRegister, requestedBin);
+
+        Packer packingProcessor(context, incomingJsonBin[constants::json::inbound::bin::DISTRIBUTE_ITEMS].asBool());
 
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
@@ -102,11 +99,11 @@ int main()
                    incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
                    incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble());
 
-            packingProcessor.masterItemRegister_->addItem(i);
+            packingProcessor.getModifiableContext()->addItemToRegister(i);
         };
 
         /* Split items by consolidation key and start packing. */
-        for (auto &sortedItemConsKeyVector : packingProcessor.masterItemRegister_->getAllSortedItemConsKeyVectors())
+        for (auto &sortedItemConsKeyVector : packingProcessor.getContext()->getSortedItemConsKeyVectors())
         {
             packingProcessor.startPackingCluster(sortedItemConsKeyVector);
         };

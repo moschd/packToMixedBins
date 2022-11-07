@@ -5,8 +5,7 @@ class PackingCluster
 {
 private:
     std::vector<Bin> bins_;
-    RequestedBin *requestedBin_;
-    Gravity *masterGravity_;
+    PackingContext *context_;
     int binIdCounter_;
     bool distributeItems_;
 
@@ -27,7 +26,7 @@ private:
             return false;
         };
 
-        const Item *lastUnfittedItem = &PackingCluster::masterItemRegister_->ItemRegister::getConstItem(PackingCluster::bins_.back().Bin::getUnfittedItems().back());
+        const Item *lastUnfittedItem = &PackingCluster::context_->getItem(PackingCluster::bins_.back().Bin::getUnfittedItems().back());
         return (lastUnfittedItem->Item::width_ == aItemToCheck->Item::width_ &&
                 lastUnfittedItem->Item::depth_ == aItemToCheck->Item::depth_ &&
                 lastUnfittedItem->Item::height_ == aItemToCheck->Item::height_ &&
@@ -72,8 +71,8 @@ private:
     const bool wouldExceedPhysicalLimit(const Item *aItemToPack) const
     {
         const Bin lastBin = PackingCluster::getLastCreatedBin();
-        return (lastBin.getActVolumeUtil() + aItemToPack->Item::volume_) > requestedBin_->getMaxVolume() ||
-               (lastBin.getActWeightUtil() + aItemToPack->Item::weight_) > requestedBin_->getMaxWeight();
+        return (lastBin.getActVolumeUtil() + aItemToPack->Item::volume_) > context_->getRequestedBin()->getMaxVolume() ||
+               (lastBin.getActWeightUtil() + aItemToPack->Item::weight_) > context_->getRequestedBin()->getMaxWeight();
     }
 
     /**
@@ -87,35 +86,128 @@ private:
      */
     const bool exceedsSelfImposedLimit() const
     {
-
         if (!PackingCluster::distributeItems_)
         {
             return false;
         }
 
         const Bin lastBin = PackingCluster::getLastCreatedBin();
-        if (PackingCluster::requestedBin_->getEstAvgVolumeUtil() < PackingCluster::requestedBin_->getEstAvgWeightUtil())
+        if (PackingCluster::context_->getRequestedBin()->getEstAvgVolumeUtil() < PackingCluster::context_->getRequestedBin()->getEstAvgWeightUtil())
         {
-            return PackingCluster::requestedBin_->getEstAvgWeightUtil() < lastBin.getActWeightUtilizationPercentage();
+            return PackingCluster::context_->getRequestedBin()->getEstAvgWeightUtil() < lastBin.getActWeightUtilPercentage();
         }
         else
         {
-            return PackingCluster::requestedBin_->getEstAvgVolumeUtil() < lastBin.getActVolumeUtilizationPercentage();
+            return PackingCluster::context_->getRequestedBin()->getEstAvgVolumeUtil() < lastBin.getActVolumeUtilPercentage();
         }
     }
 
+    /**
+     * @brief Return an integer representing the estimated number of items that will fit a empty bin.
+     *
+     * Used to reserve memory and help calibrate the pre-generated tree depth.
+     *
+     * @param aItemsToBePacked  - vector containing itemKeys
+     */
+    const int estNrOfItemsInBin(const std::vector<int> &aItemsToBePacked) const
+    {
+        int volumeEstimatedNumberOfItems = 0;
+        int weightEstimatedNumberOfItems = 0;
+        double volumeCumulativeValue = 0.0;
+        double weightCumulativeValue = 0.0;
+
+        for (auto itemKey : aItemsToBePacked)
+        {
+            const Item *itemToCheck = &PackingCluster::context_->getItem(itemKey);
+
+            if ((itemToCheck->volume_ + volumeCumulativeValue) < PackingCluster::context_->getRequestedBin()->getMaxVolume())
+            {
+                volumeEstimatedNumberOfItems += 1;
+                volumeCumulativeValue += itemToCheck->volume_;
+            };
+
+            if ((itemToCheck->weight_ + weightCumulativeValue) < PackingCluster::context_->getRequestedBin()->getMaxWeight())
+            {
+                weightEstimatedNumberOfItems += 1;
+                weightCumulativeValue += itemToCheck->weight_;
+            };
+        };
+
+        return std::min(volumeEstimatedNumberOfItems, weightEstimatedNumberOfItems);
+    };
+
+    /**
+     * @brief Add to last bin' unfitted items.
+     *
+     * @param aItem
+     */
+    void addLastBinUnfittedItem(const Item *aItem)
+    {
+        PackingCluster::bins_.back().Bin::addUnfittedItem(aItem->transientSysId_);
+    };
+
+    void deleteLastBin()
+    {
+        PackingCluster::bins_.pop_back();
+    };
+
+    /**
+     * @brief Start to add item(s) into a bin.
+     *
+     * This method iterates over the item vector and tries to place each item into the bin. If a bin is full it
+     * creates a new bin and the process starts over, now the input is the previous bin' unfitted items.
+     *
+     * @param aItemsToBePacked  - vector containing itemKeys
+     */
+    void startPackingBins(const std::vector<int> aItemsToBePacked)
+    {
+        if (aItemsToBePacked.empty())
+        {
+            return;
+        };
+
+        PackingCluster::bins_.push_back(Bin(PackingCluster::binIdCounter_, PackingCluster::context_,
+                                            PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
+
+        for (auto &itemToPackKey : aItemsToBePacked)
+        {
+            const Item *itemToPack = &PackingCluster::context_->getItem(itemToPackKey);
+
+            if (PackingCluster::wouldExceedLimit(itemToPack) || PackingCluster::equalsPreviousUnfittedItem(itemToPack))
+            {
+                PackingCluster::addLastBinUnfittedItem(itemToPack);
+                continue;
+            }
+
+            /* Check if item would be the first item in the bin, if so take shortcut. */
+            if (PackingCluster::getLastCreatedBin().Bin::getFittedItems().empty())
+            {
+                if (PackingCluster::fitFirstItem(itemToPack))
+                {
+                    continue;
+                };
+            };
+
+            PackingCluster::bins_.back().Bin::findItemPosition(itemToPackKey);
+        };
+
+        /* Delete the created bin if it contains no items. */
+        if (PackingCluster::getLastCreatedBin().Bin::getFittedItems().empty())
+        {
+            PackingCluster::deleteLastBin();
+            return;
+        }
+
+        PackingCluster::binIdCounter_ += 1;
+        PackingCluster::startPackingBins(PackingCluster::bins_.back().Bin::getUnfittedItems());
+    };
+
 public:
     int id_;
-    ItemRegister *masterItemRegister_;
-
     PackingCluster(unsigned int aId,
-                   RequestedBin &aRequestedBin,
-                   Gravity &aGravity,
-                   ItemRegister &aItemRegister,
+                   PackingContext &aContext,
                    bool aDistributeItems) : id_(aId),
-                                            requestedBin_(&aRequestedBin),
-                                            masterGravity_(&aGravity),
-                                            masterItemRegister_(&aItemRegister),
+                                            context_(&aContext),
                                             distributeItems_(aDistributeItems){};
 
     /**
@@ -170,121 +262,14 @@ public:
     };
 
     /**
-     * @brief Remove the last bin.
-     *
-     */
-    void deleteLastBin()
-    {
-        PackingCluster::bins_.pop_back();
-    };
-
-    /**
-     * @brief Add to last bin' unfitted items.
-     *
-     * @param aItem
-     */
-    void addLastBinUnfittedItem(const Item *aItem)
-    {
-        PackingCluster::bins_.back().Bin::addUnfittedItem(aItem->transientSysId_);
-    };
-
-    /**
-     * @brief Return an integer representing the estimated number of items that will fit a empty bin.
-     *
-     * Used to reserve memory and help calibrate the pre-generated tree depth.
-     *
-     * @param aItemsToBePacked  - vector containing itemKeys
-     */
-    const int estNrOfItemsInBin(const std::vector<int> &aItemsToBePacked) const
-    {
-        int volumeEstimatedNumberOfItems = 0;
-        int weightEstimatedNumberOfItems = 0;
-        double volumeCumulativeValue = 0.0;
-        double weightCumulativeValue = 0.0;
-
-        for (auto itemKey : aItemsToBePacked)
-        {
-            const Item *itemToCheck = &PackingCluster::masterItemRegister_->ItemRegister::getConstItem(itemKey);
-
-            if ((itemToCheck->volume_ + volumeCumulativeValue) < PackingCluster::requestedBin_->getMaxVolume())
-            {
-                volumeEstimatedNumberOfItems += 1;
-                volumeCumulativeValue += itemToCheck->volume_;
-            };
-
-            if ((itemToCheck->weight_ + weightCumulativeValue) < PackingCluster::requestedBin_->getMaxWeight())
-            {
-                weightEstimatedNumberOfItems += 1;
-                weightCumulativeValue += itemToCheck->weight_;
-            };
-        };
-
-        return std::min(volumeEstimatedNumberOfItems, weightEstimatedNumberOfItems);
-    };
-
-    /**
-     * @brief Prepare the cluster for packing bins.
+     * @brief Prepare the cluster for packing bins and start.
      *
      * @param aItemsToBePacked
      */
     void startPacking(const std::vector<int> aItemsToBePacked)
     {
-        PackingCluster::requestedBin_->setEstimatedAverages(aItemsToBePacked, *PackingCluster::masterItemRegister_);
+        PackingCluster::context_->setRequestedBinEstimatedAverages(aItemsToBePacked);
         PackingCluster::startPackingBins(aItemsToBePacked);
-    };
-
-    /**
-     * @brief Start to add item(s) into a bin.
-     *
-     * This method iterates over the item vector and tries to place each item into the bin. If a bin is full it
-     * creates a new bin and the process starts over, now the input is the previous bin' unfitted items.
-     *
-     * @param aItemsToBePacked  - vector containing itemKeys
-     */
-    void startPackingBins(const std::vector<int> aItemsToBePacked)
-    {
-        if (aItemsToBePacked.empty())
-        {
-            return;
-        };
-
-        PackingCluster::bins_.push_back(Bin(PackingCluster::binIdCounter_,
-                                            PackingCluster::requestedBin_,
-                                            PackingCluster::masterGravity_,
-                                            PackingCluster::masterItemRegister_,
-                                            PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
-
-        for (auto &itemToPackKey : aItemsToBePacked)
-        {
-            const Item *itemToPack = &PackingCluster::masterItemRegister_->ItemRegister::getConstItem(itemToPackKey);
-
-            if (PackingCluster::wouldExceedLimit(itemToPack) || PackingCluster::equalsPreviousUnfittedItem(itemToPack))
-            {
-                PackingCluster::addLastBinUnfittedItem(itemToPack);
-                continue;
-            }
-
-            /* Check if item would be the first item in the bin, if so take shortcut. */
-            if (PackingCluster::getLastCreatedBin().Bin::getFittedItems().empty())
-            {
-                if (PackingCluster::fitFirstItem(itemToPack))
-                {
-                    continue;
-                };
-            };
-
-            PackingCluster::bins_.back().Bin::findItemPosition(itemToPackKey);
-        };
-
-        /* Delete the created bin if it contains no items. */
-        if (PackingCluster::getLastCreatedBin().Bin::getFittedItems().empty())
-        {
-            PackingCluster::deleteLastBin();
-            return;
-        }
-
-        PackingCluster::binIdCounter_ += 1;
-        PackingCluster::startPackingBins(PackingCluster::bins_.back().Bin::getUnfittedItems());
     };
 };
 

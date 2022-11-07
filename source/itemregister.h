@@ -35,7 +35,7 @@ private:
      * Create separete vector for each distinct itemConsKey, the items within each vector are sorted according to the sortMethod argument.
      * Returns a vector of vectors, each inner vector contains itemKeys.
      */
-    const std::vector<std::vector<int>> getSortedItemConsKeyVectors(std::vector<Item> &aItemVector)
+    const std::vector<std::vector<int>> getSortedItemConsKeyVectors(std::vector<Item> &aItemVector) const
     {
         if (ItemRegister::sortMethod_ == constants::itemRegister::parameter::WEIGHT)
         {
@@ -51,7 +51,7 @@ private:
         for (int idx = 1; idx < aItemVector.size(); idx++)
         {
             if (aItemVector[idx].itemConsolidationKey_ ==
-                ItemRegister::getItem(FinalSortedItemConsKeyVectors.back().back()).Item::itemConsolidationKey_)
+                ItemRegister::getConstItem(FinalSortedItemConsKeyVectors.back().back()).Item::itemConsolidationKey_)
             {
                 FinalSortedItemConsKeyVectors.back().push_back(aItemVector[idx].Item::transientSysId_);
             }
@@ -100,25 +100,6 @@ public:
     const inline Item &getConstItem(const int key) const
     {
         return ItemRegister::completeItemMap_.at(key);
-    }
-
-    /**
-     * @brief Get sorted item vectors ready to serve as input for packing process.
-     * sorted by sortMethod and itemConsolidationKey.
-     *
-     * @param aItemKeyVector
-     * @return const std::vector<std::vector<int>>
-     */
-    const std::vector<std::vector<int>> getSortedItemConsKeyVectorsFromTransientIds(std::vector<int> aItemKeyVector)
-    {
-        std::vector<Item> itemVector;
-
-        for (int itemKey : aItemKeyVector)
-        {
-            itemVector.push_back(ItemRegister::getItem(itemKey));
-        };
-
-        return ItemRegister::getSortedItemConsKeyVectors(itemVector);
     }
 
     /**

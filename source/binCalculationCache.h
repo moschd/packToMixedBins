@@ -19,9 +19,10 @@ private:
             return (h1 ^ (h2 << 1)) ^ (h3 << 2);
         }
     };
-    __gnu_pbds::gp_hash_table<std::array<double, 3>, double, itemPositionHash> intersectionLimits;
+    __gnu_pbds::gp_hash_table<std::array<double, 3>, double, itemPositionHash> intersectionLimits_;
 
 public:
+    BinCalculationCache(){};
     /**
      * @brief Adds item to intersect cache.
      *
@@ -34,15 +35,15 @@ public:
     inline void addIntersection(const Item *aItemBeingPlaced, const Item *aItemAlreadyPlaced)
     {
         const double smallestDistance = Geometry::nearestBoundary(aItemBeingPlaced, aItemAlreadyPlaced);
-        const auto &resultIterator = BinCalculationCache::intersectionLimits.find(aItemBeingPlaced->position_);
+        const auto &resultIterator = BinCalculationCache::intersectionLimits_.find(aItemBeingPlaced->position_);
 
-        if (resultIterator == intersectionLimits.end())
+        if (resultIterator == intersectionLimits_.end())
         {
-            BinCalculationCache::intersectionLimits[aItemBeingPlaced->Item::position_] = smallestDistance;
+            BinCalculationCache::intersectionLimits_[aItemBeingPlaced->Item::position_] = smallestDistance;
         }
         else
         {
-            BinCalculationCache::intersectionLimits[aItemBeingPlaced->Item::position_] = std::min(resultIterator->second, smallestDistance);
+            BinCalculationCache::intersectionLimits_[aItemBeingPlaced->Item::position_] = std::min(resultIterator->second, smallestDistance);
         };
     };
 
@@ -57,8 +58,8 @@ public:
      */
     inline const bool itemPositionCacheHit(const Item *aItemToBeFound) const
     {
-        const auto resultIterator = BinCalculationCache::intersectionLimits.find(aItemToBeFound->Item::position_);
-        return resultIterator != BinCalculationCache::intersectionLimits.end() &&
+        const auto resultIterator = BinCalculationCache::intersectionLimits_.find(aItemToBeFound->Item::position_);
+        return resultIterator != BinCalculationCache::intersectionLimits_.end() &&
                aItemToBeFound->smallestDimension_ >= resultIterator->second;
     };
 };

@@ -10,6 +10,7 @@ public:
     std::string itemConsolidationKey_;
     double gravityStrength_;
 
+    Item(){};
     Item(int aSystemId,
          std::string aItemId,
          double aWidth,

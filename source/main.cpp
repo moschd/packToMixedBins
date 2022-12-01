@@ -3,7 +3,7 @@
 Always set to 0, cylinders are not supported (yet).
 */
 
-#define COMPILE_TO_SO true
+#define COMPILE_TO_SO false
 /*
 Compile to a shared object file.
 */
@@ -61,7 +61,7 @@ int main()
     const bool includeItems = true;
     const bool itemDimensionsAfter = false;
     const int responsePrecision = 7;
-    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/demo2.json");
+    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/5000_items_2500.json");
 #endif
 
         Json::Reader reader;
@@ -71,7 +71,8 @@ int main()
         const Json::Value incomingJsonBin = inboundRoot[constants::json::inbound::bin::BIN];
         const Json::Value incomingJsonItems = inboundRoot[constants::json::inbound::item::ITEMS];
 
-        ItemRegister itemRegister(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString());
+        ItemRegister itemRegister(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString(),
+                                  incomingJsonItems.size());
 
         Gravity masterGravity(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
 

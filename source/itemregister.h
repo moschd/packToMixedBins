@@ -64,9 +64,10 @@ private:
     };
 
 public:
-    ItemRegister(std::string aSortMethod)
+    ItemRegister(std::string aSortMethod, unsigned int nrOfItems)
     {
         ItemRegister::setSortMethod(aSortMethod);
+        ItemRegister::completeItemVector_.reserve(nrOfItems);
     }
 
     /**

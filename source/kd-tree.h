@@ -285,6 +285,7 @@ public:
         };
 
         const unsigned int axis = aDepth % constants::R;
+
         if (aStartPoint[axis] < aRoot->Node::partitionPoint_[axis])
         {
             getIntersectCandidates(aRoot->Node::left_,

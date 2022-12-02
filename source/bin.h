@@ -199,7 +199,7 @@ public:
         std::vector<int> itemsWithFreeCorrespondingAxis;
         Item *itemToFit = &Bin::context_->getModifiableItem(itemToFitKey);
 
-        for (const auto binAxis : constants::axis::ALL)
+        for (const auto binAxis : Bin::context_->getPackingDirection())
         {
             switch (binAxis)
             {

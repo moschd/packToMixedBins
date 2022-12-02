@@ -6,3 +6,4 @@ Algorithm to place multiple rectangles in another rectangle in the most desired 
 libjsoncpp.so.1
 
 
+## document packingDirection

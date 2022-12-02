@@ -18,6 +18,7 @@ private:
     double maxWeight_;
     double estAvgVolumeUtil_;
     double estAvgWeightUtil_;
+    std::array<int, 3> packingDirection_;
 
     /**
      * @brief Set the estimated number of bin values for the weight and volume dimension.
@@ -44,18 +45,40 @@ private:
         RequestedBin::estAvgWeightUtil_ = totalItemWeight / (estNrOfBins * RequestedBin::maxWeight_) * 100;
     };
 
+    /**
+     * @brief Set the desired packing direction of the bin.
+     *
+     * @param aDirection
+     */
+    void setPackingDirection(std::string aDirection)
+    {
+
+        std::transform(aDirection.begin(), aDirection.end(), aDirection.begin(), ::toupper);
+
+        if (aDirection == constants::bin::parameter::BACK_TO_FRONT)
+        {
+            RequestedBin::packingDirection_ = {constants::axis::WIDTH, constants::axis::HEIGHT, constants::axis::DEPTH};
+        }
+        else
+        {
+            RequestedBin::packingDirection_ = {constants::axis::WIDTH, constants::axis::DEPTH, constants::axis::HEIGHT};
+        };
+    }
+
 public:
     RequestedBin(std::string aBinType,
                  double aBinWidth,
                  double aBinDepth,
                  double aBinHeight,
-                 double aBinMaxWeight) : type_(aBinType),
-                                         maxWidth_(aBinWidth),
-                                         maxDepth_(aBinDepth),
-                                         maxHeight_(aBinHeight),
-                                         maxWeight_(aBinMaxWeight)
+                 double aBinMaxWeight,
+                 std::string aPackingDirection) : type_(aBinType),
+                                                  maxWidth_(aBinWidth),
+                                                  maxDepth_(aBinDepth),
+                                                  maxHeight_(aBinHeight),
+                                                  maxWeight_(aBinMaxWeight)
     {
         RequestedBin::maxVolume_ = (RequestedBin::maxWidth_ * RequestedBin::maxDepth_ * RequestedBin::maxHeight_);
+        RequestedBin::setPackingDirection(aPackingDirection);
     };
 
     /**
@@ -147,6 +170,16 @@ public:
     const double getEstAvgWeightUtil() const
     {
         return RequestedBin::estAvgWeightUtil_;
+    }
+
+    /**
+     * @brief Get the desired packing direction of the bin.
+     *
+     * @return const std::array<int, 3>
+     */
+    const std::array<int, 3> getPackingDirection() const
+    {
+        return RequestedBin::packingDirection_;
     }
 };
 

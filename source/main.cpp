@@ -3,7 +3,7 @@
 Always set to 0, cylinders are not supported (yet).
 */
 
-#define COMPILE_TO_SO false
+#define COMPILE_TO_SO true
 /*
 Compile to a shared object file.
 */
@@ -13,8 +13,6 @@ Compile to a shared object file.
 #include <unordered_map>
 #include <vector>
 #include <chrono>
-#include <cmath>
-#include <regex>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <jsoncpp/json/json.h>
 #include "constants.h"
@@ -61,7 +59,7 @@ int main()
     const bool includeItems = true;
     const bool itemDimensionsAfter = false;
     const int responsePrecision = 7;
-    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/5000_items_2500.json");
+    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/demo2.json");
 #endif
 
         Json::Reader reader;
@@ -80,7 +78,8 @@ int main()
                                   incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble(),
                                   incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble(),
                                   incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble(),
-                                  incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble());
+                                  incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble(),
+                                  incomingJsonBin[constants::json::inbound::bin::PACKING_DIRECTION].asString());
 
         PackingContext context(masterGravity, itemRegister, requestedBin);
 

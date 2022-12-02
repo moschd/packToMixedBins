@@ -60,6 +60,15 @@ namespace constants
         }
     }
 
+    namespace bin
+    {
+        namespace parameter
+        {
+            const std::string BOTTOM_UP = "BOTTOMUP";
+            const std::string BACK_TO_FRONT = "BACKTOFRONT";
+        }
+    }
+
     namespace json
     {
         namespace inbound
@@ -75,6 +84,7 @@ namespace constants
                 const std::string SORT_METHOD = "sortMethod";
                 const std::string GRAVITY_STRENGTH = "gravityStrength";
                 const std::string DISTRIBUTE_ITEMS = "distributeItems";
+                const std::string PACKING_DIRECTION = "packingDirection";
             };
 
             namespace item

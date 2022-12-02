@@ -124,6 +124,16 @@ public:
 
         return PackingContext::gravity_->obeysGravity(aItemBeingPlaced, aItemsInBin, PackingContext::getItemRegister());
     }
+
+    /**
+     * @brief Get the desired packing direction of the requested bin.
+     *
+     * @return const std::array<int, 3>
+     */
+    const std::array<int, 3> getPackingDirection() const
+    {
+        return PackingContext::requestedBin_->getPackingDirection();
+    }
 };
 
 #endif

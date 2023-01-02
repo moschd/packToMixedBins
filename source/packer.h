@@ -110,12 +110,14 @@ public:
 
         PackingCluster newCluster(Packer::clusters_.size() + 1, *Packer::context_, Packer::distributeItems_);
 
-        Packer::clusters_.empty() ? newCluster.setBinIdCounter(1)
-                                  : newCluster.setBinIdCounter(Packer::clusters_.back().getLastCreatedBin().id_ + 1);
+        Packer::clusters_.empty() ? newCluster.setBinIdCounter(1) : newCluster.setBinIdCounter(Packer::clusters_.back().getLastCreatedBin().id_ + 1);
 
         newCluster.startPacking(aItemsToBePacked);
 
-        Packer::clusters_.push_back(newCluster);
+        if (!newCluster.getPackedBins().empty())
+        {
+            Packer::clusters_.push_back(newCluster);
+        };
     };
 
     /**

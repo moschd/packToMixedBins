@@ -1,0 +1,29 @@
+{
+    "bin": {
+        "type": "Pallet",
+        "width": 1.2,
+        "depth": 0.8,
+        "height": 1.65,
+        "maxWeight": 1500
+    },
+    "items": [
+        {
+            "id": "item1",
+            "width": 1,
+            "depth": 0.22,
+            "height": 0.32,
+            "weight": 11,
+            "allowedRotations": "0123"
+        },
+        {
+            "id": "item2",
+            "width": 0.12,
+            "depth": 0.22,
+            "height": 0.32,
+            "weight": 12,
+            "itemConsKey": "value",
+            "gravityStrength": 85,
+            "allowedRotations": "01"
+        }
+    ]
+}

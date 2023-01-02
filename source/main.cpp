@@ -59,7 +59,7 @@ int main()
     const bool includeItems = true;
     const bool itemDimensionsAfter = false;
     const int responsePrecision = 7;
-    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/demo2.json");
+    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/test1.json");
 #endif
 
         Json::Reader reader;

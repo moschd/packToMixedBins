@@ -60,6 +60,7 @@ private:
                 FinalSortedItemConsKeyVectors.push_back(std::vector<int>{aItemVector[idx].Item::transientSysId_});
             };
         };
+
         return FinalSortedItemConsKeyVectors;
     };
 

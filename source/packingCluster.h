@@ -161,6 +161,7 @@ private:
      */
     void startPackingBins(const std::vector<int> aItemsToBePacked)
     {
+
         if (aItemsToBePacked.empty())
         {
             return;
@@ -199,6 +200,7 @@ private:
         }
 
         PackingCluster::binIdCounter_ += 1;
+
         PackingCluster::startPackingBins(PackingCluster::bins_.back().Bin::getUnfittedItems());
     };
 

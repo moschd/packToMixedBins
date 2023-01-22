@@ -1,15 +1,28 @@
-#define CYLINDER_SUPPORT false
 /*
-Always set to 0, cylinders are not supported (yet).
+Default parameters.
 */
+#define DEFAULT_INCLUDE_BINS true
+#define DEFAULT_INCLUDE_ITEMS true
+#define DEFAULT_ITEM_DIMENSIONS_AFTER false
+#define DEFAULT_RESPONSE_PRECISION 7
 
-#define COMPILE_TO_SO true
 /*
 Compile to a shared object file.
 */
+#define COMPILE_TO_SHARED_OBJECT_FILE false
 
+#if !COMPILE_TO_SHARED_OBJECT_FILE
+#define LOCAL_FOLDER "/home/dennis/po/algos/packToBin"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/test1.json"
+#define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
+#endif
+
+/*
+Include necessary files.
+*/
 #include <iostream>
 #include <fstream>
+#include <stack>
 #include <unordered_map>
 #include <vector>
 #include <chrono>
@@ -30,36 +43,29 @@ Compile to a shared object file.
 #include "outgoingJsonBuilder.h"
 
 /*
-    ----------------------------------------------------
-                        PACK TO BIN
-    ----------------------------------------------------
-    Input:
-        JSON
-    Output:
-        JSON
+Driver code.
 */
-
-#if COMPILE_TO_SO
+#if COMPILE_TO_SHARED_OBJECT_FILE
 extern "C"
 {
     char *packToBinAlgorithm(char *result,
                              const int bufferSize,
                              const char *incomingJson,
-                             const bool includeBins = true,
-                             const bool includeItems = true,
-                             const bool itemDimensionsAfter = false,
-                             const int responsePrecision = 7)
+                             const bool includeBins = DEFAULT_INCLUDE_BINS,
+                             const bool includeItems = DEFAULT_INCLUDE_ITEMS,
+                             const bool itemDimensionsAfter = DEFAULT_ITEM_DIMENSIONS_AFTER,
+                             const int responsePrecision = DEFAULT_RESPONSE_PRECISION)
     {
 
 #else
 int main()
 {
     auto start = std::chrono::high_resolution_clock::now();
-    const bool includeBins = true;
-    const bool includeItems = true;
-    const bool itemDimensionsAfter = false;
-    const int responsePrecision = 7;
-    std::ifstream incomingJson("/home/dennis/po/algos/packToBin/testfiles/test1.json");
+    const bool includeBins = DEFAULT_INCLUDE_BINS;
+    const bool includeItems = DEFAULT_INCLUDE_ITEMS;
+    const bool itemDimensionsAfter = DEFAULT_ITEM_DIMENSIONS_AFTER;
+    const int responsePrecision = DEFAULT_RESPONSE_PRECISION;
+    std::ifstream incomingJson(LOCAL_INPUT_FILE);
 #endif
 
         Json::Reader reader;
@@ -83,7 +89,7 @@ int main()
 
         PackingContext context(masterGravity, itemRegister, requestedBin);
 
-        Packer packingProcessor(context, incomingJsonBin[constants::json::inbound::bin::DISTRIBUTE_ITEMS].asBool());
+        Packer packingProcessor(context);
 
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
@@ -93,7 +99,6 @@ int main()
                    incomingJsonItems[idx][constants::json::item::WIDTH].asDouble(),
                    incomingJsonItems[idx][constants::json::item::DEPTH].asDouble(),
                    incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble(),
-                   incomingJsonItems[idx][constants::json::item::DIAMETER].asDouble(),
                    incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
                    incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
                    incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
@@ -112,8 +117,9 @@ int main()
         ResponseBuilder outgoingJsonBuilder(responsePrecision, includeBins, includeItems, itemDimensionsAfter);
         outgoingJsonBuilder.generate(packingProcessor);
 
-#if COMPILE_TO_SO
         std::string resultJson(Json::writeString(outgoingJsonBuilder.getBuilder(), outgoingJsonBuilder.getMessage()));
+
+#if COMPILE_TO_SHARED_OBJECT_FILE
         if (resultJson.size() < bufferSize)
         {
             resultJson.copy(result, bufferSize);
@@ -127,13 +133,10 @@ int main()
 };
 #else
     std::ofstream myfile;
-    myfile.open("output.json");
-    std::string output = Json::writeString(outgoingJsonBuilder.getBuilder(), outgoingJsonBuilder.getMessage());
-    myfile << output;
+    myfile.open(LOCAL_OUTPUT_FILE);
+    myfile << resultJson;
     myfile.close();
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout << duration.count() << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
     return 1;
 };
 #endif

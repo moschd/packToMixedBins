@@ -8,11 +8,7 @@ private:
     std::vector<PackingCluster> clusters_;
 
 public:
-    bool distributeItems_;
-
-    Packer(PackingContext &aContext,
-           bool aDistributeItems) : context_(&aContext),
-                                    distributeItems_(aDistributeItems){};
+    Packer(PackingContext &aContext) : context_(&aContext){};
 
     /**
      * @brief Get context.
@@ -108,16 +104,13 @@ public:
             return;
         };
 
-        PackingCluster newCluster(Packer::clusters_.size() + 1, *Packer::context_, Packer::distributeItems_);
+        PackingCluster newCluster(Packer::clusters_.size() + 1, *Packer::context_);
 
-        Packer::clusters_.empty() ? newCluster.setBinIdCounter(1) : newCluster.setBinIdCounter(Packer::clusters_.back().getLastCreatedBin().id_ + 1);
+        Packer::clusters_.empty() ? newCluster.setBinIdCounter(1) : newCluster.setBinIdCounter(Packer::clusters_.back().getBinIdCounter() + 1);
 
         newCluster.startPacking(aItemsToBePacked);
 
-        if (!newCluster.getPackedBins().empty())
-        {
-            Packer::clusters_.push_back(newCluster);
-        };
+        Packer::clusters_.push_back(newCluster);
     };
 
     /**

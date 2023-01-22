@@ -112,19 +112,19 @@ public:
         outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = packedPacker.Packer::getTotalVolumeUtilPercentage();
         outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = packedPacker.Packer::getTotalWeightUtilPercentage();
 
-        /* Check for items that did not get packed and include them in the header. */
+        /* Aggregate unfitted items across packing clusters. */
         std::vector<int> lastBinUnfittedItems;
         for (const auto &cluster : packedPacker.getClusters())
         {
-            const Bin &lastCreatedbin = cluster.PackingCluster::getBinById(cluster.getPackedBins().size());
-            lastBinUnfittedItems.insert(lastBinUnfittedItems.end(), lastCreatedbin.getUnfittedItems().begin(),
-                                        lastCreatedbin.getUnfittedItems().end());
+            lastBinUnfittedItems.insert(lastBinUnfittedItems.end(), cluster.getUnfittedItems().begin(),
+                                        cluster.getUnfittedItems().end());
         };
 
+        /* If there are unfitted items, create unfitted items json section. */
         if (!lastBinUnfittedItems.empty())
         {
             outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS] = Json::arrayValue;
-            for (auto &it : lastBinUnfittedItems)
+            for (const int &it : lastBinUnfittedItems)
             {
                 outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(
                     ResponseBuilder::itemToJson(

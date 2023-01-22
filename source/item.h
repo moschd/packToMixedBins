@@ -16,7 +16,6 @@ public:
          double aWidth,
          double aDepth,
          double aHeight,
-         double aDiameter,
          double aWeight,
          std::string aItemConsKey,
          std::string aAllowedRotations,
@@ -27,7 +26,6 @@ public:
                                     GeometricShape(aWidth,
                                                    aDepth,
                                                    aHeight,
-                                                   aDiameter,
                                                    aAllowedRotations)
     {
         id_ = aItemId.size() ? aItemId : "NA";

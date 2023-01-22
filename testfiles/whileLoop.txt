@@ -1,0 +1,27 @@
+        std::stack<Node> nodesToCheck;
+        unsigned int axis = aDepth % constants::R;
+        nodesToCheck.push(*aRoot);
+
+        while (!nodesToCheck.empty())
+        {
+            Node currentNode = nodesToCheck.top();
+            nodesToCheck.pop();
+
+            axis = currentNode.Node::myDepth_ % constants::R;
+
+            if (currentNode.Node::isLeaf_)
+            {
+                aPassedNodes.insert(aPassedNodes.end(), currentNode.Node::myChildren_.begin(), currentNode.Node::myChildren_.end());
+                continue;
+            };
+
+            if (aStartPoint[axis] < currentNode.Node::partitionPoint_[axis])
+            {
+                nodesToCheck.push(*currentNode.left_);
+            }
+
+            if (currentNode.Node::partitionPoint_[axis] < (aStartPoint[axis] + aMaxSearchPoint[axis]))
+            {
+                nodesToCheck.push(*currentNode.right_);
+            }
+        }

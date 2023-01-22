@@ -8,7 +8,6 @@ class GeometricShape
  *
  * Currently supports:
  * - Cuboid
- * - Cylinder (work in progress)
  *
  */
 {
@@ -31,17 +30,13 @@ public:
     int rotationType_;
     std::string allowedRotations_;
     std::string rotationTypeDescription_;
-    double radius_;
-    double diameter_;
 
     GeometricShape(double aWidth = 0.0,
                    double aDepth = 0.0,
                    double aHeight = 0.0,
-                   double aDiameter = 0.0,
                    std::string aAllowedRotations = "") : width_(aWidth),
                                                          depth_(aDepth),
                                                          height_(aHeight),
-                                                         diameter_(aDiameter),
                                                          original_width_(aWidth),
                                                          original_depth_(aDepth),
                                                          original_height_(aHeight),
@@ -153,42 +148,5 @@ public:
         GeometricShape::furthestPointDepth_ = GeometricShape::position_[constants::axis::DEPTH] + GeometricShape::depth_;
         GeometricShape::furthestPointHeight_ = GeometricShape::position_[constants::axis::HEIGHT] + GeometricShape::height_;
     };
-
-#if CYLINDER_SUPPORT
-    /**
-     * @brief Return the XY center of a cylinder shaped object.
-     *
-     * @return const std::array<double, 3>
-     */
-    inline const std::array<double, 3> getCenter() const
-    {
-        return {GeometricShape::position_[constants::axis::WIDTH] + GeometricShape::width_ / 2, // this is not correct when rotated.
-                GeometricShape::position_[constants::axis::DEPTH] + GeometricShape::depth_ / 2,
-                GeometricShape::position_[constants::axis::HEIGHT]};
-    };
-
-    /**
-     * @brief Return position between border and radius.
-     *
-     * @return const std::array<double, 3>
-     */
-    inline const std::array<double, 3> getCornerSpace(const unsigned int aCorner) const
-    {
-        std::array<double, 3> cornerPosition = GeometricShape::position_;
-        double totalDiagonal = GeometricShape::diameter_ * sqrt(2);
-        double openSpacePercentage = ((totalDiagonal - GeometricShape::diameter_) / 2) / totalDiagonal;
-        double calced = (1 - openSpacePercentage) * GeometricShape::diameter_;
-
-        switch (aCorner)
-        {
-        case 13:
-            /*XY corner*/
-            cornerPosition[constants::axis::WIDTH] += calced;
-            cornerPosition[constants::axis::DEPTH] += calced;
-            break;
-        };
-        return cornerPosition;
-    };
-#endif
 };
 #endif

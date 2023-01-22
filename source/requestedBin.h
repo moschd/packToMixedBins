@@ -82,7 +82,7 @@ public:
     };
 
     /**
-     * @brief Get the requested type.
+     * @brief Get the requested bin type.
      *
      * @return const std::string
      */

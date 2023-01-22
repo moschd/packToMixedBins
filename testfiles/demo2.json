@@ -2,11 +2,9 @@
 	"bin": {
 		"type": "Pallet",
 		"maxWeight": 1500,
-		"width": 5,
-		"height": 2.65,
-		"depth": 10,
-		"gravityStrength":50,
-		"packingDirection":"backToFront"
+		"width": 1.2,
+		"height": 1.65,
+		"depth": 0.1
 	},
 	"items": [{
 			"id": "DTM001",

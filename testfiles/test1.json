@@ -9,7 +9,7 @@
     "items": [
         {
             "id": "item1",
-            "width": 1,
+            "width": 10,
             "depth": 0.22,
             "height": 0.32,
             "weight": 11,

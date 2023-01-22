@@ -38,56 +38,5 @@ namespace Geometry
                                  objectOne->position_[constants::axis::DEPTH] - objectTwo->position_[constants::axis::DEPTH]),
                         objectOne->position_[constants::axis::HEIGHT] - objectTwo->position_[constants::axis::HEIGHT]);
     }
-
-    template <typename T>
-    T clip(const T &n, const T &lower, const T &upper)
-    {
-        return std::max(lower, std::min(n, upper));
-    }
-
-#if CYLINDER_SUPPORT
-#if __cplusplus < 201703
-
-    template <class T>
-    inline const bool xIntersectCylinderCuboid(const T cylinder, const T cuboid)
-    {
-        double closestX = std::clamp(cylinder->position_[constants::axis::WIDTH], cuboid->position_[constants::axis::WIDTH], cuboid->furthestPointWidth_);
-        return cylinder->radius_ < (cylinder->position_[constants::axis::WIDTH] - closestX);
-    };
-
-    template <class T>
-    inline const bool yIntersectCylinderCuboid(const T cylinder, const T cuboid)
-    {
-        double closestY = std::clamp(cylinder->position[constants::axis::DEPTH], cuboid->position_[constants::axis::DEPTH], cuboid->furthestPointDepth_);
-        return cylinder->radius_ < (cylinder->position[constants::axis::DEPTH] - closestY);
-    };
-
-    template <class T>
-    inline const bool xyIntersectCylinderCuboid(const T cylinder, const T cuboid)
-    {
-        return intersectingX(cylinder, cuboid) && intersectingY(cylinder, cuboid);
-    }
-#else
-    template <class T>
-    inline const bool xIntersectCylinderCuboid(const T cylinder, const T cuboid)
-    {
-        double closestX = Geometry::clip(cylinder->position_[constants::axis::WIDTH], cuboid->position_[constants::axis::WIDTH], cuboid->furthestPointWidth_);
-        return cylinder->radius_ < (cylinder->position_[constants::axis::WIDTH] - closestX);
-    };
-
-    template <class T>
-    inline const bool yIntersectCylinderCuboid(const T cylinder, const T cuboid)
-    {
-        double closestY = Geometry::clip(cylinder->position[constants::axis::DEPTH], cuboid->position_[constants::axis::DEPTH], cuboid->furthestPointDepth_);
-        return cylinder->radius_ < (cylinder->position[constants::axis::DEPTH] - closestY);
-    };
-
-#endif
-    template <class T>
-    inline const bool xyIntersectCylinderCuboid(const T cylinder, const T cuboid)
-    {
-        return intersectingX(cylinder, cuboid) && intersectingY(cylinder, cuboid);
-    }
-#endif
 }
 #endif

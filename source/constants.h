@@ -95,7 +95,6 @@ namespace constants
         namespace outbound
         {
             const std::string PACKED_BINS = "packedBins";
-            const std::string EXCEPTION = "exception";
 
             namespace header
             {

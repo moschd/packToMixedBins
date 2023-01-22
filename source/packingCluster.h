@@ -122,9 +122,18 @@ private:
         PackingCluster::bins_.back().Bin::addUnfittedItem(aItemToPackKey);
     };
 
+    /**
+     * @brief Delete the last bin from the packing cluster.
+     *
+     */
     void deleteLastBin()
     {
+        Bin binToBeDeleted = PackingCluster::bins_.back();
+        binToBeDeleted.Bin::kdTree_->KdTree::deleteAllNodesHelper();
+        delete binToBeDeleted.Bin::kdTree_;
+
         PackingCluster::bins_.pop_back();
+        PackingCluster::binIdCounter_ -= 1;
     };
 
     /**
@@ -158,6 +167,7 @@ private:
         };
 
         /* Create a new bin. */
+        PackingCluster::binIdCounter_ += 1;
         PackingCluster::bins_.push_back(Bin(PackingCluster::binIdCounter_, PackingCluster::context_,
                                             PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
 
@@ -188,32 +198,15 @@ private:
         }
 
         /* Bin has been packed, recurse. */
-        PackingCluster::binIdCounter_ += 1;
         PackingCluster::startPackingBins(PackingCluster::getLastCreatedBin().Bin::getUnfittedItems());
     };
 
 public:
     int id_;
     PackingCluster(unsigned int aId, PackingContext &aContext) : id_(aId),
-                                                                 context_(&aContext){};
-
-    /**
-     * @brief Get bin by id.
-     *
-     * @return const Bin&
-     */
-    const Bin &getBinById(const int binToGet) const
+                                                                 context_(&aContext)
     {
-        for (auto &bin : PackingCluster::bins_)
-        {
-            if (bin.id_ == binToGet)
-            {
-                return bin;
-            }
-        };
-
-        /* default, should never happen. */
-        return PackingCluster::bins_.back();
+        PackingCluster::binIdCounter_ = 0;
     };
 
     /**

@@ -51,7 +51,7 @@ private:
     const Json::Value binToJson(const Bin &bin) const
     {
         Json::Value mappedBin;
-        mappedBin[constants::json::outbound::bin::ID] = int(bin.Bin::id_);
+        mappedBin[constants::json::outbound::bin::ID] = bin.Bin::id_;
         mappedBin[constants::json::outbound::bin::TYPE] = bin.Bin::type_;
         mappedBin[constants::json::outbound::bin::NR_OF_ITEMS] = int(bin.Bin::getFittedItems().size());
         mappedBin[constants::json::outbound::bin::MAX_WIDTH] = bin.Bin::width_;
@@ -67,26 +67,19 @@ private:
         return mappedBin;
     };
 
-    void exceptionJson(const int exceptionType)
-    {
-        switch (exceptionType)
-        {
-        case 10:
-            ResponseBuilder::outboundRoot_[constants::json::outbound::EXCEPTION] = "Every single item exceeds the bin capacity. None of the items could be packed.";
-            break;
-        };
-    }
-
 public:
     const Json::StreamWriterBuilder &getBuilder() const { return ResponseBuilder::builder_; };
 
     const Json::Value &getMessage() const { return ResponseBuilder::outboundRoot_; };
 
-    ResponseBuilder(int aPrecision, bool aIncludeBins, bool aIncludeItems, bool aItemDimensionsAfter) : indentation_(""),
-                                                                                                        precision_(aPrecision),
-                                                                                                        includeBins_(aIncludeBins),
-                                                                                                        includeItems_(aIncludeItems),
-                                                                                                        itemDimensionsAfter_(aItemDimensionsAfter)
+    ResponseBuilder(int aPrecision,
+                    bool aIncludeBins,
+                    bool aIncludeItems,
+                    bool aItemDimensionsAfter) : indentation_(""),
+                                                 precision_(aPrecision),
+                                                 includeBins_(aIncludeBins),
+                                                 includeItems_(aIncludeItems),
+                                                 itemDimensionsAfter_(aItemDimensionsAfter)
     {
         ResponseBuilder::configureBuilder();
     };
@@ -95,36 +88,28 @@ public:
      * @brief Generates the outgoing JSON.
      *
      * It takes a packed packing processor as input and converts its content to the outgoing json.
-     * Generate a exception json incase none of the provided items are packed into a bin.
      *
      * @param packedPacker
      */
     void generate(Packer packedPacker)
     {
-        if (packedPacker.Packer::getNumberOfBins() == 0)
-        {
-            ResponseBuilder::exceptionJson(10);
-            return;
-        };
 
-        /* Header information. */
-        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = int(packedPacker.Packer::getNumberOfBins());
-        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = packedPacker.Packer::getTotalVolumeUtilPercentage();
-        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = packedPacker.Packer::getTotalWeightUtilPercentage();
+        /*
+        Aggregate unfitted items across packing clusters.
+        If there are unfitted items, create unfitted items json section.
+        */
 
-        /* Aggregate unfitted items across packing clusters. */
-        std::vector<int> lastBinUnfittedItems;
+        std::vector<int> myUnfittedItems;
         for (const auto &cluster : packedPacker.getClusters())
         {
-            lastBinUnfittedItems.insert(lastBinUnfittedItems.end(), cluster.getUnfittedItems().begin(),
-                                        cluster.getUnfittedItems().end());
+            myUnfittedItems.insert(myUnfittedItems.end(), cluster.getUnfittedItems().begin(),
+                                   cluster.getUnfittedItems().end());
         };
 
-        /* If there are unfitted items, create unfitted items json section. */
-        if (!lastBinUnfittedItems.empty())
+        if (!myUnfittedItems.empty())
         {
             outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS] = Json::arrayValue;
-            for (const int &it : lastBinUnfittedItems)
+            for (const int &it : myUnfittedItems)
             {
                 outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(
                     ResponseBuilder::itemToJson(
@@ -132,8 +117,22 @@ public:
             };
         };
 
+        /* Return if no bins were packed. Happens if none of the items fit. */
+        if (packedPacker.Packer::getNumberOfBins() == 0)
+        {
+            return;
+        }
+
+        /* Header information. */
+        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = packedPacker.Packer::getNumberOfBins();
+        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = packedPacker.Packer::getTotalVolumeUtilPercentage();
+        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = packedPacker.Packer::getTotalWeightUtilPercentage();
+
+        /* Free allocated memory.
+        TODO Find a way to do this in a correct way, look for best practices. */
         packedPacker.freeMemory();
 
+        /* If includeBins parameter is false, skip generating json for the bins. */
         if (!ResponseBuilder::includeBins_)
         {
             return;
@@ -143,8 +142,10 @@ public:
         {
             for (const auto &bin : cluster.PackingCluster::getPackedBins())
             {
+
                 Json::Value mappedBin = ResponseBuilder::binToJson(bin);
 
+                /* If includeItems parameter is false, skip generating json for the items. */
                 if (ResponseBuilder::includeItems_)
                 {
                     for (const auto &item : bin.Bin::getFittedItems())
@@ -153,6 +154,7 @@ public:
                             ResponseBuilder::itemToJson(packedPacker.Packer::getContext()->getItem(item)));
                     };
                 };
+
                 ResponseBuilder::outboundRoot_[constants::json::outbound::PACKED_BINS].append(mappedBin);
             };
         };

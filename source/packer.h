@@ -106,7 +106,10 @@ public:
 
         PackingCluster newCluster(Packer::clusters_.size() + 1, *Packer::context_);
 
-        Packer::clusters_.empty() ? newCluster.setBinIdCounter(1) : newCluster.setBinIdCounter(Packer::clusters_.back().getBinIdCounter() + 1);
+        if (!Packer::clusters_.empty())
+        {
+            newCluster.setBinIdCounter(Packer::clusters_.back().getBinIdCounter());
+        };
 
         newCluster.startPacking(aItemsToBePacked);
 

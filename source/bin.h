@@ -14,6 +14,11 @@ private:
     double actualWeightUtil_;
     PackingContext *context_;
 
+    /**
+     * @brief Removes items from the xfree axis when an item has been placed there.
+     *
+     * @param itemBeingPlaced
+     */
     void removeFromXFreeItems(const Item *itemBeingPlaced)
     {
         Bin::xFreeItems_.erase(
@@ -26,6 +31,11 @@ private:
             end(xFreeItems_));
     };
 
+    /**
+     * @brief Removes items from the yfree axis when an item has been placed there.
+     *
+     * @param itemBeingPlaced
+     */
     void removeFromYFreeItems(const Item *itemBeingPlaced)
     {
         Bin::yFreeItems_.erase(
@@ -38,6 +48,11 @@ private:
             end(Bin::yFreeItems_));
     };
 
+    /**
+     * @brief Removes items from the zfree axis when an item has been placed there.
+     *
+     * @param itemBeingPlaced
+     */
     void removeFromZFreeItems(const Item *itemBeingPlaced)
     {
         Bin::zFreeItems_.erase(
@@ -53,6 +68,10 @@ private:
     /**
      * @brief Keep track of the maximum dimensions that have been placed inside the bin.
      *
+     * This is used to help narrow down the number of branches to search in the kd-tree.
+     * When we know the maximum length of the item on a certain axis, we also know which
+     * branches we can prune since no item would reach that far starting from a certain point.
+     *
      * @param it
      * @param axis
      */
@@ -67,11 +86,6 @@ private:
             Bin::placedItemsMaxDimensions_[constants::axis::DEPTH] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::DEPTH], it->Item::depth_);
             break;
         case constants::axis::HEIGHT:
-            Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT], it->Item::height_);
-            break;
-        default:
-            Bin::placedItemsMaxDimensions_[constants::axis::WIDTH] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::WIDTH], it->Item::width_);
-            Bin::placedItemsMaxDimensions_[constants::axis::DEPTH] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::DEPTH], it->Item::depth_);
             Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT], it->Item::height_);
             break;
         };
@@ -96,7 +110,7 @@ private:
                                                       itemOb->Item::furthestPointDepth_,
                                                       itemOb->Item::furthestPointHeight_});
 
-        // Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.
+        /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/
         const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
                                             { return context_->getItem(i1).Item::furthestPointHeight_ < context_->getItem(i2).Item::furthestPointHeight_; });
         Bin::xFreeItems_.push_back(it);
@@ -127,6 +141,7 @@ public:
                                                          aContext->getRequestedBin()->getHeight())
     {
 
+        /* Create kd-tree and reserve vector memory in advance based on estimates. */
         Bin::kdTree_ = new KdTree(aEstimatedNumberOfItemFits, {width_, depth_, height_});
         Bin::items_.reserve(aEstimatedNumberOfItemFits);
         Bin::xFreeItems_.reserve(aEstimatedNumberOfItemFits);
@@ -151,8 +166,7 @@ public:
      */
     void addUnfittedItem(const int itemKey)
     {
-        Item *itemBeingPlaced = &Bin::context_->getModifiableItem(itemKey);
-        itemBeingPlaced->reset();
+        Bin::context_->getModifiableItem(itemKey).reset();
         Bin::unfittedItems_.push_back(itemKey);
     };
 

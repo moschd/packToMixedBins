@@ -52,23 +52,8 @@ public:
     };
 
     /**
-     * @brief returns boolean comparing item to a shape.
+     * @brief Set dimensions and rotation description based on current rotation type.
      *
-     * @param aShape
-     * @return true
-     * @return false
-     */
-    inline const bool isShape(std::string aShape) const
-    {
-        return GeometricShape::shape_ == aShape;
-    }
-
-    /**
-     * @brief Set new dimensions on the shape based on its current rotation type.
-     *
-     * Rotation types based on cuboid shape.
-     *
-     * @param aRotationType
      */
     void setNewDimensions()
     {
@@ -78,62 +63,37 @@ public:
             GeometricShape::width_ = GeometricShape::original_width_;
             GeometricShape::depth_ = GeometricShape::original_depth_;
             GeometricShape::height_ = GeometricShape::original_height_;
+            GeometricShape::rotationTypeDescription_ = "No rotation";
             break;
         case constants::rotation::type::DWH:
             GeometricShape::width_ = GeometricShape::original_depth_;
             GeometricShape::depth_ = GeometricShape::original_width_;
             GeometricShape::height_ = GeometricShape::original_height_;
+            GeometricShape::rotationTypeDescription_ = "Rotate around the z-axis by 90°";
             break;
         case constants::rotation::type::HDW:
             GeometricShape::width_ = GeometricShape::original_height_;
             GeometricShape::depth_ = GeometricShape::original_depth_;
             GeometricShape::height_ = GeometricShape::original_width_;
+            GeometricShape::rotationTypeDescription_ = "Rotate around the x-axis by 90°";
             break;
         case constants::rotation::type::DHW:
             GeometricShape::width_ = GeometricShape::original_depth_;
             GeometricShape::depth_ = GeometricShape::original_height_;
             GeometricShape::height_ = GeometricShape::original_width_;
+            GeometricShape::rotationTypeDescription_ = "Rotate around the x-axis by 90° and then around the z-axis by 90°";
             break;
         case constants::rotation::type::HWD:
             GeometricShape::width_ = GeometricShape::original_height_;
             GeometricShape::depth_ = GeometricShape::original_width_;
             GeometricShape::height_ = GeometricShape::original_depth_;
+            GeometricShape::rotationTypeDescription_ = "Rotate around the z-axis by 90° and then around the x-axis by 90°";
             break;
         case constants::rotation::type::WHD:
             GeometricShape::width_ = GeometricShape::original_width_;
             GeometricShape::depth_ = GeometricShape::original_height_;
             GeometricShape::height_ = GeometricShape::original_depth_;
-            break;
-        };
-    };
-
-    /**
-     * @brief Set the rotation type description.
-     *
-     * Descriptions are based on cuboid shape.
-     *
-     */
-    void setRotationTypeDesc()
-    {
-        switch (GeometricShape::rotationType_)
-        {
-        case constants::rotation::type::WDH:
-            GeometricShape::rotationTypeDescription_ = "No rotation";
-            break;
-        case constants::rotation::type::DWH:
-            GeometricShape::rotationTypeDescription_ = "Rotate around the z-axis by 90°";
-            break;
-        case constants::rotation::type::HDW:
-            GeometricShape::rotationTypeDescription_ = "Rotate around the x-axis by 90°";
-            break;
-        case constants::rotation::type::DHW:
-            GeometricShape::rotationTypeDescription_ = "Rotate around the x-axis by 90° and then around the z-axis by 90°";
-            break;
-        case constants::rotation::type::WHD:
             GeometricShape::rotationTypeDescription_ = "Rotate around the y-axis by 90°";
-            break;
-        case constants::rotation::type::HWD:
-            GeometricShape::rotationTypeDescription_ = "Rotate around the z-axis by 90° and then around the x-axis by 90°";
             break;
         };
     };

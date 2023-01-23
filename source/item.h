@@ -10,7 +10,6 @@ public:
     std::string itemConsolidationKey_;
     double gravityStrength_;
 
-    Item(){};
     Item(int aSystemId,
          std::string aItemId,
          double aWidth,
@@ -39,7 +38,6 @@ public:
     inline void rotate(int aRotationType)
     {
         Item::rotationType_ = aRotationType;
-        Item::setRotationTypeDesc();
         Item::setNewDimensions();
         Item::setFurthestPoints();
     }
@@ -48,7 +46,7 @@ public:
      * @brief Resets the attributes of the item.
      *
      * Used when an item has been evaluated and rotated during packing but didnt manage to be packed.
-     * The items attributes must be reset to be correctly evualated for packing later on.
+     * The items attributes must be reset to be correctly evualated for packing later on, or for being returned as an unfit item.
      *
      */
     void reset()

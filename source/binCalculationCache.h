@@ -50,6 +50,9 @@ public:
     /**
      * @brief Checks if item is valid or if intersecting items have been found already.
      *
+     * Compares the items smallest dimension to the known intersection distance for this position.
+     * If the items smallest dimension is bigger, it will not matter how we rotate the item since it simply will never fit.
+     *
      * Short circuit boolean return to prevent additional assignment and if statement.
      *
      * @param aItemToBeFound

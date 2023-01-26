@@ -10,6 +10,7 @@ private:
     std::vector<int> yFreeItems_;
     std::vector<int> zFreeItems_;
     std::array<double, 3> placedItemsMaxDimensions_;
+    std::array<double, 3> placedItemsFurthestPoints_;
     double actualVolumeUtil_;
     double actualWeightUtil_;
     PackingContext *context_;
@@ -92,6 +93,22 @@ private:
     };
 
     /**
+     * @brief Get the furthest position of any item on the pallet.
+     * 
+     * Can be used to calculate product underhang.
+     * 
+     * @param it 
+     * @param axis 
+     */
+    void updatePlacedMaxItemPositions(const Item *it, const int axis)
+    {
+        Bin::placedItemsFurthestPoints_[constants::axis::WIDTH] = std::max(Bin::placedItemsFurthestPoints_[constants::axis::WIDTH], it->Item::furthestPointWidth_);
+        Bin::placedItemsFurthestPoints_[constants::axis::DEPTH] = std::max(Bin::placedItemsFurthestPoints_[constants::axis::DEPTH], it->Item::furthestPointDepth_);
+        Bin::placedItemsFurthestPoints_[constants::axis::HEIGHT] = std::max(Bin::placedItemsFurthestPoints_[constants::axis::HEIGHT], it->Item::furthestPointHeight_);
+    };
+
+
+    /**
      * @brief Update everything that needs to be updated once an item has found a fitting spot inside the bin.
      *
      * @param it
@@ -105,6 +122,7 @@ private:
         Bin::actualVolumeUtil_ += itemOb->Item::volume_;
 
         Bin::updatePlacedMaxItemDimensions(itemOb, binAxis);
+        Bin::updatePlacedMaxItemPositions(itemOb, binAxis);
         Bin::kdTree_->KdTree::addItemKeyToLeafHelper(it,
                                                      {itemOb->Item::furthestPointWidth_,
                                                       itemOb->Item::furthestPointDepth_,
@@ -136,6 +154,7 @@ public:
                                           actualWeightUtil_(0.0),
                                           context_(aContext),
                                           placedItemsMaxDimensions_(constants::START_POSITION),
+                                          placedItemsFurthestPoints_(constants::START_POSITION),
                                           GeometricShape(aContext->getRequestedBin()->getWidth(),
                                                          aContext->getRequestedBin()->getDepth(),
                                                          aContext->getRequestedBin()->getHeight())
@@ -158,6 +177,11 @@ public:
     {
         return Bin::unfittedItems_;
     };
+
+    const std::array<double, 3> getPlacedItemsFurthestPoints() const
+    {
+        return Bin::placedItemsFurthestPoints_;
+    }
 
     /**
      * @brief Reset the item to inital values and add to unfitted items.

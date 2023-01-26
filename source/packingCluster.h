@@ -172,23 +172,22 @@ private:
                                             PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
 
         /* Start packing evaluation process. */
-        PackingCluster::bins_.back().Bin::constructLayer(aItemsToBePacked.front());
-        bool noItemInBin = false;
-        // for (auto &itemToPackKey : aItemsToBePacked)
-        // {
-        //     if (noItemInBin)
-        //     {
-        //         noItemInBin = !PackingCluster::fitFirstItem(itemToPackKey);
-        //     }
-        //     else if (PackingCluster::wouldExceedLimit(itemToPackKey) || PackingCluster::equalsPreviousUnfittedItem(itemToPackKey))
-        //     {
-        //         PackingCluster::addLastBinUnfittedItem(itemToPackKey);
-        //     }
-        //     else
-        //     {
-        //         PackingCluster::bins_.back().Bin::findItemPosition(itemToPackKey);
-        //     }
-        // };
+        bool noItemInBin = true;
+        for (auto &itemToPackKey : aItemsToBePacked)
+        {
+            if (noItemInBin)
+            {
+                noItemInBin = !PackingCluster::fitFirstItem(itemToPackKey);
+            }
+            else if (PackingCluster::wouldExceedLimit(itemToPackKey) || PackingCluster::equalsPreviousUnfittedItem(itemToPackKey))
+            {
+                PackingCluster::addLastBinUnfittedItem(itemToPackKey);
+            }
+            else
+            {
+                PackingCluster::bins_.back().Bin::findItemPosition(itemToPackKey);
+            }
+        };
 
         /* Delete the created bin if it contains no items. */
         if (noItemInBin)

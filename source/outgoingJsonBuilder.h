@@ -143,12 +143,6 @@ public:
             for (const auto &bin : cluster.PackingCluster::getPackedBins())
             {
 
-                std::cout
-                    << "W=" << bin.getPlacedItemsFurthestPoints()[0]
-                    << " D=" << bin.getPlacedItemsFurthestPoints()[1]
-                    << " H=" << bin.getPlacedItemsFurthestPoints()[2]
-                    << "\n";
-
                 Json::Value mappedBin = ResponseBuilder::binToJson(bin);
 
                 /* If includeItems parameter is false, skip generating json for the items. */

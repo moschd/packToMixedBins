@@ -9,11 +9,11 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE false
+#define COMPILE_TO_SHARED_OBJECT_FILE true
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
-#define LOCAL_FOLDER "/home/dennis/po/algos/layeredPacking"
-#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/seismicdemo.json"
+#define LOCAL_FOLDER "/home/dennis/po/algos/packToBin"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
 
@@ -48,7 +48,7 @@ Driver code.
 #if COMPILE_TO_SHARED_OBJECT_FILE
 extern "C"
 {
-    char *layeredPackingAlgorithm(char *result,
+    char *packToBinAlgorithm(char *result,
                              const int bufferSize,
                              const char *incomingJson,
                              const bool includeBins = DEFAULT_INCLUDE_BINS,
@@ -94,7 +94,7 @@ int main()
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
         {
-            Item i(1,
+            Item i(idx,
                    incomingJsonItems[idx][constants::json::item::ID].asString(),
                    incomingJsonItems[idx][constants::json::item::WIDTH].asDouble(),
                    incomingJsonItems[idx][constants::json::item::DEPTH].asDouble(),

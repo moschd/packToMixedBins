@@ -94,16 +94,6 @@ public:
     }
 
     /**
-     * @brief Get the numer of created items.
-     *
-     * @return const int
-     */
-    inline const int numberOfItems() const
-    {
-        return ItemRegister::completeItemVector_.size();
-    };
-
-    /**
      * @brief Get a const Item object.
      *
      * @param key

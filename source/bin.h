@@ -10,6 +10,7 @@ private:
     std::vector<int> yFreeItems_;
     std::vector<int> zFreeItems_;
     std::array<double, 3> placedItemsMaxDimensions_;
+    std::array<double, 3> placedItemsFurthestPoints_;
     double actualVolumeUtil_;
     double actualWeightUtil_;
     PackingContext *context_;
@@ -92,6 +93,21 @@ private:
     };
 
     /**
+     * @brief Get the furthest position of any item on the pallet.
+     *
+     * Can be used to calculate product underhang.
+     *
+     * @param it
+     * @param axis
+     */
+    void updatePlacedMaxItemPositions(const Item *it, const int axis)
+    {
+        Bin::placedItemsFurthestPoints_[constants::axis::WIDTH] = std::max(Bin::placedItemsFurthestPoints_[constants::axis::WIDTH], it->Item::furthestPointWidth_);
+        Bin::placedItemsFurthestPoints_[constants::axis::DEPTH] = std::max(Bin::placedItemsFurthestPoints_[constants::axis::DEPTH], it->Item::furthestPointDepth_);
+        Bin::placedItemsFurthestPoints_[constants::axis::HEIGHT] = std::max(Bin::placedItemsFurthestPoints_[constants::axis::HEIGHT], it->Item::furthestPointHeight_);
+    };
+
+    /**
      * @brief Update everything that needs to be updated once an item has found a fitting spot inside the bin.
      *
      * @param it
@@ -105,6 +121,7 @@ private:
         Bin::actualVolumeUtil_ += itemOb->Item::volume_;
 
         Bin::updatePlacedMaxItemDimensions(itemOb, binAxis);
+        Bin::updatePlacedMaxItemPositions(itemOb, binAxis);
         Bin::kdTree_->KdTree::addItemKeyToLeafHelper(it,
                                                      {itemOb->Item::furthestPointWidth_,
                                                       itemOb->Item::furthestPointDepth_,
@@ -136,6 +153,7 @@ public:
                                           actualWeightUtil_(0.0),
                                           context_(aContext),
                                           placedItemsMaxDimensions_(constants::START_POSITION),
+                                          placedItemsFurthestPoints_(constants::START_POSITION),
                                           GeometricShape(aContext->getRequestedBin()->getWidth(),
                                                          aContext->getRequestedBin()->getDepth(),
                                                          aContext->getRequestedBin()->getHeight())
@@ -158,6 +176,11 @@ public:
     {
         return Bin::unfittedItems_;
     };
+
+    const std::array<double, 3> getPlacedItemsFurthestPoints() const
+    {
+        return Bin::placedItemsFurthestPoints_;
+    }
 
     /**
      * @brief Reset the item to inital values and add to unfitted items.
@@ -200,6 +223,222 @@ public:
     {
         Bin::updateWithFittedItem(it, binAxis);
     };
+
+    void generateItemsOnXFromItem(const int aBaseItemKey)
+    {
+        const Item *baseItem = &Bin::context_->getItem(aBaseItemKey);
+        const double itemWeight = baseItem->weight_;
+
+        double incrementalWidth = baseItem->furthestPointWidth_;
+
+        //    (Bin::getActWeightUtil() + itemWeight) < context_->getRequestedBin()->getMaxWeight()
+        while (Bin::width_ > (incrementalWidth + baseItem->width_))
+        {
+
+            const Item *previousItem = &Bin::context_->getItem(context_->getNumberOfCreatedItems());
+            const int newItemId = context_->getNumberOfCreatedItems() + 1;
+            Item newItem(newItemId,
+                         "newItem",
+                         baseItem->width_,
+                         baseItem->depth_,
+                         baseItem->height_,
+                         baseItem->weight_,
+                         baseItem->itemConsolidationKey_,
+                         baseItem->allowedRotations_,
+                         baseItem->gravityStrength_);
+
+            Bin::context_->addItemToRegister(newItem);
+
+            Item *retrievedNewItem = &Bin::context_->getModifiableItem(newItemId);
+
+            retrievedNewItem->Item::position_ = previousItem->position_;
+            retrievedNewItem->Item::position_[constants::axis::WIDTH] += baseItem->Item::width_;
+
+            incrementalWidth += baseItem->width_;
+
+            Bin::updateWithFittedItem(retrievedNewItem->transientSysId_, constants::axis::WIDTH);
+
+            std::cout << "Created item=" << retrievedNewItem->transientSysId_ << " "
+                      << "X=" << retrievedNewItem->position_[constants::axis::WIDTH] << "\n";
+        }
+    }
+
+    void generateItemsOnYFromItem(const int aBaseItemKey)
+    {
+        const Item *baseItem = &Bin::context_->getItem(aBaseItemKey);
+
+        double incrementalDepth = baseItem->position_[constants::axis::DEPTH] + baseItem->depth_;
+
+        //    (Bin::getActWeightUtil() + itemWeight) < context_->getRequestedBin()->getMaxWeight()
+        while (Bin::depth_ > (incrementalDepth + baseItem->depth_))
+        {
+
+            const Item *previousItem = &Bin::context_->getItem(context_->getNumberOfCreatedItems());
+            const int newItemId = context_->getNumberOfCreatedItems() + 1;
+            Item newItem(newItemId,
+                         "newItem",
+                         baseItem->width_,
+                         baseItem->depth_,
+                         baseItem->height_,
+                         baseItem->weight_,
+                         baseItem->itemConsolidationKey_,
+                         baseItem->allowedRotations_,
+                         baseItem->gravityStrength_);
+
+            Bin::context_->addItemToRegister(newItem);
+
+            Item *retrievedNewItem = &Bin::context_->getModifiableItem(newItemId);
+
+            retrievedNewItem->Item::position_ = previousItem->position_;
+            retrievedNewItem->Item::position_[constants::axis::DEPTH] += baseItem->Item::depth_;
+
+            incrementalDepth += baseItem->depth_;
+
+            Bin::updateWithFittedItem(retrievedNewItem->transientSysId_, constants::axis::DEPTH);
+
+            std::cout << "Created item=" << retrievedNewItem->transientSysId_ << " "
+                      << "Y=" << retrievedNewItem->position_[constants::axis::DEPTH] << "\n";
+        }
+    }
+
+    void constructMasterLayer(const int aMasterItem)
+    {
+        Bin::updateWithFittedItem(aMasterItem, constants::axis::WIDTH);
+        Bin::constructLayer(aMasterItem);
+    }
+    /**
+     * @brief
+     *
+     *
+     *
+    take item width, add it until item would exceed bin.
+        if it would exceed.
+        take current distance - max distance, turn in % relative to max
+
+    take item depth, add it until item would exceed bin.
+        if it would exceed.
+        take current distance - max distance, turn in % relative to max
+
+    rotate
+
+    take item width, add it until item would exceed bin.
+        if it would exceed.
+        take current distance - max distance, turn in % relative to max
+
+    take item depth, add it until item would exceed bin.
+        if it would exceed.
+        take current distance - max distance, turn in % relative to max
+     *
+     * @param itemToFitKey
+     */
+    void constructLayer(const int &itemToFitKey)
+    {
+
+        Item *baseItem = &Bin::context_->getModifiableItem(itemToFitKey);
+
+        int numberOfItemsWidth = 1;
+        const double startPositionWidth = baseItem->position_[constants::axis::WIDTH];
+        const double startPositionDepth = baseItem->position_[constants::axis::DEPTH];
+
+        std::cout << "STARTING FROM WIDTH=" << startPositionWidth << " "
+                  << "STARTING FROM DEPTH=" << startPositionDepth << "\n";
+        double incrementalWidth = baseItem->width_;
+        while (Bin::width_ > (startPositionWidth + incrementalWidth + baseItem->width_))
+        {
+            incrementalWidth += baseItem->width_;
+            numberOfItemsWidth++;
+        }
+
+        const bool xFit = numberOfItemsWidth > 1;
+        double xFreeDistance = Bin::width_ - incrementalWidth;
+        std::cout << "WIDTH " << baseItem->width_ << " " << numberOfItemsWidth << " " << xFreeDistance << "\n";
+
+        int numberOfItemsDepth = 1;
+        double incrementalDepth = baseItem->depth_;
+        while (Bin::depth_ > (startPositionDepth + incrementalDepth + baseItem->depth_))
+        {
+            incrementalDepth += baseItem->depth_;
+            numberOfItemsDepth++;
+        }
+        const bool yFit = numberOfItemsDepth > 1;
+        double yFreeDistance = Bin::depth_ - incrementalDepth;
+        std::cout << "DEPTH " << baseItem->depth_ << " " << numberOfItemsDepth << " " << yFreeDistance << "\n";
+
+        baseItem->rotate(constants::rotation::type::DWH);
+
+        std::cout << "ROTATING ITEM\n";
+
+        int numberOfItemsWidth2 = 1;
+        double incrementalWidth2 = baseItem->width_;
+        while (Bin::width_ > (startPositionWidth + incrementalWidth2 + baseItem->width_))
+        {
+            incrementalWidth2 += baseItem->width_;
+            numberOfItemsWidth2++;
+        }
+        const bool xFit2 = numberOfItemsWidth2 > 1;
+        double xFreeDistance2 = Bin::width_ - incrementalWidth2;
+        std::cout << "WIDTH2 " << baseItem->width_ << " " << numberOfItemsWidth2 << " " << xFreeDistance2 << "\n";
+
+        int numberOfItemsDepth2 = 1;
+        double incrementalDepth2 = baseItem->depth_;
+        while (Bin::depth_ > (startPositionDepth + incrementalDepth2 + baseItem->depth_))
+        {
+            incrementalDepth2 += baseItem->depth_;
+            numberOfItemsDepth2++;
+        }
+        const bool yFit2 = numberOfItemsDepth2 > 1;
+        double yFreeDistance2 = Bin::depth_ - incrementalDepth2;
+        std::cout << "DEPTH2 " << baseItem->depth_ << " " << numberOfItemsDepth2 << " " << yFreeDistance2 << "\n";
+
+        baseItem->reset();
+
+        const double mostEfficientDirection = std::min(std::min(xFreeDistance, yFreeDistance), std::min(xFreeDistance2, xFreeDistance2));
+        std::cout << mostEfficientDirection << "\n";
+        if (xFit && xFreeDistance == mostEfficientDirection)
+        {
+            std::cout << "Going here1\n";
+            generateItemsOnXFromItem(baseItem->transientSysId_);
+        }
+        else if (yFit && yFreeDistance == mostEfficientDirection)
+        {
+            std::cout << "Going here2 " << baseItem->transientSysId_ << "\n";
+            generateItemsOnYFromItem(baseItem->transientSysId_);
+
+            const int newItemId = context_->getNumberOfCreatedItems() + 1;
+            Item newItem(newItemId,
+                         "newItem",
+                         baseItem->width_,
+                         baseItem->depth_,
+                         baseItem->height_,
+                         baseItem->weight_,
+                         baseItem->itemConsolidationKey_,
+                         baseItem->allowedRotations_,
+                         baseItem->gravityStrength_);
+
+            Bin::context_->addItemToRegister(newItem);
+            Item *retrievedNewItem = &Bin::context_->getModifiableItem(newItemId);
+
+            retrievedNewItem->Item::position_ = baseItem->position_;
+            retrievedNewItem->Item::position_[constants::axis::WIDTH] += baseItem->Item::width_;
+
+            std::cout << "NR_OF_ITEMS=" << context_->getNumberOfCreatedItems() << "\n";
+            constructLayer(newItemId);
+        }
+        else if (xFit2 && xFreeDistance2 == mostEfficientDirection)
+        {
+            std::cout << "Going here3\n";
+            baseItem->rotate(constants::rotation::type::DWH);
+            generateItemsOnXFromItem(baseItem->transientSysId_);
+        }
+        else if (yFit2 && yFreeDistance2 == mostEfficientDirection)
+        {
+            std::cout << "Going here4\n";
+            baseItem->rotate(constants::rotation::type::DWH);
+            generateItemsOnYFromItem(baseItem->transientSysId_);
+        };
+
+        std::cout << "Numer of items=" << context_->getNumberOfCreatedItems() << "\n";
+    }
 
     /**
      * @brief Look for a position inside the bin to place the item.

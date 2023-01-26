@@ -98,6 +98,16 @@ public:
     }
 
     /**
+     * @brief Get the number of created items.
+     *
+     * @return const int
+     */
+    const inline int getNumberOfCreatedItems() const
+    {
+        return PackingContext::itemRegister_->numberOfItems();
+    };
+
+    /**
      * @brief Get sorted item consolidation key vectors.
      *
      * @param item

@@ -108,9 +108,9 @@ namespace constants
                 const std::string ID = "id";
                 const std::string TYPE = "type";
                 const std::string NR_OF_ITEMS = "nrOfItems";
-                const std::string MAX_WIDTH = "maxWidth";
-                const std::string MAX_DEPTH = "maxDepth";
-                const std::string MAX_HEIGHT = "maxHeight";
+                const std::string WIDTH = "width";
+                const std::string DEPTH = "depth";
+                const std::string HEIGHT = "height";
                 const std::string MAX_VOLUME = "maxVolume";
                 const std::string ACTUAL_VOLUME = "actualVolume";
                 const std::string ACTUAL_VOLUME_UTIL = "actualVolumeUtil";
@@ -118,6 +118,9 @@ namespace constants
                 const std::string ACTUAL_WEIGHT = "actualWeight";
                 const std::string ACTUAL_WEIGHT_UTIL = "actualWeightUtil";
                 const std::string FITTED_ITEMS = "fittedItems";
+                const std::string FURTHEST_POINT_WIDTH = "furthestPointWidth";
+                const std::string FURTHEST_POINT_DEPTH = "furthestPointDepth";
+                const std::string FURTHEST_POINT_HEIGHT = "furthestPointHeight";
             }
         };
 

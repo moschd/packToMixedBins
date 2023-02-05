@@ -54,15 +54,21 @@ private:
         mappedBin[constants::json::outbound::bin::ID] = bin.Bin::id_;
         mappedBin[constants::json::outbound::bin::TYPE] = bin.Bin::type_;
         mappedBin[constants::json::outbound::bin::NR_OF_ITEMS] = int(bin.Bin::getFittedItems().size());
-        mappedBin[constants::json::outbound::bin::MAX_WIDTH] = bin.Bin::width_;
-        mappedBin[constants::json::outbound::bin::MAX_DEPTH] = bin.Bin::depth_;
-        mappedBin[constants::json::outbound::bin::MAX_HEIGHT] = bin.Bin::height_;
+        mappedBin[constants::json::outbound::bin::WIDTH] = bin.Bin::width_;
+        mappedBin[constants::json::outbound::bin::DEPTH] = bin.Bin::depth_;
+        mappedBin[constants::json::outbound::bin::HEIGHT] = bin.Bin::height_;
+
         mappedBin[constants::json::outbound::bin::MAX_VOLUME] = bin.Bin::volume_;
         mappedBin[constants::json::outbound::bin::ACTUAL_VOLUME] = bin.Bin::getActVolumeUtil();
         mappedBin[constants::json::outbound::bin::ACTUAL_VOLUME_UTIL] = bin.Bin::getActVolumeUtilPercentage();
+
         mappedBin[constants::json::outbound::bin::MAX_WEIGHT] = bin.Bin::maxWeight_;
         mappedBin[constants::json::outbound::bin::ACTUAL_WEIGHT] = bin.Bin::getActWeightUtil();
         mappedBin[constants::json::outbound::bin::ACTUAL_WEIGHT_UTIL] = bin.Bin::getActWeightUtilPercentage();
+
+        mappedBin[constants::json::outbound::bin::FURTHEST_POINT_WIDTH] = bin.Bin::furthestPointWidth_;
+        mappedBin[constants::json::outbound::bin::FURTHEST_POINT_DEPTH] = bin.Bin::furthestPointDepth_;
+        mappedBin[constants::json::outbound::bin::FURTHEST_POINT_HEIGHT] = bin.Bin::furthestPointHeight_;
 
         return mappedBin;
     };
@@ -142,13 +148,6 @@ public:
         {
             for (const auto &bin : cluster.PackingCluster::getPackedBins())
             {
-
-                std::cout
-                    << "W=" << bin.getPlacedItemsFurthestPoints()[0]
-                    << " D=" << bin.getPlacedItemsFurthestPoints()[1]
-                    << " H=" << bin.getPlacedItemsFurthestPoints()[2]
-                    << "\n";
-
                 Json::Value mappedBin = ResponseBuilder::binToJson(bin);
 
                 /* If includeItems parameter is false, skip generating json for the items. */

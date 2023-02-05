@@ -13,7 +13,7 @@ Compile to a shared object file.
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennis/po/algos/packToBin"
-#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/seismicdemo.json"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
 

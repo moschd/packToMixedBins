@@ -38,7 +38,7 @@ public:
     /**
      * @brief Get the requestedBin.
      *
-     * @return const RequestedBin*
+     * @return const std::shared_ptr<RequestedBin>
      */
     const std::shared_ptr<RequestedBin> getRequestedBin() const
     {
@@ -95,6 +95,21 @@ public:
     const inline std::shared_ptr<Item> getItem(const int key) const
     {
         return PackingContext::itemRegister_->getConstItem(key);
+    }
+
+    /**
+     * @brief Check if two items are equal.
+     *
+     * Used for spotting unfitted items which are equal to current item.
+     *
+     * @param aItemKey1
+     * @param aItemKey2
+     * @return true
+     * @return false
+     */
+    const inline bool itemsAreEqual(const int aItemKey1, const int aItemKey2) const
+    {
+        return PackingContext::itemRegister_->itemsAreEqual(aItemKey1, aItemKey2);
     }
 
     /**

@@ -20,6 +20,7 @@ Compile to a shared object file.
 /*
 Include necessary files.
 */
+#include <memory>
 #include <iostream>
 #include <fstream>
 #include <stack>
@@ -37,6 +38,7 @@ Include necessary files.
 #include "packingContext.h"
 #include "binCalculationCache.h"
 #include "bin.h"
+#include "itemPositionConstructor.h"
 #include "packingCluster.h"
 #include "packer.h"
 #include "binSortMethods.h"

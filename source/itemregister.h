@@ -115,6 +115,24 @@ public:
     {
         return ItemRegister::getSortedItemConsKeyVectors(ItemRegister::completeItemVector_);
     };
+
+    /**
+     * @brief Checks if two items are equal.
+     *
+     * @param aItemToCompare1
+     * @param aItemToCompare2
+     * @return true
+     * @return false
+     */
+    const bool itemsAreEqual(const int aItemToCompare1, const int aItemToCompare2) const
+    {
+        const std::shared_ptr<Item> itemToCompare1 = ItemRegister::getConstItem(aItemToCompare1);
+        const std::shared_ptr<Item> itemToCompare2 = ItemRegister::getConstItem(aItemToCompare2);
+        return (itemToCompare2->Item::width_ == itemToCompare1->Item::width_ &&
+                itemToCompare2->Item::depth_ == itemToCompare1->Item::depth_ &&
+                itemToCompare2->Item::height_ == itemToCompare1->Item::height_ &&
+                itemToCompare2->Item::allowedRotations_ == itemToCompare1->Item::allowedRotations_);
+    };
 };
 
 #endif

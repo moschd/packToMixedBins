@@ -10,25 +10,6 @@ private:
     std::vector<int> unfittedItems_;
 
     /**
-     * @brief Checks if two items are equal, packing wise.
-     *
-     * @param aItemToCompare1
-     * @param aItemToCompare2
-     * @return true
-     * @return false
-     */
-    const bool itemsAreEqual(const int aItemToCompare1, const int aItemToCompare2) const
-    {
-
-        const std::shared_ptr<Item> itemToCompare1 = PackingCluster::context_->getItem(aItemToCompare1);
-        const std::shared_ptr<Item> itemToCompare2 = PackingCluster::context_->getItem(aItemToCompare2);
-        return (itemToCompare2->Item::width_ == itemToCompare1->Item::width_ &&
-                itemToCompare2->Item::depth_ == itemToCompare1->Item::depth_ &&
-                itemToCompare2->Item::height_ == itemToCompare1->Item::height_ &&
-                itemToCompare2->Item::allowedRotations_ == itemToCompare1->Item::allowedRotations_);
-    };
-
-    /**
      * @brief Function to be used when placing the first item inside a bin.
      *
      * @param aItemToPackKey
@@ -167,18 +148,30 @@ private:
 
         /* Start packing evaluation process. */
         bool noItemInBin = true;
+        std::unique_ptr<ItemPositionConstructor> positionConstructor = std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
+
+        if (positionConstructor->hasResult_)
+        {
+            for (Item2D item : positionConstructor->getItems())
+            {
+                std::cout << item.id_ << "\n";
+            };
+        }
+
         for (auto &itemToPackKey : aItemsToBePacked)
         {
             if (noItemInBin)
             {
                 noItemInBin = !PackingCluster::fitFirstItem(itemToPackKey);
             }
+            // checks for weight constraint
             else if (PackingCluster::wouldExceedLimit(itemToPackKey))
             {
                 PackingCluster::addLastBinUnfittedItem(itemToPackKey);
             }
+            // checks for unfitted items which are the same as current item.
             else if (!PackingCluster::bins_.back()->Bin::getUnfittedItems().empty() &&
-                     PackingCluster::itemsAreEqual(itemToPackKey, PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems().back()))
+                     PackingCluster::context_->itemsAreEqual(itemToPackKey, PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems().back()))
             {
                 PackingCluster::addLastBinUnfittedItem(itemToPackKey);
             }

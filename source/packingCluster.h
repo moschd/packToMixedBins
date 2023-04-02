@@ -23,6 +23,26 @@ private:
             ? PackingCluster::bins_.back()->Bin::updateWithFittedItemHelper(aItemToPackKey, 0)
             : PackingCluster::addLastBinUnfittedItem(aItemToPackKey);
 
+        std::cout << "First item does not fit.\n";
+        return itemFits;
+    };
+
+    /**
+     * @brief Place item in bin on a precalculated position.
+     *
+     * @param aItemToPackKey
+     * @return const bool
+     */
+    const bool fitPrecalculatedItem(const int aItemToPackKey)
+    {
+        const bool itemFits = PackingCluster::bins_.back()->Bin::placeItemInBin(aItemToPackKey);
+
+        if (itemFits)
+        {
+            std::cout << "Item FITS.\n";
+            PackingCluster::bins_.back()->Bin::updateWithFittedItemHelper(aItemToPackKey, 99);
+        };
+
         return itemFits;
     };
 
@@ -131,7 +151,7 @@ private:
      *
      * @param aItemsToBePacked  - vector containing itemKeys
      */
-    void startPackingBins(const std::vector<int> aItemsToBePacked)
+    void startPackingBins(std::vector<int> aItemsToBePacked)
     {
 
         /* All items have been packed. */
@@ -148,16 +168,49 @@ private:
 
         /* Start packing evaluation process. */
         bool noItemInBin = true;
-        std::unique_ptr<ItemPositionConstructor> positionConstructor = std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
+        // std::unique_ptr<ItemPositionConstructor> positionConstructor = std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
 
-        if (positionConstructor->hasResult_)
-        {
-            for (Item2D item : positionConstructor->getItems())
-            {
-                std::cout << item.id_ << "\n";
-            };
-        }
+        // while (positionConstructor->hasResult())
+        // {
+        //     int itemIndex = 0;
+        //     double heightToIcrement = 0.0;
 
+        //     for (Item2D item : positionConstructor->getPrecalculatedItems())
+        //     {
+        //         if (itemIndex > (int)positionConstructor->getItemsFromDistinctItem().size())
+        //         {
+        //             break;
+        //         };
+        //         std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(positionConstructor->getItemsFromDistinctItem()[itemIndex]);
+
+        //         itemIndex += 1;
+
+        //         myItem->allowedRotations_.insert(0, std::to_string(item.rotationType_));
+        //         myItem->position_[constants::axis::WIDTH] = item.position_[constants::axis::WIDTH];
+        //         myItem->position_[constants::axis::DEPTH] = item.position_[constants::axis::DEPTH];
+        //         myItem->position_[constants::axis::HEIGHT] = positionConstructor->getHeightAddition();
+
+        //         bool fits = PackingCluster::fitPrecalculatedItem(myItem->transientSysId_);
+        //         if (fits)
+        //         {
+        //             aItemsToBePacked.erase(std::remove(aItemsToBePacked.begin(), aItemsToBePacked.end(), myItem->transientSysId_), aItemsToBePacked.end());
+        //             noItemInBin = false;
+
+        //             heightToIcrement = myItem->height_;
+        //         }
+        //         else
+        //         {
+        //             std::cout << "Resetting..\n";
+        //             myItem->allowedRotations_.erase(0, 1);
+        //             myItem->reset();
+        //         }
+        //     };
+        //     positionConstructor->addToHeightAddition(heightToIcrement);
+        //     positionConstructor->reconfigure(aItemsToBePacked);
+
+        // };
+
+        std::cout << "items to check size: " << aItemsToBePacked.size() << " " << noItemInBin << "\n";
         for (auto &itemToPackKey : aItemsToBePacked)
         {
             if (noItemInBin)

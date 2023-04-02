@@ -52,9 +52,9 @@ public:
         case RectBestAreaFit:
             newNode = maxRectsPackingInstance_->insert(aAlgorithm);
             break;
-        case SpiralFitPacker:
-            newNode = spiralPackingInstance_->insert();
-            break;
+        // case SpiralFitPacker:
+        //     newNode = spiralPackingInstance_->insert();
+        //     break;
         case NeatGroupFitPacker:
             newNode = neatPackingInstance_->insert();
             break;

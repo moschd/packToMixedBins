@@ -6,7 +6,7 @@ enum HeuristicAlgorithmType
     RectBestAreaFit,      ///< -BAF: Positions the rectangle into the smallest free rect into which it fits.
     RectBottomLeftRule,   ///< -BL: Does the Tetris placement.
     RectContactPointRule, ///< -CP: Chooses the placement where the rectangle touches other rects as much as possible.
-    SpiralFitPacker,      ///< -Spiral packing pattern.
-    NeatGroupFitPacker,   ///< -Neat fitting packing pattern.
+    // SpiralFitPacker,      ///< -Spiral packing pattern.
+    NeatGroupFitPacker, ///< -Neat fitting packing pattern.
     Last
 };

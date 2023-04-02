@@ -4,34 +4,28 @@
 class PackingCluster
 {
 private:
-    std::vector<Bin> bins_;
-    PackingContext *context_;
+    std::vector<std::shared_ptr<Bin>> bins_;
+    std::shared_ptr<PackingContext> context_;
     int binIdCounter_;
     std::vector<int> unfittedItems_;
 
     /**
-     * @brief Checks if the item is the same as the most recent unfitted item.
+     * @brief Checks if two items are equal, packing wise.
      *
-     * Return false if no item is unfitted yet.
-     * Return true if items have the same dimensions, and have the same allowed rotations.
-     *
-     * @param aItemToCheck
+     * @param aItemToCompare1
+     * @param aItemToCompare2
      * @return true
      * @return false
      */
-    const bool equalsPreviousUnfittedItem(const int aItemToCheckKey) const
+    const bool itemsAreEqual(const int aItemToCompare1, const int aItemToCompare2) const
     {
-        if (PackingCluster::bins_.back().Bin::getUnfittedItems().empty())
-        {
-            return false;
-        };
 
-        const Item *aItemToCheck = &PackingCluster::context_->getItem(aItemToCheckKey);
-        const Item *lastUnfittedItem = &PackingCluster::context_->getItem(PackingCluster::getLastCreatedBin().Bin::getUnfittedItems().back());
-        return (lastUnfittedItem->Item::width_ == aItemToCheck->Item::width_ &&
-                lastUnfittedItem->Item::depth_ == aItemToCheck->Item::depth_ &&
-                lastUnfittedItem->Item::height_ == aItemToCheck->Item::height_ &&
-                lastUnfittedItem->Item::allowedRotations_ == aItemToCheck->Item::allowedRotations_);
+        const std::shared_ptr<Item> itemToCompare1 = PackingCluster::context_->getItem(aItemToCompare1);
+        const std::shared_ptr<Item> itemToCompare2 = PackingCluster::context_->getItem(aItemToCompare2);
+        return (itemToCompare2->Item::width_ == itemToCompare1->Item::width_ &&
+                itemToCompare2->Item::depth_ == itemToCompare1->Item::depth_ &&
+                itemToCompare2->Item::height_ == itemToCompare1->Item::height_ &&
+                itemToCompare2->Item::allowedRotations_ == itemToCompare1->Item::allowedRotations_);
     };
 
     /**
@@ -42,10 +36,10 @@ private:
      */
     const bool fitFirstItem(const int aItemToPackKey)
     {
-        const bool itemFits = PackingCluster::bins_.back().Bin::placeItemInBin(aItemToPackKey);
+        const bool itemFits = PackingCluster::bins_.back()->Bin::placeItemInBin(aItemToPackKey);
 
         itemFits
-            ? PackingCluster::bins_.back().Bin::updateWithFittedItemHelper(aItemToPackKey, 0)
+            ? PackingCluster::bins_.back()->Bin::updateWithFittedItemHelper(aItemToPackKey, 0)
             : PackingCluster::addLastBinUnfittedItem(aItemToPackKey);
 
         return itemFits;
@@ -73,9 +67,9 @@ private:
      */
     const bool wouldExceedPhysicalLimit(const int aItemToPackKey) const
     {
-        const Item *aItemToPack = &PackingCluster::context_->getItem(aItemToPackKey);
-        return (PackingCluster::getLastCreatedBin().getActVolumeUtil() + aItemToPack->Item::volume_) > context_->getRequestedBin()->getMaxVolume() ||
-               (PackingCluster::getLastCreatedBin().getActWeightUtil() + aItemToPack->Item::weight_) > context_->getRequestedBin()->getMaxWeight();
+        const std::shared_ptr<Item> aItemToPack = PackingCluster::context_->getItem(aItemToPackKey);
+        return (PackingCluster::getLastCreatedBin()->getActVolumeUtil() + aItemToPack->Item::volume_) > context_->getRequestedBin()->getMaxVolume() ||
+               (PackingCluster::getLastCreatedBin()->getActWeightUtil() + aItemToPack->Item::weight_) > context_->getRequestedBin()->getMaxWeight();
     }
 
     /**
@@ -94,7 +88,7 @@ private:
 
         for (auto itemKey : aItemsToBePacked)
         {
-            const Item *itemToCheck = &PackingCluster::context_->getItem(itemKey);
+            const std::shared_ptr<Item> itemToCheck = PackingCluster::context_->getItem(itemKey);
 
             if ((itemToCheck->volume_ + volumeCumulativeValue) < PackingCluster::context_->getRequestedBin()->getMaxVolume())
             {
@@ -119,7 +113,7 @@ private:
      */
     void addLastBinUnfittedItem(const int aItemToPackKey)
     {
-        PackingCluster::bins_.back().Bin::addUnfittedItem(aItemToPackKey);
+        PackingCluster::bins_.back()->Bin::addUnfittedItem(aItemToPackKey);
     };
 
     /**
@@ -128,9 +122,8 @@ private:
      */
     void deleteLastBin()
     {
-        Bin binToBeDeleted = PackingCluster::bins_.back();
-        binToBeDeleted.Bin::kdTree_->KdTree::deleteAllNodesHelper();
-        delete binToBeDeleted.Bin::kdTree_;
+        std::shared_ptr<Bin> binToBeDeleted = PackingCluster::bins_.back();
+        binToBeDeleted->Bin::kdTree_->KdTree::deleteAllNodesHelper();
 
         PackingCluster::bins_.pop_back();
         PackingCluster::binIdCounter_ -= 1;
@@ -168,8 +161,9 @@ private:
 
         /* Create a new bin. */
         PackingCluster::binIdCounter_ += 1;
-        PackingCluster::bins_.push_back(Bin(PackingCluster::binIdCounter_, PackingCluster::context_,
-                                            PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
+        PackingCluster::bins_.push_back(std::make_shared<Bin>(PackingCluster::binIdCounter_,
+                                                              PackingCluster::context_,
+                                                              PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
 
         /* Start packing evaluation process. */
         bool noItemInBin = true;
@@ -179,32 +173,38 @@ private:
             {
                 noItemInBin = !PackingCluster::fitFirstItem(itemToPackKey);
             }
-            else if (PackingCluster::wouldExceedLimit(itemToPackKey) || PackingCluster::equalsPreviousUnfittedItem(itemToPackKey))
+            else if (PackingCluster::wouldExceedLimit(itemToPackKey))
+            {
+                PackingCluster::addLastBinUnfittedItem(itemToPackKey);
+            }
+            else if (!PackingCluster::bins_.back()->Bin::getUnfittedItems().empty() &&
+                     PackingCluster::itemsAreEqual(itemToPackKey, PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems().back()))
             {
                 PackingCluster::addLastBinUnfittedItem(itemToPackKey);
             }
             else
             {
-                PackingCluster::bins_.back().Bin::findItemPosition(itemToPackKey);
+                PackingCluster::bins_.back()->Bin::findItemPosition(itemToPackKey);
             }
         };
 
         /* Delete the created bin if it contains no items. */
         if (noItemInBin)
         {
-            PackingCluster::addToUnfittedItems(PackingCluster::getLastCreatedBin().Bin::getUnfittedItems());
+            PackingCluster::addToUnfittedItems(PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems());
             PackingCluster::deleteLastBin();
             return;
         }
 
         /* Bin has been packed, recurse. */
-        PackingCluster::startPackingBins(PackingCluster::getLastCreatedBin().Bin::getUnfittedItems());
+        PackingCluster::startPackingBins(PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems());
     };
 
 public:
     int id_;
-    PackingCluster(unsigned int aId, PackingContext &aContext) : id_(aId),
-                                                                 context_(&aContext)
+    PackingCluster(unsigned int aId,
+                   std::shared_ptr<PackingContext> aContext) : id_(aId),
+                                                               context_(aContext)
     {
         PackingCluster::binIdCounter_ = 0;
     };
@@ -214,7 +214,7 @@ public:
      *
      * @return const std::vector<Bin>&
      */
-    const std::vector<Bin> &getPackedBins() const
+    const std::vector<std::shared_ptr<Bin>> &getPackedBins() const
     {
         return PackingCluster::bins_;
     };
@@ -256,7 +256,7 @@ public:
      *
      * @return const std::vector<Bin>&
      */
-    const Bin &getLastCreatedBin() const
+    const std::shared_ptr<Bin> &getLastCreatedBin() const
     {
         return PackingCluster::bins_.back();
     };

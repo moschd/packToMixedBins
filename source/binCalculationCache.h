@@ -32,7 +32,7 @@ public:
      * @param aItemBeingPlaced
      * @param aItemAlreadyPlaced
      */
-    inline void addIntersection(const Item *aItemBeingPlaced, const Item *aItemAlreadyPlaced)
+    inline void addIntersection(const std::shared_ptr<Item> aItemBeingPlaced, const std::shared_ptr<Item> aItemAlreadyPlaced)
     {
         const double smallestDistance = Geometry::nearestBoundary(aItemBeingPlaced, aItemAlreadyPlaced);
         const auto &resultIterator = BinCalculationCache::intersectionLimits_.find(aItemBeingPlaced->position_);
@@ -59,7 +59,7 @@ public:
      * @return true
      * @return false
      */
-    inline const bool itemPositionCacheHit(const Item *aItemToBeFound) const
+    inline const bool itemPositionCacheHit(const std::shared_ptr<Item> aItemToBeFound) const
     {
         const auto resultIterator = BinCalculationCache::intersectionLimits_.find(aItemToBeFound->Item::position_);
         return resultIterator != BinCalculationCache::intersectionLimits_.end() &&

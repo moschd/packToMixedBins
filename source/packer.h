@@ -4,18 +4,18 @@
 class Packer
 {
 private:
-    PackingContext *context_;
-    std::vector<PackingCluster> clusters_;
+    std::shared_ptr<PackingContext> context_;
+    std::vector<std::shared_ptr<PackingCluster>> clusters_;
 
 public:
-    Packer(PackingContext &aContext) : context_(&aContext){};
+    Packer(std::shared_ptr<PackingContext> aContext) : context_(aContext){};
 
     /**
      * @brief Get context.
      *
      * @return const PackingContext*
      */
-    const PackingContext *getContext() const
+    const std::shared_ptr<PackingContext> getContext() const
     {
         return Packer::context_;
     }
@@ -25,7 +25,7 @@ public:
      *
      * @return const PackingContext*
      */
-    PackingContext *getModifiableContext() const
+    std::shared_ptr<PackingContext> getModifiableContext() const
     {
         return Packer::context_;
     }
@@ -35,7 +35,7 @@ public:
      *
      * @return const std::vector<PackingCluster>
      */
-    const std::vector<PackingCluster> &getClusters() const
+    const std::vector<std::shared_ptr<PackingCluster>> &getClusters() const
     {
         return Packer::clusters_;
     }
@@ -50,7 +50,7 @@ public:
         int numberOfBins = 0;
         for (auto &cluster : clusters_)
         {
-            numberOfBins += cluster.getPackedBins().size();
+            numberOfBins += cluster->getPackedBins().size();
         };
         return numberOfBins;
     }
@@ -65,9 +65,9 @@ public:
         double runningUtilSum = 0.0;
         for (auto &cluster : clusters_)
         {
-            for (auto &bin : cluster.getPackedBins())
+            for (auto &bin : cluster->getPackedBins())
             {
-                runningUtilSum += bin.getActVolumeUtilPercentage();
+                runningUtilSum += bin->getActVolumeUtilPercentage();
             };
         };
         return runningUtilSum / Packer::getNumberOfBins();
@@ -83,9 +83,9 @@ public:
         double runningUtilSum = 0.0;
         for (auto &cluster : clusters_)
         {
-            for (auto &bin : cluster.getPackedBins())
+            for (auto &bin : cluster->getPackedBins())
             {
-                runningUtilSum += bin.getActWeightUtilPercentage();
+                runningUtilSum += bin->getActWeightUtilPercentage();
             };
         };
         return runningUtilSum / Packer::getNumberOfBins();
@@ -104,14 +104,14 @@ public:
             return;
         };
 
-        PackingCluster newCluster(Packer::clusters_.size() + 1, *Packer::context_);
+        std::shared_ptr<PackingCluster> newCluster = std::make_shared<PackingCluster>(Packer::clusters_.size() + 1, Packer::context_);
 
         if (!Packer::clusters_.empty())
         {
-            newCluster.setBinIdCounter(Packer::clusters_.back().getBinIdCounter());
+            newCluster->setBinIdCounter(Packer::clusters_.back()->getBinIdCounter());
         };
 
-        newCluster.startPacking(aItemsToBePacked);
+        newCluster->startPacking(aItemsToBePacked);
 
         Packer::clusters_.push_back(newCluster);
     };
@@ -124,11 +124,10 @@ public:
     {
         for (auto &cluster : clusters_)
         {
-            for (auto &bin : cluster.getPackedBins())
+            for (auto &bin : cluster->getPackedBins())
             {
                 /* Free memory again, how to do this in a more structured way? */
-                bin.Bin::kdTree_->KdTree::deleteAllNodesHelper();
-                delete bin.Bin::kdTree_;
+                bin->Bin::kdTree_->KdTree::deleteAllNodesHelper();
             };
         };
     };

@@ -12,19 +12,19 @@ private:
     std::array<double, 3> placedItemsMaxDimensions_;
     double actualVolumeUtil_;
     double actualWeightUtil_;
-    PackingContext *context_;
+    std::shared_ptr<PackingContext> context_;
 
     /**
      * @brief Removes items from the xfree axis when an item has been placed there.
      *
      * @param itemBeingPlaced
      */
-    void removeFromXFreeItems(const Item *itemBeingPlaced)
+    void removeFromXFreeItems(const std::shared_ptr<Item> itemBeingPlaced)
     {
         Bin::xFreeItems_.erase(
             std::remove_if(begin(Bin::xFreeItems_), end(Bin::xFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                    const Item* itemInBin = &Bin::context_->getItem(itemInBinKey);
+                    const std::shared_ptr<Item> itemInBin = Bin::context_->getItem(itemInBinKey);
                     return (
                             itemBeingPlaced->Item::position_[constants::axis::WIDTH] == itemInBin->Item::furthestPointWidth_ &&
                             Geometry::intersectingY(itemBeingPlaced,itemInBin) && Geometry::intersectingZ(itemBeingPlaced,itemInBin)); }),
@@ -36,12 +36,12 @@ private:
      *
      * @param itemBeingPlaced
      */
-    void removeFromYFreeItems(const Item *itemBeingPlaced)
+    void removeFromYFreeItems(const std::shared_ptr<Item> itemBeingPlaced)
     {
         Bin::yFreeItems_.erase(
             std::remove_if(begin(Bin::yFreeItems_), end(Bin::yFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                const Item* itemInBin = &context_->getItem(itemInBinKey);
+                const std::shared_ptr<Item> itemInBin = context_->getItem(itemInBinKey);
                 return (
                         itemBeingPlaced->Item::position_[constants::axis::DEPTH] == itemInBin->Item::furthestPointDepth_ && 
                         Geometry::intersectingX(itemBeingPlaced,itemInBin) && Geometry::intersectingZ(itemBeingPlaced,itemInBin)); }),
@@ -53,12 +53,12 @@ private:
      *
      * @param itemBeingPlaced
      */
-    void removeFromZFreeItems(const Item *itemBeingPlaced)
+    void removeFromZFreeItems(const std::shared_ptr<Item> itemBeingPlaced)
     {
         Bin::zFreeItems_.erase(
             std::remove_if(begin(Bin::zFreeItems_), end(Bin::zFreeItems_), [&](int &itemInBinKey) -> bool
                            { 
-                const Item* itemInBin = &context_->getItem(itemInBinKey);
+                const std::shared_ptr<Item> itemInBin = context_->getItem(itemInBinKey);
                 return (
                         itemBeingPlaced->Item::position_[constants::axis::HEIGHT] == itemInBin->Item::furthestPointHeight_ &&
                         Geometry::intersectingX(itemBeingPlaced,itemInBin) && Geometry::intersectingY(itemBeingPlaced,itemInBin)); }),
@@ -75,7 +75,7 @@ private:
      * @param it
      * @param axis
      */
-    void updatePlacedMaxItemDimensions(const Item *it, const int axis)
+    void updatePlacedMaxItemDimensions(const std::shared_ptr<Item> it, const int axis)
     {
         switch (axis)
         {
@@ -99,7 +99,7 @@ private:
      */
     void updateWithFittedItem(const int &it, const int binAxis)
     {
-        const Item *itemOb = &context_->getItem(it);
+        const std::shared_ptr<Item> itemOb = context_->getItem(it);
 
         Bin::items_.push_back(it);
         Bin::actualWeightUtil_ += itemOb->Item::weight_;
@@ -115,7 +115,7 @@ private:
 
         /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/
         const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
-                                            { return context_->getItem(i1).Item::furthestPointHeight_ < context_->getItem(i2).Item::furthestPointHeight_; });
+                                            { return context_->getItem(i1)->Item::furthestPointHeight_ < context_->getItem(i2)->Item::furthestPointHeight_; });
         Bin::xFreeItems_.push_back(it);
         Bin::yFreeItems_.push_back(it);
         Bin::zFreeItems_.insert(hiter, it);
@@ -128,10 +128,10 @@ public:
     int id_;
     std::string type_;
     double maxWeight_;
-    KdTree *kdTree_;
+    std::unique_ptr<KdTree> kdTree_;
 
     Bin(int aId,
-        PackingContext *aContext,
+        std::shared_ptr<PackingContext> aContext,
         int aEstimatedNumberOfItemFits) : id_(aId),
                                           type_(aContext->getRequestedBin()->getType()),
                                           maxWeight_(aContext->getRequestedBin()->getMaxWeight()),
@@ -145,7 +145,10 @@ public:
     {
 
         /* Create kd-tree and reserve vector memory in advance based on estimates. */
-        Bin::kdTree_ = new KdTree(aEstimatedNumberOfItemFits, {width_, depth_, height_});
+
+        std::array<double, 3> maxDimensions = {width_, depth_, height_};
+        Bin::kdTree_ = std::make_unique<KdTree>(aEstimatedNumberOfItemFits, maxDimensions);
+
         Bin::items_.reserve(aEstimatedNumberOfItemFits);
         Bin::xFreeItems_.reserve(aEstimatedNumberOfItemFits);
         Bin::yFreeItems_.reserve(aEstimatedNumberOfItemFits);
@@ -169,7 +172,7 @@ public:
      */
     void addUnfittedItem(const int itemKey)
     {
-        Bin::context_->getModifiableItem(itemKey).reset();
+        Bin::context_->getModifiableItem(itemKey)->reset();
         Bin::unfittedItems_.push_back(itemKey);
     };
 
@@ -214,7 +217,7 @@ public:
         bool fitted = false;
 
         std::vector<int> itemsWithFreeCorrespondingAxis;
-        Item *itemToFit = &Bin::context_->getModifiableItem(itemToFitKey);
+        std::shared_ptr<Item> itemToFit = Bin::context_->getModifiableItem(itemToFitKey);
 
         for (const auto binAxis : Bin::context_->getPackingDirection())
         {
@@ -233,7 +236,7 @@ public:
 
             for (const auto itemInBinKey : itemsWithFreeCorrespondingAxis)
             {
-                const Item *itemInBin = &Bin::context_->getItem(itemInBinKey);
+                const std::shared_ptr<Item> itemInBin = Bin::context_->getItem(itemInBinKey);
                 itemToFit->Item::position_ = itemInBin->Item::position_;
 
                 switch (binAxis)
@@ -286,7 +289,7 @@ public:
     const bool placeItemInBin(const unsigned int aItemBeingPlacedKey)
     {
         bool intersectionFound = false;
-        Item *itemBeingPlaced = &Bin::context_->getModifiableItem(aItemBeingPlacedKey);
+        std::shared_ptr<Item> itemBeingPlaced = Bin::context_->getModifiableItem(aItemBeingPlacedKey);
 
         /* Loop over items allowed rotation in order to find a fitting place. */
         for (int stringCharCounter = 0;
@@ -317,7 +320,7 @@ public:
             /* Iterate over candidates and check for collision. */
             for (auto intersectCandidateKey : intersectCandidates)
             {
-                const Item *intersectCandidate = &Bin::context_->getItem(intersectCandidateKey);
+                const std::shared_ptr<Item> intersectCandidate = Bin::context_->getItem(intersectCandidateKey);
 
                 /*  Check if X and Y axis are intersecting with a item already placed in the bin. */
                 if (!Geometry::intersectingXY(itemBeingPlaced, intersectCandidate))

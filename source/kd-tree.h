@@ -203,8 +203,11 @@ private:
     };
 
 public:
-    KdTree(unsigned int aEstimatedNumberOfItemFits, std::array<double, 3> aMaxDimensions) : minDimensions_(constants::START_POSITION),
-                                                                                            maxDimensions_(aMaxDimensions)
+    KdTree(unsigned int aEstimatedNumberOfItemFits,
+           std::array<double, 3> aMaxDimensions) : minDimensions_(constants::START_POSITION),
+                                                   maxDimensions_(aMaxDimensions),
+                                                   maxDepth_(8)
+
     {
         KdTree::calculateMaxDepth(aEstimatedNumberOfItemFits);
         KdTree::treeRoot_ = genNodex({KdTree::maxDimensions_[constants::axis::WIDTH] / 2,

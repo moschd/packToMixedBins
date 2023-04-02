@@ -23,7 +23,7 @@ private:
      * @param aItemBeingPlaced
      * @return const double
      */
-    inline const double activeGravityStrength(const Item *aItemBeingPlaced) const
+    inline const double activeGravityStrength(const std::shared_ptr<Item> &aItemBeingPlaced) const
     {
         if (aItemBeingPlaced->Item::gravityStrength_ > 0)
         {
@@ -43,7 +43,7 @@ private:
      * @return true
      * @return false
      */
-    inline const bool hasSufficientSurfaceSupport(const Item *aItemBeingPlaced, const double aCoveredSurfaceArea) const
+    inline const bool hasSufficientSurfaceSupport(const std::shared_ptr<Item> &aItemBeingPlaced, const double aCoveredSurfaceArea) const
     {
         return aCoveredSurfaceArea >= activeGravityStrength(aItemBeingPlaced);
     };
@@ -63,7 +63,7 @@ public:
      * @return true
      * @return false
      */
-    inline const bool gravityEnabled(const Item *aItem) const
+    inline const bool gravityEnabled(const std::shared_ptr<Item> &aItem) const
     {
         return highLevelGravityEnabled_ || aItem->gravityStrength_ > 0;
     }
@@ -90,9 +90,9 @@ public:
      * @return true
      * @return false
      */
-    const bool obeysGravity(const Item *aItemBeingPlaced,
+    const bool obeysGravity(const std::shared_ptr<Item> &aItemBeingPlaced,
                             const std::vector<int> aItemsInBin,
-                            const ItemRegister *aMyItems) const
+                            const std::shared_ptr<ItemRegister> aMyItems) const
     {
         bool gravityFit = false;
         double supportedSurfaceAreaPercentage = 0.0;
@@ -104,7 +104,7 @@ public:
 
         for (auto const &itemInSpaceKey : aItemsInBin)
         {
-            const Item *itemInSpace = &aMyItems->ItemRegister::getConstItem(itemInSpaceKey);
+            const std::shared_ptr<Item> &itemInSpace = aMyItems->ItemRegister::getConstItem(itemInSpaceKey);
             if (aItemBeingPlaced->Item::position_[constants::axis::HEIGHT] != itemInSpace->Item::furthestPointHeight_)
             {
                 continue;

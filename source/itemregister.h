@@ -5,8 +5,8 @@ struct ItemRegister
 {
 private:
     std::string sortMethod_;
-    std::vector<Item> completeItemVector_;
-    std::unordered_map<int, Item> completeItemMap_;
+    std::vector<std::shared_ptr<Item>> completeItemVector_;
+    std::unordered_map<int, std::shared_ptr<Item>> completeItemMap_;
 
     /**
      * @brief Set the main sort method for the packer.
@@ -35,7 +35,7 @@ private:
      * Create separete vector for each distinct itemConsKey, the items within each vector are sorted according to the sortMethod argument.
      * Returns a vector of vectors, each inner vector contains itemKeys.
      */
-    const std::vector<std::vector<int>> getSortedItemConsKeyVectors(std::vector<Item> &aItemVector) const
+    const std::vector<std::vector<int>> getSortedItemConsKeyVectors(std::vector<std::shared_ptr<Item>> &aItemVector) const
     {
         if (ItemRegister::sortMethod_ == constants::itemRegister::parameter::WEIGHT)
         {
@@ -46,18 +46,18 @@ private:
             std::sort(aItemVector.begin(), aItemVector.end(), consKeyAndVolumeSorter());
         }
 
-        std::vector<std::vector<int>> FinalSortedItemConsKeyVectors = {std::vector<int>{aItemVector[0].Item::transientSysId_}};
+        std::vector<std::vector<int>> FinalSortedItemConsKeyVectors = {std::vector<int>{aItemVector[0]->Item::transientSysId_}};
 
         for (int idx = 1; idx < aItemVector.size(); idx++)
         {
-            if (aItemVector[idx].itemConsolidationKey_ ==
-                ItemRegister::getConstItem(FinalSortedItemConsKeyVectors.back().back()).Item::itemConsolidationKey_)
+            if (aItemVector[idx]->itemConsolidationKey_ ==
+                ItemRegister::getConstItem(FinalSortedItemConsKeyVectors.back().back())->Item::itemConsolidationKey_)
             {
-                FinalSortedItemConsKeyVectors.back().push_back(aItemVector[idx].Item::transientSysId_);
+                FinalSortedItemConsKeyVectors.back().push_back(aItemVector[idx]->Item::transientSysId_);
             }
             else
             {
-                FinalSortedItemConsKeyVectors.push_back(std::vector<int>{aItemVector[idx].Item::transientSysId_});
+                FinalSortedItemConsKeyVectors.push_back(std::vector<int>{aItemVector[idx]->Item::transientSysId_});
             };
         };
 
@@ -76,10 +76,11 @@ public:
      *
      * @param item
      */
-    inline void addItem(const Item &item)
+    inline void addItem(std::shared_ptr<Item> item)
     {
         ItemRegister::completeItemVector_.push_back(item);
-        ItemRegister::completeItemMap_.insert({item.Item::transientSysId_, item});
+        // ItemRegister::completeItemMap_.insert({item->Item::transientSysId_, item});
+        ItemRegister::completeItemMap_.insert(std::make_pair(item->Item::transientSysId_, std::move(item)));
     };
 
     /**
@@ -88,7 +89,7 @@ public:
      * @param key
      * @return Item&
      */
-    inline Item &getItem(const int key)
+    inline std::shared_ptr<Item> &getItem(const int key)
     {
         return ItemRegister::completeItemMap_.at(key);
     }
@@ -99,7 +100,7 @@ public:
      * @param key
      * @return Item&
      */
-    const inline Item &getConstItem(const int key) const
+    const inline std::shared_ptr<Item> &getConstItem(const int key) const
     {
         return ItemRegister::completeItemMap_.at(key);
     }

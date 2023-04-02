@@ -19,14 +19,14 @@ namespace Geometry
     }
 
     template <class T>
-    inline const bool intersectingZ(const T *cuboidOne, const T *cuboidTwo)
+    inline const bool intersectingZ(const T cuboidOne, const T cuboidTwo)
     {
         return cuboidOne->furthestPointHeight_ > cuboidTwo->position_[constants::axis::HEIGHT] &&
                cuboidOne->position_[constants::axis::HEIGHT] < cuboidTwo->furthestPointHeight_;
     }
 
     template <class T>
-    inline const bool intersectingXY(const T *cuboidOne, const T *cuboidTwo)
+    inline const bool intersectingXY(const T cuboidOne, const T cuboidTwo)
     {
         return intersectingX(cuboidOne, cuboidTwo) && intersectingY(cuboidOne, cuboidTwo);
     }

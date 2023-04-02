@@ -32,7 +32,7 @@ private:
 
         for (auto itemKey : aItemsToBePacked)
         {
-            const Item *itemToCheck = &aItemRegister.ItemRegister::getConstItem(itemKey);
+            const std::shared_ptr<Item> &itemToCheck = aItemRegister.ItemRegister::getConstItem(itemKey);
 
             totalItemVolume += itemToCheck->volume_;
             totalItemWeight += itemToCheck->weight_;

@@ -12,7 +12,7 @@ Compile to a shared object file.
 #define COMPILE_TO_SHARED_OBJECT_FILE false
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
-#define LOCAL_FOLDER "/home/dennis/po/algos/packToBin"
+#define LOCAL_FOLDER "/home/dennis/packingOptimizerCompany/code/algorithms/packToBin"
 #define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
@@ -75,36 +75,33 @@ int main()
         const Json::Value incomingJsonBin = inboundRoot[constants::json::inbound::bin::BIN];
         const Json::Value incomingJsonItems = inboundRoot[constants::json::inbound::item::ITEMS];
 
-        ItemRegister itemRegister(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString(),
-                                  incomingJsonItems.size());
+        std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString(),
+                                                                                    incomingJsonItems.size());
+        std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
+        std::shared_ptr<RequestedBin> requestedBin = std::make_shared<RequestedBin>(incomingJsonBin[constants::json::inbound::bin::TYPE].asString(),
+                                                                                    incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble(),
+                                                                                    incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble(),
+                                                                                    incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble(),
+                                                                                    incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble(),
+                                                                                    incomingJsonBin[constants::json::inbound::bin::PACKING_DIRECTION].asString());
 
-        Gravity masterGravity(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
-
-        RequestedBin requestedBin(incomingJsonBin[constants::json::inbound::bin::TYPE].asString(),
-                                  incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble(),
-                                  incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble(),
-                                  incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble(),
-                                  incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble(),
-                                  incomingJsonBin[constants::json::inbound::bin::PACKING_DIRECTION].asString());
-
-        PackingContext context(masterGravity, itemRegister, requestedBin);
+        std::shared_ptr<PackingContext> context = std::make_shared<PackingContext>(masterGravity, itemRegister, requestedBin);
 
         Packer packingProcessor(context);
 
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
         {
-            Item i(idx,
-                   incomingJsonItems[idx][constants::json::item::ID].asString(),
-                   incomingJsonItems[idx][constants::json::item::WIDTH].asDouble(),
-                   incomingJsonItems[idx][constants::json::item::DEPTH].asDouble(),
-                   incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble(),
-                   incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
-                   incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
-                   incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
-                   incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble());
-
-            packingProcessor.getModifiableContext()->addItemToRegister(i);
+            packingProcessor.getModifiableContext()->addItemToRegister(
+                std::make_shared<Item>(idx,
+                                       incomingJsonItems[idx][constants::json::item::ID].asString(),
+                                       incomingJsonItems[idx][constants::json::item::WIDTH].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::DEPTH].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
+                                       incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
+                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble()));
         };
 
         /* Split items by consolidation key and start packing. */

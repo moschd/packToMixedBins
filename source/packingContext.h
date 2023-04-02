@@ -14,16 +14,16 @@
 class PackingContext
 {
 private:
-    Gravity *gravity_;
-    ItemRegister *itemRegister_;
-    RequestedBin *requestedBin_;
+    std::shared_ptr<Gravity> gravity_;
+    std::shared_ptr<ItemRegister> itemRegister_;
+    std::shared_ptr<RequestedBin> requestedBin_;
 
 public:
-    PackingContext(Gravity &aGravity,
-                   ItemRegister &aItemRegister,
-                   RequestedBin &aRequestedBin) : gravity_(&aGravity),
-                                                  itemRegister_(&aItemRegister),
-                                                  requestedBin_(&aRequestedBin){};
+    PackingContext(std::shared_ptr<Gravity> aGravity,
+                   std::shared_ptr<ItemRegister> aItemRegister,
+                   std::shared_ptr<RequestedBin> aRequestedBin) : gravity_(aGravity),
+                                                                  itemRegister_(aItemRegister),
+                                                                  requestedBin_(aRequestedBin){};
 
     /**
      * @brief Set the estimated avg bin utilization.
@@ -40,7 +40,7 @@ public:
      *
      * @return const RequestedBin*
      */
-    const RequestedBin *getRequestedBin() const
+    const std::shared_ptr<RequestedBin> getRequestedBin() const
     {
         return PackingContext::requestedBin_;
     };
@@ -50,7 +50,7 @@ public:
      *
      * @return const Gravity*
      */
-    const Gravity *getGravity() const
+    const std::shared_ptr<Gravity> getGravity() const
     {
         return PackingContext::gravity_;
     };
@@ -60,7 +60,7 @@ public:
      *
      * @return const ItemRegister*
      */
-    const ItemRegister *getItemRegister() const
+    const std::shared_ptr<ItemRegister> getItemRegister() const
     {
         return PackingContext::itemRegister_;
     };
@@ -70,7 +70,7 @@ public:
      *
      * @param item
      */
-    void addItemToRegister(const Item &item)
+    void addItemToRegister(std::shared_ptr<Item> item)
     {
         PackingContext::itemRegister_->addItem(item);
     }
@@ -81,7 +81,7 @@ public:
      * @param key
      * @return Item&
      */
-    inline Item &getModifiableItem(const int key)
+    inline std::shared_ptr<Item> getModifiableItem(const int key)
     {
         return PackingContext::itemRegister_->getItem(key);
     }
@@ -92,7 +92,7 @@ public:
      * @param key
      * @return Item&
      */
-    const inline Item &getItem(const int key) const
+    const inline std::shared_ptr<Item> getItem(const int key) const
     {
         return PackingContext::itemRegister_->getConstItem(key);
     }
@@ -115,7 +115,7 @@ public:
      * @return true
      * @return false
      */
-    const bool itemObeysGravity(const Item *aItemBeingPlaced, const std::vector<int> aItemsInBin) const
+    const bool itemObeysGravity(const std::shared_ptr<Item> &aItemBeingPlaced, const std::vector<int> aItemsInBin) const
     {
         if (!PackingContext::gravity_->gravityEnabled(aItemBeingPlaced))
         {

@@ -1,3 +1,9 @@
+
+/*
+Get rid of doubles. algorithm only works with integers.
+*/
+#define MULTIPLIER 100000
+
 /*
 Default parameters.
 */

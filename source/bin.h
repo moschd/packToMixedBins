@@ -303,11 +303,13 @@ public:
             /* Rotate item according to current rotation type. */
             itemBeingPlaced->Item::rotate(itemBeingPlaced->Item::allowedRotations_[stringCharCounter] - '0');
 
+            std::cout << itemBeingPlaced->id_ << "\n";
             /* Check if item is not exceeding the bin dimensions, if so try a different rotation. */
             if (Bin::width_ < itemBeingPlaced->Item::furthestPointWidth_ ||
                 Bin::depth_ < itemBeingPlaced->Item::furthestPointDepth_ ||
                 Bin::height_ < itemBeingPlaced->Item::furthestPointHeight_)
             {
+                std::cout << "Being blocked here. rt:" << itemBeingPlaced->rotationType_ << "\n";
                 continue;
             };
 
@@ -338,6 +340,11 @@ public:
                 {
                     BinCalculationCache::addIntersection(itemBeingPlaced, intersectCandidate);
                     intersectionFound = true;
+                    std::cout << "Being blocked here. intersection:" << itemBeingPlaced->rotationType_ << "\n";
+                    std::cout << "Being blocked here. intersection with:" << intersectCandidate->id_ << "\n";
+                    std::cout << itemBeingPlaced->id_ << " " << itemBeingPlaced->allowedRotations_ << " " << itemBeingPlaced->position_[0] << " " << itemBeingPlaced->position_[1] << " " << itemBeingPlaced->position_[2] << " " << itemBeingPlaced->width_ << " " << itemBeingPlaced->depth_ << " " << itemBeingPlaced->height_ << " " << itemBeingPlaced->furthestPointWidth_ << " " << itemBeingPlaced->furthestPointDepth_ << " " << itemBeingPlaced->furthestPointHeight_ << "\n";
+                    std::cout << intersectCandidate->id_ << " " << intersectCandidate->allowedRotations_ << " " << intersectCandidate->position_[0] << " " << intersectCandidate->position_[1] << " " << intersectCandidate->position_[2] << " " << intersectCandidate->width_ << " " << intersectCandidate->depth_ << " " << intersectCandidate->height_ << " " << intersectCandidate->furthestPointWidth_ << " " << intersectCandidate->furthestPointDepth_ << " " << intersectCandidate->furthestPointHeight_ << "\n";
+
                     break;
                 };
             };

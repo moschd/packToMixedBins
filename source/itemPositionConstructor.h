@@ -23,8 +23,9 @@ private:
     std::vector<int> items_;
     std::map<int, std::vector<int>> distinctItems_;
     std::shared_ptr<PackingContext> context_;
-    std::shared_ptr<Bin2D> winning2DBin_;
+    std::shared_ptr<Bin2D> precalculatedBin_;
     double heightAddition_;
+    bool hasPrecalculatedBinAvailable_;
 
     /**
      * @brief Create a vector of arrays.
@@ -34,6 +35,8 @@ private:
      */
     void filterDistinctItems()
     {
+
+        std::cout << "making distinct items from: " << ItemPositionConstructor::items_.size() << " items.\n";
         for (const int &itemKey : ItemPositionConstructor::items_)
         {
 
@@ -65,7 +68,7 @@ private:
     void process()
     {
 
-        ItemPositionConstructor::hasResult_ = false;
+        ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
 
         int winningSurfaceArea = 0;
 
@@ -91,69 +94,71 @@ private:
 
             std::shared_ptr<ItemRegister2D> itemRegister2D = std::make_shared<ItemRegister2D>(baseItem);
 
-            /// @brief Construct the packing context and initialize the packer which will manage the packing process.
             std::shared_ptr<Bin2D> new2DBin = std::make_shared<Bin2D>(std::make_shared<PackingContext2D>(itemRegister2D, requestedBin2D));
 
             new2DBin->startPacking();
+
             if (new2DBin->getItemsPerLayer() <= (int)distinctItemInfo->second.size() && new2DBin->getItemsPerLayer() > 0)
             {
                 std::cout << "Nr of items required for base layer " << new2DBin->getItemsPerLayer() << " covered area " << int(new2DBin->getCoveredSurfaceArea() * MULTIPLIER) << "\n";
-                if (winningSurfaceArea < int(new2DBin->getCoveredSurfaceArea() * MULTIPLIER))
+                if (winningSurfaceArea < (new2DBin->getCoveredSurfaceArea() * MULTIPLIER))
                 {
-                    winningSurfaceArea = int(new2DBin->getCoveredSurfaceArea() * MULTIPLIER);
-                    ItemPositionConstructor::winning2DBin_ = new2DBin;
-                    ItemPositionConstructor::hasResult_ = true;
-                }
+                    winningSurfaceArea = (new2DBin->getCoveredSurfaceArea() * MULTIPLIER);
+
+                    ItemPositionConstructor::hasPrecalculatedBinAvailable_ = true;
+                    ItemPositionConstructor::precalculatedBin_ = new2DBin;
+                };
             }
         }
     }
 
 public:
-    bool hasResult_;
-
     ItemPositionConstructor(std::shared_ptr<PackingContext> aContext,
                             const std::vector<int> aItems) : context_(aContext),
                                                              items_(aItems),
-                                                             hasResult_(false),
-                                                             heightAddition_(0)
+                                                             hasPrecalculatedBinAvailable_(false),
+                                                             heightAddition_(0.0)
     {
         ItemPositionConstructor::reconfigure(aItems);
     };
 
-    /**
-     * @brief Get the items as calculated by the 2d packer.
-     *
-     * @return const std::vector<Item2D>
-     */
-    const std::vector<Item2D> getPrecalculatedItems() const
-    {
-        return ItemPositionConstructor::winning2DBin_->getFittedItems();
-    }
+    /// @brief True if there are precalculated items available for packing.
+    /// @return const bool
+    const bool hasPrecalculatedBinAvailable() const { return hasPrecalculatedBinAvailable_; };
 
-    const int getItemKeyForWhichALayerWasCalculated() const
-    {
-        return std::stoi(ItemPositionConstructor::getPrecalculatedItems().front().id_);
-    }
+    /// @brief Get the bin which has been precalculated.
+    /// @return const std::shared_ptr<Bin2D>
+    const std::shared_ptr<Bin2D> getPrecalculatedBin() const { return precalculatedBin_; };
 
-    const bool hasResult()
-    {
-        return ItemPositionConstructor::hasResult_;
-    };
-
+    /// @brief Get the incremental height additions for subsequent bins.
+    /// @return double
     const double getHeightAddition() const { return ItemPositionConstructor::heightAddition_; };
 
+    /// @brief Add to the additional height.
+    /// @param aAddition
     void addToHeightAddition(double aAddition) { ItemPositionConstructor::heightAddition_ += aAddition; };
 
-    /**
-     * @brief Get the items which are the same as this single distinct item.
-     *
-     * @param aKey
-     * @return const std::vector<int>
-     */
-    const std::vector<int> getItemsFromDistinctItem() const
+    /// @brief Returns the distinct item key for this packing.
+    /// @return const int
+    const int getDistinctItemKey() const { return std::atoi(precalculatedBin_->getFittedItems()[0].id_.c_str()); };
+
+    /// @brief Returns the vector of item keys relevant to this distinct item key.
+    /// @param aKey
+    /// @return const std::vector<int>
+    const std::vector<int> getRelevantItems() const { return distinctItems_.at(ItemPositionConstructor::getDistinctItemKey()); };
+
+    /// @brief Get a number of items in the base layer.
+    /// @return const int
+    const int getNumberOfBaseItems() { return (int)precalculatedBin_->getBaseLayer()->getFittedItems().size(); };
+
+    /// @brief Get a precalculated item by index.
+    /// @param aIndex
+    /// @return const Item2D
+    const Item2D getBaseItemByIndex(const int aIndex)
     {
-        return ItemPositionConstructor::distinctItems_.at(ItemPositionConstructor::getItemKeyForWhichALayerWasCalculated());
-    }
+        const int aItemKey = precalculatedBin_->getBaseLayer()->getFittedItems()[aIndex];
+        return precalculatedBin_->getContext()->getItemRegister()->getConstItem(aItemKey);
+    };
 
     void reconfigure(std::vector<int> aItems)
     {

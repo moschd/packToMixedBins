@@ -29,7 +29,7 @@ public:
 	Rect insert(HeuristicAlgorithmType method);
 
 	/// Computes the ratio of used surface area to the total bin area.
-	double Occupancy() const;
+	int Occupancy() const;
 
 private:
 	int binWidth;
@@ -245,13 +245,13 @@ Rect MaxRectsBinPack::ScoreRect(int width, int height, HeuristicAlgorithmType me
 }
 
 /// Computes the ratio of used surface area.
-double MaxRectsBinPack::Occupancy() const
+int MaxRectsBinPack::Occupancy() const
 {
 	uint64_t usedSurfaceArea = 0;
 	for (size_t i = 0; i < usedRectangles.size(); ++i)
 		usedSurfaceArea += usedRectangles[i].width * usedRectangles[i].height;
 
-	return (double)usedSurfaceArea / ((uint64_t)binWidth * binHeight);
+	return (int)usedSurfaceArea / ((uint64_t)binWidth * binHeight);
 }
 
 Rect MaxRectsBinPack::FindPositionForNewNodeBestShortSideFit(int aWidth, int aHeight, int &bestShortSideFit, int &bestLongSideFit) const

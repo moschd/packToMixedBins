@@ -1,7 +1,6 @@
 #ifndef ITEM_POSITION_CONSTRUCTOR_H
 #define ITEM_POSITION_CONSTRUCTOR_H
 
-#define MULTIPLIER 10000
 #define BASE_ITEM_KEY 0
 
 #include "2dConstructor/heuristicAlgorithms.h"
@@ -24,7 +23,7 @@ private:
     std::map<int, std::vector<int>> distinctItems_;
     std::shared_ptr<PackingContext> context_;
     std::shared_ptr<Bin2D> precalculatedBin_;
-    double heightAddition_;
+    int heightAddition_;
     bool hasPrecalculatedBinAvailable_;
 
     /**
@@ -69,7 +68,6 @@ private:
     {
 
         ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
-
         int winningSurfaceArea = 0;
 
         std::shared_ptr<RequestedBin2D> requestedBin2D = std::make_shared<RequestedBin2D>(ItemPositionConstructor::context_->getRequestedBin()->getType(),
@@ -77,9 +75,9 @@ private:
                                                                                           ItemPositionConstructor::context_->getRequestedBin()->getDepth(),
                                                                                           ItemPositionConstructor::context_->getRequestedBin()->getHeight(),
                                                                                           ItemPositionConstructor::context_->getRequestedBin()->getMaxWeight(),
-                                                                                          0.0,
-                                                                                          0.0,
-                                                                                          0.0);
+                                                                                          0,
+                                                                                          0,
+                                                                                          0);
 
         for (std::map<int, std::vector<int>>::iterator distinctItemInfo = distinctItems_.begin(); distinctItemInfo != distinctItems_.end(); ++distinctItemInfo)
         {
@@ -98,15 +96,16 @@ private:
 
             new2DBin->startPacking();
 
+            std::cout << "Nr of items required for base layer " << new2DBin->getItemsPerLayer() << " " << distinctItemInfo->second.size() << " " << new2DBin->getCoveredSurfaceArea() << "\n";
             if (new2DBin->getItemsPerLayer() <= (int)distinctItemInfo->second.size() && new2DBin->getItemsPerLayer() > 0)
             {
-                std::cout << "Nr of items required for base layer " << new2DBin->getItemsPerLayer() << " covered area " << int(new2DBin->getCoveredSurfaceArea() * MULTIPLIER) << "\n";
-                if (winningSurfaceArea < (new2DBin->getCoveredSurfaceArea() * MULTIPLIER))
+                if (winningSurfaceArea < new2DBin->getCoveredSurfaceArea())
                 {
-                    winningSurfaceArea = (new2DBin->getCoveredSurfaceArea() * MULTIPLIER);
+                    winningSurfaceArea = new2DBin->getCoveredSurfaceArea();
 
                     ItemPositionConstructor::hasPrecalculatedBinAvailable_ = true;
                     ItemPositionConstructor::precalculatedBin_ = new2DBin;
+                    std::cout << "Found a bin.\n";
                 };
             }
         }
@@ -117,7 +116,7 @@ public:
                             const std::vector<int> aItems) : context_(aContext),
                                                              items_(aItems),
                                                              hasPrecalculatedBinAvailable_(false),
-                                                             heightAddition_(0.0)
+                                                             heightAddition_(0)
     {
         ItemPositionConstructor::reconfigure(aItems);
     };
@@ -131,12 +130,12 @@ public:
     const std::shared_ptr<Bin2D> getPrecalculatedBin() const { return precalculatedBin_; };
 
     /// @brief Get the incremental height additions for subsequent bins.
-    /// @return double
-    const double getHeightAddition() const { return ItemPositionConstructor::heightAddition_; };
+    /// @return int
+    const int getHeightAddition() const { return ItemPositionConstructor::heightAddition_; };
 
     /// @brief Add to the additional height.
     /// @param aAddition
-    void addToHeightAddition(double aAddition) { ItemPositionConstructor::heightAddition_ += aAddition; };
+    void addToHeightAddition(int aAddition) { ItemPositionConstructor::heightAddition_ += aAddition; };
 
     /// @brief Returns the distinct item key for this packing.
     /// @return const int

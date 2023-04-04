@@ -32,7 +32,7 @@ namespace Geometry
     }
 
     template <class T>
-    inline const double nearestBoundary(const T objectOne, const T objectTwo)
+    inline const int nearestBoundary(const T objectOne, const T objectTwo)
     {
         return std::min(std::min(objectOne->position_[constants::axis::WIDTH] - objectTwo->position_[constants::axis::WIDTH],
                                  objectOne->position_[constants::axis::DEPTH] - objectTwo->position_[constants::axis::DEPTH]),

@@ -11,9 +11,9 @@ class RequestedBin
 {
 private:
     std::string type_;
-    double maxWidth_;
-    double maxDepth_;
-    double maxHeight_;
+    int maxWidth_;
+    int maxDepth_;
+    int maxHeight_;
     double maxVolume_;
     double maxWeight_;
     double estAvgVolumeUtil_;
@@ -25,21 +25,21 @@ private:
      *
      * @param aItemsToBePacked
      */
-    void setEstAvgUtilPerBin(const std::vector<int> aItemsToBePacked, ItemRegister &aItemRegister)
+    void setEstAvgUtilPerBin(const std::vector<int> aItemsToBePacked, std::shared_ptr<ItemRegister> aItemRegister)
     {
-        double totalItemVolume;
-        double totalItemWeight;
+        double totalItemVolume = 0.0;
+        double totalItemWeight = 0.0;
 
         for (auto itemKey : aItemsToBePacked)
         {
-            const std::shared_ptr<Item> &itemToCheck = aItemRegister.ItemRegister::getConstItem(itemKey);
+            const std::shared_ptr<Item> itemToCheck = aItemRegister->getConstItem(itemKey);
 
             totalItemVolume += itemToCheck->volume_;
             totalItemWeight += itemToCheck->weight_;
         };
 
-        const unsigned int estNrOfBins = std::max(std::ceil(totalItemVolume / RequestedBin::maxVolume_),
-                                                  std::ceil(totalItemWeight / RequestedBin::maxWeight_));
+        const int estNrOfBins = std::max(std::ceil(totalItemVolume / RequestedBin::maxVolume_),
+                                         std::ceil(totalItemWeight / RequestedBin::maxWeight_));
 
         RequestedBin::estAvgVolumeUtil_ = totalItemVolume / (estNrOfBins * RequestedBin::maxVolume_) * 100;
         RequestedBin::estAvgWeightUtil_ = totalItemWeight / (estNrOfBins * RequestedBin::maxWeight_) * 100;
@@ -67,9 +67,9 @@ private:
 
 public:
     RequestedBin(std::string aBinType,
-                 double aBinWidth,
-                 double aBinDepth,
-                 double aBinHeight,
+                 int aBinWidth,
+                 int aBinDepth,
+                 int aBinHeight,
                  double aBinMaxWeight,
                  std::string aPackingDirection) : type_(aBinType),
                                                   maxWidth_(aBinWidth),
@@ -77,7 +77,7 @@ public:
                                                   maxHeight_(aBinHeight),
                                                   maxWeight_(aBinMaxWeight)
     {
-        RequestedBin::maxVolume_ = (RequestedBin::maxWidth_ * RequestedBin::maxDepth_ * RequestedBin::maxHeight_);
+        RequestedBin::maxVolume_ = ((double)RequestedBin::maxWidth_ / MULTIPLIER) * ((double)RequestedBin::maxDepth_ / MULTIPLIER) * ((double)RequestedBin::maxHeight_ / MULTIPLIER);
         RequestedBin::setPackingDirection(aPackingDirection);
     };
 
@@ -94,9 +94,9 @@ public:
     /**
      * @brief Get the requested width.
      *
-     * @return const double
+     * @return const int
      */
-    const double getWidth() const
+    const int getWidth() const
     {
         return RequestedBin::maxWidth_;
     };
@@ -104,9 +104,9 @@ public:
     /**
      * @brief Get the requested depth.
      *
-     * @return const double
+     * @return const int
      */
-    const double getDepth() const
+    const int getDepth() const
     {
         return RequestedBin::maxDepth_;
     };
@@ -114,9 +114,9 @@ public:
     /**
      * @brief Get the requested height.
      *
-     * @return const double
+     * @return const int
      */
-    const double getHeight() const
+    const int getHeight() const
     {
         return RequestedBin::maxHeight_;
     };
@@ -126,10 +126,7 @@ public:
      *
      * @return const double
      */
-    const double getMaxWeight() const
-    {
-        return RequestedBin::maxWeight_;
-    };
+    const double getMaxWeight() const { return RequestedBin::maxWeight_; };
 
     /**
      * @brief Get the requested maxVolume.
@@ -147,7 +144,7 @@ public:
      * @param aItemsToBePacked
      * @param aItemRegister
      */
-    void setEstimatedAverages(const std::vector<int> aItemsToBePacked, ItemRegister &aItemRegister)
+    void setEstimatedAverages(const std::vector<int> aItemsToBePacked, std::shared_ptr<ItemRegister> aItemRegister)
     {
         RequestedBin::setEstAvgUtilPerBin(aItemsToBePacked, aItemRegister);
     };

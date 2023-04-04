@@ -6,14 +6,14 @@ class PackingLayer
 private:
     int id_;
     std::shared_ptr<PackingContext2D> context_;
-    std::array<double, 3> position_;
+    std::array<int, 3> position_;
     std::vector<int> fittedItems_;
 
     /// @brief Spawn an item on a certain position inside this layer.
     /// @param aXLocation
     /// @param aYLocation
     /// @param aIsRotated
-    void spawnItem(const double aXLocation, const double aYLocation, const bool aIsRotated)
+    void spawnItem(const int aXLocation, const int aYLocation, const bool aIsRotated)
     {
         const int newItemId = PackingLayer::context_->getItemRegister()->getNewItemId();
         Item2D newItem(
@@ -39,7 +39,7 @@ public:
 
     PackingLayer(int aId,
                  std::shared_ptr<PackingContext2D> aContext,
-                 std::array<double, 3> aPosition) : id_(aId),
+                 std::array<int, 3> aPosition) : id_(aId),
                                                     context_(aContext),
                                                     position_(aPosition),
                                                     fittedItems_()
@@ -55,8 +55,8 @@ public:
     /// @param aXLocation
     /// @param aYLocation
     /// @param aIsRotated
-    void addItem(const double aXLocation,
-                 const double aYLocation,
+    void addItem(const int aXLocation,
+                 const int aYLocation,
                  const bool aIsRotated) { PackingLayer::spawnItem(aXLocation, aYLocation, aIsRotated); }
 };
 

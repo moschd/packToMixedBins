@@ -6,15 +6,15 @@ class Item2D : public GeometricShape2D
 public:
     int transientSysId_;
     std::string id_;
-    double weight_;
+    int weight_;
     int layer_;
 
     Item2D(int aSystemId,
          std::string aItemId,
-         double aWidth,
-         double aDepth,
-         double aHeight,
-         double aWeight,
+         int aWidth,
+         int aDepth,
+         int aHeight,
+         int aWeight,
          int aLayerId) : transientSysId_(aSystemId),
                          id_(aItemId.size() ? aItemId : "NA"),
                          weight_(aWeight),

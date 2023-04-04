@@ -67,8 +67,8 @@ private:
     const bool wouldExceedPhysicalLimit(const int aItemToPackKey) const
     {
         const std::shared_ptr<Item> aItemToPack = PackingCluster::context_->getItem(aItemToPackKey);
-        return (PackingCluster::getLastCreatedBin()->getActVolumeUtil() + aItemToPack->Item::volume_) > context_->getRequestedBin()->getMaxVolume() ||
-               (PackingCluster::getLastCreatedBin()->getActWeightUtil() + aItemToPack->Item::weight_) > context_->getRequestedBin()->getMaxWeight();
+        return (PackingCluster::getLastCreatedBin()->getRealActualVolumeUtil() + aItemToPack->Item::volume_) > context_->getRequestedBin()->getMaxVolume() ||
+               (PackingCluster::getLastCreatedBin()->getRealActualWeightUtil() + aItemToPack->Item::weight_) > context_->getRequestedBin()->getMaxWeight();
     }
 
     /**
@@ -169,7 +169,7 @@ private:
 
         while (positionConstructor->hasPrecalculatedBinAvailable())
         {
-            double heightToIcrement = 0.0;
+            int heightToIcrement = 0;
             const std::vector<int> relevantItems = positionConstructor->getRelevantItems();
 
             for (int i = 0; i < (int)positionConstructor->getNumberOfBaseItems(); i++)
@@ -183,7 +183,9 @@ private:
                 myItem->position_[constants::axis::HEIGHT] = positionConstructor->getHeightAddition();
 
                 myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem.rotationType_));
-                std::cout << myItem->id_ << " " << myItem->allowedRotations_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
+
+                // std::cout << myItem->id_ << " " << myItem->allowedRotations_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
+
                 bool fits = PackingCluster::fitPrecalculatedItem(myItem->transientSysId_);
                 myItem->allowedRotations_.erase(0, 1);
 

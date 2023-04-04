@@ -32,7 +32,7 @@ public:
      */
     void setRequestedBinEstimatedAverages(const std::vector<int> aItemsToBePacked)
     {
-        PackingContext::requestedBin_->setEstimatedAverages(aItemsToBePacked, *itemRegister_);
+        PackingContext::requestedBin_->setEstimatedAverages(aItemsToBePacked, itemRegister_);
     };
 
     /**

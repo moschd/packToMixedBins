@@ -1,8 +1,8 @@
 
 /*
-Get rid of doubles. algorithm only works with integers.
+Get rid of ints. algorithm only works with integers.
 */
-#define MULTIPLIER 100000
+#define MULTIPLIER 10000
 
 /*
 Default parameters.
@@ -85,11 +85,11 @@ int main()
 
         std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString(),
                                                                                     incomingJsonItems.size());
-        std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
+        std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble() * MULTIPLIER);
         std::shared_ptr<RequestedBin> requestedBin = std::make_shared<RequestedBin>(incomingJsonBin[constants::json::inbound::bin::TYPE].asString(),
-                                                                                    incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble(),
-                                                                                    incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble(),
-                                                                                    incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble(),
+                                                                                    incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble() * MULTIPLIER,
+                                                                                    incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble() * MULTIPLIER,
+                                                                                    incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble() * MULTIPLIER,
                                                                                     incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble(),
                                                                                     incomingJsonBin[constants::json::inbound::bin::PACKING_DIRECTION].asString());
 
@@ -103,13 +103,13 @@ int main()
             packingProcessor.getModifiableContext()->addItemToRegister(
                 std::make_shared<Item>(idx,
                                        incomingJsonItems[idx][constants::json::item::ID].asString(),
-                                       incomingJsonItems[idx][constants::json::item::WIDTH].asDouble(),
-                                       incomingJsonItems[idx][constants::json::item::DEPTH].asDouble(),
-                                       incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::WIDTH].asDouble() * MULTIPLIER,
+                                       incomingJsonItems[idx][constants::json::item::DEPTH].asDouble() * MULTIPLIER,
+                                       incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble() * MULTIPLIER,
                                        incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
                                        incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
                                        incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
-                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble()));
+                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble() * MULTIPLIER));
         };
 
         /* Split items by consolidation key and start packing. */
@@ -120,6 +120,7 @@ int main()
 
         // /* Initialize outgoing json builder */
         ResponseBuilder outgoingJsonBuilder(responsePrecision, includeBins, includeItems, itemDimensionsAfter);
+
         outgoingJsonBuilder.generate(packingProcessor);
 
         std::string resultJson(Json::writeString(outgoingJsonBuilder.getBuilder(), outgoingJsonBuilder.getMessage()));

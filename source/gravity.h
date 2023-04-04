@@ -13,7 +13,7 @@
 class Gravity
 {
 private:
-    double gravityStrength_;
+    int gravityStrength_;
 
     /**
      * @brief Get gravityStrength applicable for this item.
@@ -21,9 +21,9 @@ private:
      * Item gravityStrength has precedence over global gravityStrength.
      *
      * @param aItemBeingPlaced
-     * @return const double
+     * @return const int
      */
-    inline const double activeGravityStrength(const std::shared_ptr<Item> &aItemBeingPlaced) const
+    inline const int activeGravityStrength(const std::shared_ptr<Item> &aItemBeingPlaced) const
     {
         if (aItemBeingPlaced->Item::gravityStrength_ > 0)
         {
@@ -43,7 +43,7 @@ private:
      * @return true
      * @return false
      */
-    inline const bool hasSufficientSurfaceSupport(const std::shared_ptr<Item> &aItemBeingPlaced, const double aCoveredSurfaceArea) const
+    inline const bool hasSufficientSurfaceSupport(const std::shared_ptr<Item> &aItemBeingPlaced, const int aCoveredSurfaceArea) const
     {
         return aCoveredSurfaceArea >= activeGravityStrength(aItemBeingPlaced);
     };
@@ -51,9 +51,9 @@ private:
 public:
     bool highLevelGravityEnabled_;
 
-    Gravity(double aGravityStrengthPercentage) : gravityStrength_(aGravityStrengthPercentage - 0.1)
+    Gravity(int aGravityStrengthPercentage) : gravityStrength_(aGravityStrengthPercentage)
     {
-        Gravity::highLevelGravityEnabled_ = (gravityStrength_ > 0.0 ? true : false);
+        Gravity::highLevelGravityEnabled_ = (gravityStrength_ > 0 ? true : false);
     };
 
     /**
@@ -95,7 +95,7 @@ public:
                             const std::shared_ptr<ItemRegister> aMyItems) const
     {
         bool gravityFit = false;
-        double supportedSurfaceAreaPercentage = 0.0;
+        int supportedSurfaceAreaPercentage = 0;
 
         if (aItemBeingPlaced->Item::position_[constants::axis::HEIGHT] == constants::START_POSITION[constants::axis::HEIGHT])
         {
@@ -118,11 +118,11 @@ public:
             if (Geometry::intersectingXY(aItemBeingPlaced, itemInSpace))
             {
                 supportedSurfaceAreaPercentage +=
-                    (std::max(0.0,
+                    (std::max(0,
                               (std::min(itemInSpace->Item::furthestPointWidth_, aItemBeingPlaced->Item::furthestPointWidth_) -
                                std::max(itemInSpace->Item::position_[constants::axis::WIDTH],
                                         aItemBeingPlaced->Item::position_[constants::axis::WIDTH]))) *
-                     std::max(0.0,
+                     std::max(0,
                               (std::min(itemInSpace->Item::furthestPointDepth_, aItemBeingPlaced->Item::furthestPointDepth_) -
                                std::max(itemInSpace->Item::position_[constants::axis::DEPTH],
                                         aItemBeingPlaced->Item::position_[constants::axis::DEPTH])))) /

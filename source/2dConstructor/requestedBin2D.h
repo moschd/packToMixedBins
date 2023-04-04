@@ -11,24 +11,24 @@ class RequestedBin2D
 {
 private:
     std::string type_;
-    double maxWidth_;
-    double maxDepth_;
-    double maxHeight_;
-    double maxWeight_;
-    double maxVolume_;
-    double packingMarginWidth_;
-    double packingMarginDepth_;
-    double packingMarginHeight_;
+    int maxWidth_;
+    int maxDepth_;
+    int maxHeight_;
+    int maxWeight_;
+    int maxVolume_;
+    int packingMarginWidth_;
+    int packingMarginDepth_;
+    int packingMarginHeight_;
 
 public:
     RequestedBin2D(std::string aBinType,
-                     double aBinWidth,
-                     double aBinDepth,
-                     double aBinHeight,
-                     double aBinMaxWeight,
-                     double aPackingMarginWidth,
-                     double aPackingMarginDepth,
-                     double aPackingMarginHeight) : type_(aBinType),
+                     int aBinWidth,
+                     int aBinDepth,
+                     int aBinHeight,
+                     int aBinMaxWeight,
+                     int aPackingMarginWidth,
+                     int aPackingMarginDepth,
+                     int aPackingMarginHeight) : type_(aBinType),
                                                     maxWidth_(aBinWidth),
                                                     maxDepth_(aBinDepth),
                                                     maxHeight_(aBinHeight),
@@ -48,48 +48,48 @@ public:
     const std::string getType() const { return RequestedBin2D::type_; };
 
     /// @brief Get the width of the requested bin.
-    /// @return const double
-    const double getWidth() const { return RequestedBin2D::maxWidth_; };
+    /// @return const int
+    const int getWidth() const { return RequestedBin2D::maxWidth_; };
 
     /// @brief Get the depth of the requested bin.
-    /// @return const double
-    const double getDepth() const { return RequestedBin2D::maxDepth_; };
+    /// @return const int
+    const int getDepth() const { return RequestedBin2D::maxDepth_; };
 
     /// @brief Get the height of the requested bin.
-    /// @return const double
-    const double getHeight() const { return RequestedBin2D::maxHeight_; };
+    /// @return const int
+    const int getHeight() const { return RequestedBin2D::maxHeight_; };
 
     /// @brief Get the maximum weight of the requested bin.
-    /// @return const double
-    const double getMaxWeight() const { return RequestedBin2D::maxWeight_; };
+    /// @return const int
+    const int getMaxWeight() const { return RequestedBin2D::maxWeight_; };
 
     /// @brief Get the maximum volume of the requested bin.
-    /// @return const double
-    const double getMaxVolume() const { return RequestedBin2D::maxVolume_; }
+    /// @return const int
+    const int getMaxVolume() const { return RequestedBin2D::maxVolume_; }
 
     /// @brief Get the maximum distance on the x axis, this takes any allowed margin into account.
-    /// @return const double
-    const double getMaxAllowedPackingWidth() const { return RequestedBin2D::maxWidth_ + RequestedBin2D::packingMarginWidth_; }
+    /// @return const int
+    const int getMaxAllowedPackingWidth() const { return RequestedBin2D::maxWidth_ + RequestedBin2D::packingMarginWidth_; }
 
     /// @brief Get the maximum distance on the y axis, this takes any allowed margin into account.
-    /// @return const double
-    const double getMaxAllowedPackingDepth() const { return RequestedBin2D::maxDepth_ + RequestedBin2D::packingMarginDepth_; }
+    /// @return const int
+    const int getMaxAllowedPackingDepth() const { return RequestedBin2D::maxDepth_ + RequestedBin2D::packingMarginDepth_; }
 
     /// @brief Get the maximum distance on the z axis, this takes any allowed margin into account.
-    /// @return const double
-    const double getMaxAllowedPackingHeight() const { return RequestedBin2D::maxHeight_ + RequestedBin2D::packingMarginHeight_; }
+    /// @return const int
+    const int getMaxAllowedPackingHeight() const { return RequestedBin2D::maxHeight_ + RequestedBin2D::packingMarginHeight_; }
 
     /// @brief Get allowed packing margin for x axis.
-    /// @return const double
-    const double getPackingMarginWidth() const { return RequestedBin2D::packingMarginWidth_; }
+    /// @return const int
+    const int getPackingMarginWidth() const { return RequestedBin2D::packingMarginWidth_; }
 
     /// @brief Get allowed packing margin for y axis.
-    /// @return const double
-    const double getPackingMarginDepth() const { return RequestedBin2D::packingMarginDepth_; }
+    /// @return const int
+    const int getPackingMarginDepth() const { return RequestedBin2D::packingMarginDepth_; }
 
     /// @brief Get allowed packing margin for z axis.
-    /// @return const double
-    const double getPackingMarginHeight() const { return RequestedBin2D::packingMarginHeight_; }
+    /// @return const int
+    const int getPackingMarginHeight() const { return RequestedBin2D::packingMarginHeight_; }
 };
 
 #endif

@@ -15,25 +15,25 @@ class GeometricShape
 private:
 public:
     std::string shape_;
-    double width_;
-    double depth_;
-    double height_;
-    double original_width_;
-    double original_height_;
-    double original_depth_;
-    double smallestDimension_;
-    double furthestPointWidth_;
-    double furthestPointDepth_;
-    double furthestPointHeight_;
-    std::array<double, 3> position_;
+    int width_;
+    int depth_;
+    int height_;
+    int original_width_;
+    int original_height_;
+    int original_depth_;
+    int smallestDimension_;
+    int furthestPointWidth_;
+    int furthestPointDepth_;
+    int furthestPointHeight_;
+    std::array<int, 3> position_;
     double volume_;
     int rotationType_;
     std::string allowedRotations_;
     std::string rotationTypeDescription_;
 
-    GeometricShape(double aWidth = 0.0,
-                   double aDepth = 0.0,
-                   double aHeight = 0.0,
+    GeometricShape(int aWidth = 0,
+                   int aDepth = 0,
+                   int aHeight = 0,
                    std::string aAllowedRotations = "") : width_(aWidth),
                                                          depth_(aDepth),
                                                          height_(aHeight),
@@ -49,10 +49,29 @@ public:
                                                          rotationTypeDescription_("")
     {
         GeometricShape::shape_ = constants::shape::CUBOID;
-        GeometricShape::volume_ = width_ * depth_ * height_;
         GeometricShape::smallestDimension_ = std::min(std::min(GeometricShape::width_, GeometricShape::depth_), GeometricShape::height_);
         GeometricShape::allowedRotations_ = GeometricShape::allowedRotations_.size() == 0 ? "012345" : GeometricShape::allowedRotations_;
+
+        GeometricShape::volume_ = ((double)width_ / MULTIPLIER) * ((double)depth_ / MULTIPLIER) * ((double)height_ / MULTIPLIER);
     };
+
+    const double getRealVolume() const { return volume_; };
+
+    const double getRealWidth() const { return (double)width_ / MULTIPLIER; };
+    const double getRealDepth() const { return (double)depth_ / MULTIPLIER; };
+    const double getRealHeight() const { return (double)height_ / MULTIPLIER; };
+
+    const double getRealOriginalWidth() const { return (double)original_width_ / MULTIPLIER; };
+    const double getRealOriginalDepth() const { return (double)original_depth_ / MULTIPLIER; };
+    const double getRealOriginalHeight() const { return (double)original_height_ / MULTIPLIER; };
+
+    const double getRealFurthestPointWidth() const { return (double)furthestPointWidth_ / MULTIPLIER; };
+    const double getRealFurthestPointDepth() const { return (double)furthestPointDepth_ / MULTIPLIER; };
+    const double getRealFurthestPointHeight() const { return (double)furthestPointHeight_ / MULTIPLIER; };
+
+    const double getRealXPosition() const { return (double)position_[constants::axis::WIDTH] / MULTIPLIER; };
+    const double getRealYPosition() const { return (double)position_[constants::axis::DEPTH] / MULTIPLIER; };
+    const double getRealZPosition() const { return (double)position_[constants::axis::HEIGHT] / MULTIPLIER; };
 
     /**
      * @brief Set dimensions and rotation description based on current rotation type.

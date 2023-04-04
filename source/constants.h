@@ -3,7 +3,7 @@
 
 namespace constants
 {
-    constexpr std::array<double, 3> START_POSITION = {0, 0, 0};
+    constexpr std::array<int, 3> START_POSITION = {0, 0, 0};
 
     namespace shape
     {

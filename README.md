@@ -7,3 +7,6 @@ libjsoncpp.so.1
 
 
 ## document packingDirection
+
+
+input supports 4 decimals

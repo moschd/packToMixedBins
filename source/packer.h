@@ -62,12 +62,12 @@ public:
      */
     const double getTotalVolumeUtilPercentage() const
     {
-        double runningUtilSum = 0.0;
+        double runningUtilSum = 0;
         for (auto &cluster : clusters_)
         {
             for (auto &bin : cluster->getPackedBins())
             {
-                runningUtilSum += bin->getActVolumeUtilPercentage();
+                runningUtilSum += bin->getRealActualVolumeUtilPercentage();
             };
         };
         return runningUtilSum / Packer::getNumberOfBins();
@@ -76,7 +76,7 @@ public:
     /**
      * @brief Get the total weight utilization across bins.
      *
-     * @return const double
+     * @return const int
      */
     const double getTotalWeightUtilPercentage() const
     {
@@ -85,7 +85,7 @@ public:
         {
             for (auto &bin : cluster->getPackedBins())
             {
-                runningUtilSum += bin->getActWeightUtilPercentage();
+                runningUtilSum += bin->getRealActualWeightUtilPercentage();
             };
         };
         return runningUtilSum / Packer::getNumberOfBins();

@@ -9,7 +9,7 @@ private:
     std::vector<int> xFreeItems_;
     std::vector<int> yFreeItems_;
     std::vector<int> zFreeItems_;
-    std::array<double, 3> placedItemsMaxDimensions_;
+    std::array<int, 3> placedItemsMaxDimensions_;
     double actualVolumeUtil_;
     double actualWeightUtil_;
     std::shared_ptr<PackingContext> context_;
@@ -150,7 +150,7 @@ public:
 
         /* Create kd-tree and reserve vector memory in advance based on estimates. */
 
-        std::array<double, 3> maxDimensions = {width_, depth_, height_};
+        std::array<int, 3> maxDimensions = {width_, depth_, height_};
         Bin::kdTree_ = std::make_unique<KdTree>(aEstimatedNumberOfItemFits, maxDimensions);
 
         Bin::items_.reserve(aEstimatedNumberOfItemFits);
@@ -180,25 +180,11 @@ public:
         Bin::unfittedItems_.push_back(itemKey);
     };
 
-    const double getActVolumeUtilPercentage() const
-    {
-        return Bin::actualVolumeUtil_ / GeometricShape::volume_ * 100;
-    };
-
-    const double getActWeightUtilPercentage() const
-    {
-        return Bin::actualWeightUtil_ / Bin::maxWeight_ * 100;
-    };
-
-    const double getActWeightUtil() const
-    {
-        return Bin::actualWeightUtil_;
-    };
-
-    const double getActVolumeUtil() const
-    {
-        return Bin::actualVolumeUtil_;
-    };
+    const double getRealActualVolumeUtilPercentage() const { return Bin::getRealActualVolumeUtil() / GeometricShape::volume_ * 100; };
+    const double getRealActualWeightUtilPercentage() const { return Bin::getRealActualWeightUtil() / Bin::maxWeight_ * 100; };
+    const double getRealActualVolumeUtil() const { return actualVolumeUtil_; };
+    const double getRealActualWeightUtil() const { return actualWeightUtil_; };
+    const double getRealMaxWeight() const { return maxWeight_; };
 
     /**
      * @brief Helper function to be able to update the bin without exposing the complete function.
@@ -303,13 +289,11 @@ public:
             /* Rotate item according to current rotation type. */
             itemBeingPlaced->Item::rotate(itemBeingPlaced->Item::allowedRotations_[stringCharCounter] - '0');
 
-            std::cout << itemBeingPlaced->id_ << "\n";
             /* Check if item is not exceeding the bin dimensions, if so try a different rotation. */
             if (Bin::width_ < itemBeingPlaced->Item::furthestPointWidth_ ||
                 Bin::depth_ < itemBeingPlaced->Item::furthestPointDepth_ ||
                 Bin::height_ < itemBeingPlaced->Item::furthestPointHeight_)
             {
-                std::cout << "Being blocked here. rt:" << itemBeingPlaced->rotationType_ << "\n";
                 continue;
             };
 
@@ -340,10 +324,10 @@ public:
                 {
                     BinCalculationCache::addIntersection(itemBeingPlaced, intersectCandidate);
                     intersectionFound = true;
-                    std::cout << "Being blocked here. intersection:" << itemBeingPlaced->rotationType_ << "\n";
-                    std::cout << "Being blocked here. intersection with:" << intersectCandidate->id_ << "\n";
-                    std::cout << itemBeingPlaced->id_ << " " << itemBeingPlaced->allowedRotations_ << " " << itemBeingPlaced->position_[0] << " " << itemBeingPlaced->position_[1] << " " << itemBeingPlaced->position_[2] << " " << itemBeingPlaced->width_ << " " << itemBeingPlaced->depth_ << " " << itemBeingPlaced->height_ << " " << itemBeingPlaced->furthestPointWidth_ << " " << itemBeingPlaced->furthestPointDepth_ << " " << itemBeingPlaced->furthestPointHeight_ << "\n";
-                    std::cout << intersectCandidate->id_ << " " << intersectCandidate->allowedRotations_ << " " << intersectCandidate->position_[0] << " " << intersectCandidate->position_[1] << " " << intersectCandidate->position_[2] << " " << intersectCandidate->width_ << " " << intersectCandidate->depth_ << " " << intersectCandidate->height_ << " " << intersectCandidate->furthestPointWidth_ << " " << intersectCandidate->furthestPointDepth_ << " " << intersectCandidate->furthestPointHeight_ << "\n";
+                    // std::cout << "Being blocked here. intersection:" << itemBeingPlaced->rotationType_ << "\n";
+                    // std::cout << "Being blocked here. intersection with:" << intersectCandidate->id_ << "\n";
+                    // std::cout << itemBeingPlaced->id_ << " " << itemBeingPlaced->allowedRotations_ << " " << itemBeingPlaced->position_[0] << " " << itemBeingPlaced->position_[1] << " " << itemBeingPlaced->position_[2] << " " << itemBeingPlaced->width_ << " " << itemBeingPlaced->depth_ << " " << itemBeingPlaced->height_ << " " << itemBeingPlaced->furthestPointWidth_ << " " << itemBeingPlaced->furthestPointDepth_ << " " << itemBeingPlaced->furthestPointHeight_ << "\n";
+                    // std::cout << intersectCandidate->id_ << " " << intersectCandidate->allowedRotations_ << " " << intersectCandidate->position_[0] << " " << intersectCandidate->position_[1] << " " << intersectCandidate->position_[2] << " " << intersectCandidate->width_ << " " << intersectCandidate->depth_ << " " << intersectCandidate->height_ << " " << intersectCandidate->furthestPointWidth_ << " " << intersectCandidate->furthestPointDepth_ << " " << intersectCandidate->furthestPointHeight_ << "\n";
 
                     break;
                 };

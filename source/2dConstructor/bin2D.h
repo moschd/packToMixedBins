@@ -6,8 +6,8 @@ class Bin2D : public GeometricShape2D
 private:
     std::shared_ptr<PackingContext2D> context_;
     std::vector<std::shared_ptr<PackingLayer>> layers_;
-    double actualVolumeUtil_;
-    double actualWeightUtil_;
+    int actualVolumeUtil_;
+    int actualWeightUtil_;
     int maxItemsWeightConstraint_;
 
     /**
@@ -20,12 +20,11 @@ private:
     {
         std::shared_ptr<PackingLayer> winningLayer = std::make_shared<PackingLayer>();
 
-        /* Work with multiplier to get rid of doubles. Converting to integer makes arithmetic comparison more reliable. */
         const bool allowRotation = true;
-        const int binWidth = Bin2D::context_->getRequestedBin()->getMaxAllowedPackingWidth() * MULTIPLIER;
-        const int binHeight = Bin2D::context_->getRequestedBin()->getMaxAllowedPackingDepth() * MULTIPLIER;
-        const int rectWidth = Bin2D::context_->getBaseItem().width_ * MULTIPLIER;
-        const int rectHeight = Bin2D::context_->getBaseItem().depth_ * MULTIPLIER;
+        const int binWidth = Bin2D::context_->getRequestedBin()->getMaxAllowedPackingWidth();
+        const int binHeight = Bin2D::context_->getRequestedBin()->getMaxAllowedPackingDepth();
+        const int rectWidth = Bin2D::context_->getBaseItem().width_;
+        const int rectHeight = Bin2D::context_->getBaseItem().depth_;
 
         std::unique_ptr<AlgorithmHandler> algorithmHandler = std::make_unique<AlgorithmHandler>(binWidth, binHeight, rectWidth, rectHeight, allowRotation);
 
@@ -56,8 +55,8 @@ private:
                 if (weightFit && packedRect.height > 0)
                 {
                     numberOfItemsInBase += 1;
-                    const double xLocation = (double)packedRect.x / MULTIPLIER;
-                    const double yLocation = (double)packedRect.y / MULTIPLIER;
+                    const int xLocation = (int)packedRect.x;
+                    const int yLocation = (int)packedRect.y;
                     const bool isRotated = (packedRect.width != rectWidth);
                     baseLayer->addItem(xLocation, yLocation, isRotated);
                 }
@@ -113,8 +112,8 @@ private:
 public:
     Bin2D(std::shared_ptr<PackingContext2D> aContext) : context_(aContext),
                                                         layers_({}),
-                                                        actualVolumeUtil_(0.0),
-                                                        actualWeightUtil_(0.0),
+                                                        actualVolumeUtil_(0),
+                                                        actualWeightUtil_(0),
                                                         GeometricShape2D(aContext->getRequestedBin()->getWidth(),
                                                                          aContext->getRequestedBin()->getDepth(),
                                                                          aContext->getRequestedBin()->getHeight())
@@ -134,20 +133,20 @@ public:
     const std::vector<std::shared_ptr<PackingLayer>> getLayers() const { return Bin2D::layers_; };
 
     /// @brief Get the actual volume utilization of this bin expressed in percentage points.
-    /// @return const double
-    const double getActVolumeUtilPercentage() const { return Bin2D::actualVolumeUtil_ / Bin2D::context_->getRequestedBin()->getMaxVolume() * 100; };
+    /// @return const int
+    const int getActVolumeUtilPercentage() const { return Bin2D::actualVolumeUtil_ / Bin2D::context_->getRequestedBin()->getMaxVolume() * 100; };
 
     /// @brief Get the actual weight utilization of this bin expressed in percentage points.
-    /// @return const double
-    const double getActWeightUtilPercentage() const { return Bin2D::actualWeightUtil_ / Bin2D::context_->getRequestedBin()->getMaxWeight() * 100; };
+    /// @return const int
+    const int getActWeightUtilPercentage() const { return Bin2D::actualWeightUtil_ / Bin2D::context_->getRequestedBin()->getMaxWeight() * 100; };
 
     /// @brief Get the actual weight utilization expressed in the weight units.
-    /// @return const double
-    const double getActWeightUtil() const { return Bin2D::actualWeightUtil_; };
+    /// @return const int
+    const int getActWeightUtil() const { return Bin2D::actualWeightUtil_; };
 
     /// @brief Get the actual volume utilization expressed in the volume units.
-    /// @return const double
-    const double getActVolumeUtil() const { return Bin2D::actualVolumeUtil_; };
+    /// @return const int
+    const int getActVolumeUtil() const { return Bin2D::actualVolumeUtil_; };
 
     /// @brief Generate a new id for a packing layer.
     /// @return const int
@@ -162,8 +161,8 @@ public:
     const int getItemsPerLayer() const { return Bin2D::layers_.empty() ? 0 : int(Bin2D::getBaseLayer()->getFittedItems().size()); }
 
     /// @brief Get the 2d covered surface area for layer.
-    /// @return const double
-    const double getCoveredSurfaceArea() const { return Bin2D::getItemsPerLayer() * (Bin2D::context_->getBaseItem().width_ * Bin2D::context_->getBaseItem().depth_); };
+    /// @return const int
+    const int getCoveredSurfaceArea() const { return Bin2D::getItemsPerLayer() * (Bin2D::context_->getBaseItem().width_ * Bin2D::context_->getBaseItem().depth_); };
 
     /// @brief Aggregate items from layers and return them as a single vector.
     /// @return const std::vector<int>&

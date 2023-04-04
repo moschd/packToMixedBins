@@ -8,13 +8,13 @@ struct Node
     Node *right_;
     unsigned int myDepth_;
     std::vector<int> myChildren_;
-    std::array<double, 3> partitionPoint_;
-    std::array<double, 3> minSearchDimensions_;
-    std::array<double, 3> maxSearchDimensions_;
+    std::array<int, 3> partitionPoint_;
+    std::array<int, 3> minSearchDimensions_;
+    std::array<int, 3> maxSearchDimensions_;
 
-    Node(const std::array<double, 3> aPartitionPoint,
-         const std::array<double, 3> aMins,
-         const std::array<double, 3> aMaxs,
+    Node(const std::array<int, 3> aPartitionPoint,
+         const std::array<int, 3> aMins,
+         const std::array<int, 3> aMaxs,
          const int aCurrentDepth) : isLeaf_(false),
                                     left_(NULL),
                                     right_(NULL),
@@ -38,9 +38,9 @@ struct Node
  * @param aMaxs             - 3R point marking the maximum border of the search area point for which this node will be responsable.
  * @param aCurrentDepth     - the tree depth on which this node is created.
  */
-inline Node *genNodex(const std::array<double, 3> aPartitionPoint,
-                      const std::array<double, 3> aMins,
-                      const std::array<double, 3> aMaxs,
+inline Node *genNodex(const std::array<int, 3> aPartitionPoint,
+                      const std::array<int, 3> aMins,
+                      const std::array<int, 3> aMaxs,
                       const int aCurrentDepth)
 {
     return new Node(aPartitionPoint, aMins, aMaxs, aCurrentDepth);
@@ -51,8 +51,8 @@ class KdTree
 private:
     int maxDepth_;
     Node *treeRoot_;
-    std::array<double, 3> minDimensions_;
-    std::array<double, 3> maxDimensions_;
+    std::array<int, 3> minDimensions_;
+    std::array<int, 3> maxDimensions_;
 
     /**
      * @brief Calculates the depth of the tree that will be generated.
@@ -83,15 +83,15 @@ private:
      */
     void generateTree(Node *aRoot,
                       const unsigned int aDepth,
-                      const std::array<double, 3> aPartitionPoint,
-                      const std::array<double, 3> aMins,
-                      const std::array<double, 3> aMaxs,
+                      const std::array<int, 3> aPartitionPoint,
+                      const std::array<int, 3> aMins,
+                      const std::array<int, 3> aMaxs,
                       const unsigned int aRequestedDepth)
     {
         const int unsigned axis = aDepth % constants::R;
         const int unsigned previousAxis = (aDepth == 0 ? aDepth : (aDepth - 1) % constants::R);
 
-        std::array<double, 3> newPartitionPoint = aPartitionPoint;
+        std::array<int, 3> newPartitionPoint = aPartitionPoint;
         newPartitionPoint[previousAxis] = (aMins[previousAxis] + aMaxs[previousAxis]) / 2;
 
         if (aDepth > aRequestedDepth)
@@ -104,11 +104,11 @@ private:
         aRoot->Node::left_ = genNodex(newPartitionPoint, aMins, aMaxs, aDepth);
         aRoot->Node::right_ = genNodex(newPartitionPoint, aMins, aMaxs, aDepth);
 
-        std::array<double, 3> leftMaxs = aMaxs;
+        std::array<int, 3> leftMaxs = aMaxs;
         leftMaxs[axis] = newPartitionPoint[axis];
         generateTree(aRoot->Node::left_, aDepth + 1, newPartitionPoint, aMins, leftMaxs, aRequestedDepth);
 
-        std::array<double, 3> rightMins = aMins;
+        std::array<int, 3> rightMins = aMins;
         rightMins[axis] = newPartitionPoint[axis];
         generateTree(aRoot->Node::right_, aDepth + 1, newPartitionPoint, rightMins, aMaxs, aRequestedDepth);
     }
@@ -124,7 +124,7 @@ private:
      * @param aDepth            - The current depth of the tree.
      * @param aItemMaxPosition  - The furthest point in space that the item reaches, ie top right corner.
      */
-    void addItemKeyToLeaf(Node *aRoot, const unsigned int aItemKey, const unsigned int aDepth, const std::array<double, 3> aItemMaxPosition)
+    void addItemKeyToLeaf(Node *aRoot, const unsigned int aItemKey, const unsigned int aDepth, const std::array<int, 3> aItemMaxPosition)
     {
         if (aRoot->Node::isLeaf_)
         {
@@ -204,7 +204,7 @@ private:
 
 public:
     KdTree(unsigned int aEstimatedNumberOfItemFits,
-           std::array<double, 3> aMaxDimensions) : minDimensions_(constants::START_POSITION),
+           std::array<int, 3> aMaxDimensions) : minDimensions_(constants::START_POSITION),
                                                    maxDimensions_(aMaxDimensions),
                                                    maxDepth_(8)
 
@@ -254,7 +254,7 @@ public:
      * @param aItemKey          - The itemKey which will be added to the tree.
      * @param aItemMaxPosition  - The top right corner of the item, this is the position which will be used to search for the correct place to add the item.
      */
-    void addItemKeyToLeafHelper(const int aItemKey, const std::array<double, 3> aItemMaxPosition)
+    void addItemKeyToLeafHelper(const int aItemKey, const std::array<int, 3> aItemMaxPosition)
     {
         KdTree::addItemKeyToLeaf(KdTree::treeRoot_,
                                  aItemKey,
@@ -275,8 +275,8 @@ public:
      */
     void getIntersectCandidates(const Node *aRoot,
                                 const unsigned int aDepth,
-                                const std::array<double, 3> &aStartPoint,
-                                const std::array<double, 3> aMaxSearchPoint,
+                                const std::array<int, 3> &aStartPoint,
+                                const std::array<int, 3> aMaxSearchPoint,
                                 std::vector<int> &aPassedNodes) const
     {
         if (aRoot->Node::isLeaf_)

@@ -11,15 +11,15 @@ class BinCalculationCache
 private:
     struct itemPositionHash
     {
-        size_t operator()(const std::array<double, 3> &itemPosition) const
+        size_t operator()(const std::array<int, 3> &itemPosition) const
         {
-            size_t h1 = std::hash<double>()(itemPosition[constants::axis::WIDTH]);
-            size_t h2 = std::hash<double>()(itemPosition[constants::axis::DEPTH]);
-            size_t h3 = std::hash<double>()(itemPosition[constants::axis::HEIGHT]);
+            size_t h1 = std::hash<int>()(itemPosition[constants::axis::WIDTH]);
+            size_t h2 = std::hash<int>()(itemPosition[constants::axis::DEPTH]);
+            size_t h3 = std::hash<int>()(itemPosition[constants::axis::HEIGHT]);
             return (h1 ^ (h2 << 1)) ^ (h3 << 2);
         }
     };
-    __gnu_pbds::gp_hash_table<std::array<double, 3>, double, itemPositionHash> intersectionLimits_;
+    __gnu_pbds::gp_hash_table<std::array<int, 3>, int, itemPositionHash> intersectionLimits_;
 
 public:
     BinCalculationCache(){};
@@ -34,7 +34,7 @@ public:
      */
     inline void addIntersection(const std::shared_ptr<Item> aItemBeingPlaced, const std::shared_ptr<Item> aItemAlreadyPlaced)
     {
-        const double smallestDistance = Geometry::nearestBoundary(aItemBeingPlaced, aItemAlreadyPlaced);
+        const int smallestDistance = Geometry::nearestBoundary(aItemBeingPlaced, aItemAlreadyPlaced);
         const auto &resultIterator = BinCalculationCache::intersectionLimits_.find(aItemBeingPlaced->position_);
 
         if (resultIterator == intersectionLimits_.end())

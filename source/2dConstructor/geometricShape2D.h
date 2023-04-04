@@ -14,23 +14,23 @@ class GeometricShape2D
 
 private:
 public:
-    double width_;
-    double depth_;
-    double height_;
-    double volume_;
-    double original_width_;
-    double original_depth_;
-    double original_height_;
-    std::array<double, 3> position_;
+    int width_;
+    int depth_;
+    int height_;
+    int volume_;
+    int original_width_;
+    int original_depth_;
+    int original_height_;
+    std::array<int, 3> position_;
     int rotationType_;
     std::string rotationTypeDescription_;
-    double furthestPointWidth_;
-    double furthestPointDepth_;
-    double furthestPointHeight_;
+    int furthestPointWidth_;
+    int furthestPointDepth_;
+    int furthestPointHeight_;
 
-    GeometricShape2D(double aWidth = 0.0,
-                   double aDepth = 0.0,
-                   double aHeight = 0.0) : width_(aWidth),
+    GeometricShape2D(int aWidth = 0,
+                   int aDepth = 0,
+                   int aHeight = 0) : width_(aWidth),
                                            depth_(aDepth),
                                            height_(aHeight),
                                            volume_(aWidth * aDepth * aHeight),
@@ -40,9 +40,9 @@ public:
                                            position_(constants::START_POSITION),
                                            rotationType_(constants::rotation::type::WDH),
                                            rotationTypeDescription_(""),
-                                           furthestPointWidth_(0.0),
-                                           furthestPointDepth_(0.0),
-                                           furthestPointHeight_(0.0){};
+                                           furthestPointWidth_(0),
+                                           furthestPointDepth_(0),
+                                           furthestPointHeight_(0){};
 
     /**
      * @brief Set dimensions and rotation description based on current rotation type.

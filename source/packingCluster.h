@@ -167,13 +167,19 @@ private:
         /* Start packing evaluation process. */
         std::unique_ptr<ItemPositionConstructor> positionConstructor = std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
 
-        while (positionConstructor->hasPrecalculatedBinAvailable())
+        bool continueLayingLayers = true;
+        while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
         {
             int heightToIcrement = 0;
             const std::vector<int> relevantItems = positionConstructor->getRelevantItems();
 
             for (int i = 0; i < (int)positionConstructor->getNumberOfBaseItems(); i++)
             {
+
+                if (i >= (int)relevantItems.size())
+                {
+                    break;
+                };
 
                 std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
                 Item2D precalculatedItem = positionConstructor->getBaseItemByIndex(i);
@@ -197,6 +203,7 @@ private:
                 }
                 else
                 {
+                    continueLayingLayers = false;
                     std::cout << "Resetting item.\n";
                     std::cout << myItem->id_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
                     myItem->reset();

@@ -25,4 +25,3 @@ dont include exception handling.
 
 -fno-rtti  
 Disable generation of information about every class with virtual functions for use by the C++ runtime type identification features.
-

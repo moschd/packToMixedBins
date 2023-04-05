@@ -45,7 +45,6 @@ private:
             }
             else
             {
-
                 bool isDistinct = true;
                 for (std::map<int, std::vector<int>>::iterator mapIterator = distinctItems_.begin(); mapIterator != distinctItems_.end(); ++mapIterator)
                 {
@@ -66,9 +65,9 @@ private:
 
     void process()
     {
-
-        ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
         int winningSurfaceArea = 0;
+        const double minimumSurfaceArea = 80.0;
+        ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
 
         std::shared_ptr<RequestedBin2D> requestedBin2D = std::make_shared<RequestedBin2D>(ItemPositionConstructor::context_->getRequestedBin()->getType(),
                                                                                           ItemPositionConstructor::context_->getRequestedBin()->getWidth(),
@@ -97,17 +96,29 @@ private:
             new2DBin->startPacking();
 
             std::cout << "Nr of items required for base layer " << new2DBin->getItemsPerLayer() << " " << distinctItemInfo->second.size() << " " << new2DBin->getCoveredSurfaceArea() << "\n";
-            if (new2DBin->getItemsPerLayer() <= (int)distinctItemInfo->second.size() && new2DBin->getItemsPerLayer() > 0)
-            {
-                if (winningSurfaceArea < new2DBin->getCoveredSurfaceArea())
-                {
-                    winningSurfaceArea = new2DBin->getCoveredSurfaceArea();
 
-                    ItemPositionConstructor::hasPrecalculatedBinAvailable_ = true;
-                    ItemPositionConstructor::precalculatedBin_ = new2DBin;
-                    std::cout << "Found a bin.\n";
-                };
+            // Continue if not enough items to build a layer.
+            // if (new2DBin->getItemsPerLayer() > (int)distinctItemInfo->second.size())
+            // {
+            //     continue;
+            // };
+
+            // Continue if the layer does not have good coverage.
+            if (new2DBin->getCoveredSurfaceArea() < minimumSurfaceArea)
+            {
+                continue;
             }
+
+            // Continue if the layer is not more efficient than an already found layer.
+            if (winningSurfaceArea > new2DBin->getCoveredSurfaceArea())
+            {
+                continue;
+            }
+
+            std::cout << "Found a bin.\n";
+            winningSurfaceArea = new2DBin->getCoveredSurfaceArea();
+            ItemPositionConstructor::hasPrecalculatedBinAvailable_ = true;
+            ItemPositionConstructor::precalculatedBin_ = new2DBin;
         }
     }
 

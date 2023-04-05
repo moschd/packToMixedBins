@@ -161,8 +161,12 @@ public:
     const int getItemsPerLayer() const { return Bin2D::layers_.empty() ? 0 : int(Bin2D::getBaseLayer()->getFittedItems().size()); }
 
     /// @brief Get the 2d covered surface area for layer.
-    /// @return const int
-    const int getCoveredSurfaceArea() const { return Bin2D::getItemsPerLayer() * (Bin2D::context_->getBaseItem().width_ * Bin2D::context_->getBaseItem().depth_); };
+    /// @return const double
+    const double getCoveredSurfaceArea() const
+    {
+        return (Bin2D::context_->getBaseItem().getRealWidth() * Bin2D::context_->getBaseItem().getRealDepth() * Bin2D::getItemsPerLayer()) /
+               Bin2D::getReal2DSurfaceArea() * 100;
+    };
 
     /// @brief Aggregate items from layers and return them as a single vector.
     /// @return const std::vector<int>&

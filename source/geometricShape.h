@@ -61,6 +61,8 @@ public:
     const double getRealDepth() const { return (double)depth_ / MULTIPLIER; };
     const double getRealHeight() const { return (double)height_ / MULTIPLIER; };
 
+    const double getRealBottomSurfaceArea() const { return getRealWidth() * getRealDepth(); };
+
     const double getRealOriginalWidth() const { return (double)original_width_ / MULTIPLIER; };
     const double getRealOriginalDepth() const { return (double)original_depth_ / MULTIPLIER; };
     const double getRealOriginalHeight() const { return (double)original_height_ / MULTIPLIER; };

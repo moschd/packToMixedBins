@@ -8,7 +8,7 @@ public:
     int transientSysId_;
     double weight_;
     std::string itemConsolidationKey_;
-    int gravityStrength_;
+    double gravityStrength_;
 
     Item(int aSystemId,
          std::string aItemId,
@@ -18,14 +18,14 @@ public:
          double aWeight,
          std::string aItemConsKey,
          std::string aAllowedRotations,
-         int aGravityStrength) : transientSysId_(aSystemId),
-                                 weight_(aWeight),
-                                 itemConsolidationKey_(aItemConsKey),
-                                 gravityStrength_(aGravityStrength),
-                                 GeometricShape(aWidth,
-                                                aDepth,
-                                                aHeight,
-                                                aAllowedRotations)
+         double aGravityStrength) : transientSysId_(aSystemId),
+                                    weight_(aWeight),
+                                    itemConsolidationKey_(aItemConsKey),
+                                    gravityStrength_(aGravityStrength),
+                                    GeometricShape(aWidth,
+                                                   aDepth,
+                                                   aHeight,
+                                                   aAllowedRotations)
     {
         id_ = aItemId.size() ? aItemId : "NA";
     };

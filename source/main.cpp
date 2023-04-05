@@ -2,7 +2,7 @@
 /*
 Get rid of ints. algorithm only works with integers.
 */
-#define MULTIPLIER 10000
+#define MULTIPLIER 1000
 
 /*
 Default parameters.
@@ -85,7 +85,7 @@ int main()
 
         std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString(),
                                                                                     incomingJsonItems.size());
-        std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble() * MULTIPLIER);
+        std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
         std::shared_ptr<RequestedBin> requestedBin = std::make_shared<RequestedBin>(incomingJsonBin[constants::json::inbound::bin::TYPE].asString(),
                                                                                     incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble() * MULTIPLIER,
                                                                                     incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble() * MULTIPLIER,
@@ -109,7 +109,7 @@ int main()
                                        incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
                                        incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
                                        incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
-                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble() * MULTIPLIER));
+                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble()));
         };
 
         /* Split items by consolidation key and start packing. */

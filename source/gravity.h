@@ -13,7 +13,7 @@
 class Gravity
 {
 private:
-    int gravityStrength_;
+    double gravityStrength_;
 
     /**
      * @brief Get gravityStrength applicable for this item.
@@ -21,11 +21,11 @@ private:
      * Item gravityStrength has precedence over global gravityStrength.
      *
      * @param aItemBeingPlaced
-     * @return const int
+     * @return const double
      */
-    inline const int activeGravityStrength(const std::shared_ptr<Item> &aItemBeingPlaced) const
+    inline const double activeGravityStrength(const std::shared_ptr<Item> &aItemBeingPlaced) const
     {
-        if (aItemBeingPlaced->Item::gravityStrength_ > 0)
+        if (aItemBeingPlaced->Item::gravityStrength_ > 0.0)
         {
             return aItemBeingPlaced->Item::gravityStrength_;
         }
@@ -43,7 +43,7 @@ private:
      * @return true
      * @return false
      */
-    inline const bool hasSufficientSurfaceSupport(const std::shared_ptr<Item> &aItemBeingPlaced, const int aCoveredSurfaceArea) const
+    inline const bool hasSufficientSurfaceSupport(const std::shared_ptr<Item> &aItemBeingPlaced, const double aCoveredSurfaceArea) const
     {
         return aCoveredSurfaceArea >= activeGravityStrength(aItemBeingPlaced);
     };
@@ -53,7 +53,7 @@ public:
 
     Gravity(int aGravityStrengthPercentage) : gravityStrength_(aGravityStrengthPercentage)
     {
-        Gravity::highLevelGravityEnabled_ = (gravityStrength_ > 0 ? true : false);
+        Gravity::highLevelGravityEnabled_ = (gravityStrength_ > 0.0);
     };
 
     /**
@@ -65,7 +65,7 @@ public:
      */
     inline const bool gravityEnabled(const std::shared_ptr<Item> &aItem) const
     {
-        return highLevelGravityEnabled_ || aItem->gravityStrength_ > 0;
+        return highLevelGravityEnabled_ || aItem->gravityStrength_ > 0.0;
     }
 
     /**
@@ -95,7 +95,7 @@ public:
                             const std::shared_ptr<ItemRegister> aMyItems) const
     {
         bool gravityFit = false;
-        int supportedSurfaceAreaPercentage = 0;
+        double supportedSurfaceAreaPercentage = 0.0;
 
         if (aItemBeingPlaced->Item::position_[constants::axis::HEIGHT] == constants::START_POSITION[constants::axis::HEIGHT])
         {
@@ -117,16 +117,22 @@ public:
 
             if (Geometry::intersectingXY(aItemBeingPlaced, itemInSpace))
             {
-                supportedSurfaceAreaPercentage +=
-                    (std::max(0,
-                              (std::min(itemInSpace->Item::furthestPointWidth_, aItemBeingPlaced->Item::furthestPointWidth_) -
-                               std::max(itemInSpace->Item::position_[constants::axis::WIDTH],
-                                        aItemBeingPlaced->Item::position_[constants::axis::WIDTH]))) *
-                     std::max(0,
-                              (std::min(itemInSpace->Item::furthestPointDepth_, aItemBeingPlaced->Item::furthestPointDepth_) -
-                               std::max(itemInSpace->Item::position_[constants::axis::DEPTH],
-                                        aItemBeingPlaced->Item::position_[constants::axis::DEPTH])))) /
-                    (aItemBeingPlaced->Item::width_ * aItemBeingPlaced->Item::depth_) * 100;
+
+                double coveredX = (double)std::max(0,
+                                                   (std::min(itemInSpace->Item::furthestPointWidth_, aItemBeingPlaced->Item::furthestPointWidth_) -
+                                                    std::max(itemInSpace->Item::position_[constants::axis::WIDTH],
+                                                             aItemBeingPlaced->Item::position_[constants::axis::WIDTH]))) /
+                                  MULTIPLIER;
+
+                double coveredY = (double)std::max(0,
+                                                   (std::min(itemInSpace->Item::furthestPointDepth_, aItemBeingPlaced->Item::furthestPointDepth_) -
+                                                    std::max(itemInSpace->Item::position_[constants::axis::DEPTH],
+                                                             aItemBeingPlaced->Item::position_[constants::axis::DEPTH]))) /
+                                  MULTIPLIER;
+
+                double maxSurface = aItemBeingPlaced->Item::getRealBottomSurfaceArea();
+
+                supportedSurfaceAreaPercentage += coveredX * coveredY / maxSurface * 100;
 
                 gravityFit = Gravity::hasSufficientSurfaceSupport(aItemBeingPlaced, supportedSurfaceAreaPercentage);
             };

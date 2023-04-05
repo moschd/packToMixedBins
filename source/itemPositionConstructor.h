@@ -35,7 +35,6 @@ private:
     void filterDistinctItems()
     {
 
-        std::cout << "making distinct items from: " << ItemPositionConstructor::items_.size() << " items.\n";
         for (const int &itemKey : ItemPositionConstructor::items_)
         {
 
@@ -80,7 +79,6 @@ private:
 
         for (std::map<int, std::vector<int>>::iterator distinctItemInfo = distinctItems_.begin(); distinctItemInfo != distinctItems_.end(); ++distinctItemInfo)
         {
-            std::cout << "Going in for distinct item: " << distinctItemInfo->first << "\n";
             Item2D baseItem(BASE_ITEM_KEY,
                             std::to_string(ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->transientSysId_),
                             ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->width_,
@@ -89,13 +87,18 @@ private:
                             ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->weight_,
                             0);
 
+            if (minimumSurfaceArea > (baseItem.getReal2DSurfaceArea() * (int)distinctItemInfo->second.size()))
+            {
+                continue;
+            };
+
             std::shared_ptr<ItemRegister2D> itemRegister2D = std::make_shared<ItemRegister2D>(baseItem);
 
             std::shared_ptr<Bin2D> new2DBin = std::make_shared<Bin2D>(std::make_shared<PackingContext2D>(itemRegister2D, requestedBin2D));
 
             new2DBin->startPacking();
 
-            std::cout << "Nr of items required for base layer " << new2DBin->getItemsPerLayer() << " " << distinctItemInfo->second.size() << " " << new2DBin->getCoveredSurfaceArea() << "\n";
+            // std::cout << "Nr of items required for base layer " << new2DBin->getItemsPerLayer() << " " << distinctItemInfo->second.size() << " " << new2DBin->getCoveredSurfaceArea() << "\n";
 
             // Continue if not enough items to build a layer.
             // if (new2DBin->getItemsPerLayer() > (int)distinctItemInfo->second.size())
@@ -115,7 +118,6 @@ private:
                 continue;
             }
 
-            std::cout << "Found a bin.\n";
             winningSurfaceArea = new2DBin->getCoveredSurfaceArea();
             ItemPositionConstructor::hasPrecalculatedBinAvailable_ = true;
             ItemPositionConstructor::precalculatedBin_ = new2DBin;

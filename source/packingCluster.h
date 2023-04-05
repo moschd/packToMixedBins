@@ -197,15 +197,13 @@ private:
 
                 if (fits)
                 {
-                    std::cout << "Item fits.\n";
                     aItemsToBePacked.erase(std::remove(aItemsToBePacked.begin(), aItemsToBePacked.end(), myItem->transientSysId_), aItemsToBePacked.end());
                     heightToIcrement = myItem->height_;
                 }
                 else
                 {
                     continueLayingLayers = false;
-                    std::cout << "Resetting item.\n";
-                    std::cout << myItem->id_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
+                    // std::cout << myItem->id_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
                     myItem->reset();
                 }
             };
@@ -214,7 +212,6 @@ private:
             positionConstructor->reconfigure(aItemsToBePacked);
         };
 
-        std::cout << "items to check size: " << aItemsToBePacked.size() << " " << PackingCluster::lastBinHasFittedItems() << "\n";
         for (auto &itemToPackKey : aItemsToBePacked)
         {
             if (!PackingCluster::lastBinHasFittedItems())

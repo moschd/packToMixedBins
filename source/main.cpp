@@ -2,7 +2,7 @@
 /*
 Get rid of ints. algorithm only works with integers.
 */
-#define MULTIPLIER 1000
+#define MULTIPLIER 10000
 
 /*
 Default parameters.

@@ -57,6 +57,7 @@ namespace constants
         {
             const std::string VOLUME = "VOLUME";
             const std::string WEIGHT = "WEIGHT";
+            const std::string OPTIMIZED = "OPTIMIZED";
         }
     }
 

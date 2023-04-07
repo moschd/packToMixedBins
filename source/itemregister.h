@@ -23,9 +23,13 @@ private:
         {
             ItemRegister::sortMethod_ = constants::itemRegister::parameter::WEIGHT;
         }
-        else
+        else if (aSortMethod == constants::itemRegister::parameter::VOLUME)
         {
             ItemRegister::sortMethod_ = constants::itemRegister::parameter::VOLUME;
+        }
+        else
+        {
+            ItemRegister::sortMethod_ = constants::itemRegister::parameter::OPTIMIZED;
         };
     }
 
@@ -71,6 +75,8 @@ public:
         ItemRegister::completeItemVector_.reserve(nrOfItems);
     }
 
+    const std::string getSortMethod() const { return ItemRegister::sortMethod_; };
+
     /**
      * @brief Add item to the register.
      *
@@ -79,7 +85,6 @@ public:
     inline void addItem(std::shared_ptr<Item> item)
     {
         ItemRegister::completeItemVector_.push_back(item);
-        // ItemRegister::completeItemMap_.insert({item->Item::transientSysId_, item});
         ItemRegister::completeItemMap_.insert(std::make_pair(item->Item::transientSysId_, std::move(item)));
     };
 

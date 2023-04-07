@@ -167,49 +167,52 @@ private:
         /* Start packing evaluation process. */
         std::unique_ptr<ItemPositionConstructor> positionConstructor = std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
 
-        bool continueLayingLayers = true;
-        while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
+        if (PackingCluster::context_->getItemSortMethod() == constants::itemRegister::parameter::OPTIMIZED)
         {
-            int heightToIcrement = 0;
-            const std::vector<int> relevantItems = positionConstructor->getRelevantItems();
-
-            for (int i = 0; i < (int)positionConstructor->getNumberOfBaseItems(); i++)
+            bool continueLayingLayers = true;
+            while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
             {
+                int heightToIcrement = 0;
+                const std::vector<int> relevantItems = positionConstructor->getRelevantItems();
 
-                if (i >= (int)relevantItems.size())
+                for (int i = 0; i < (int)positionConstructor->getNumberOfBaseItems(); i++)
                 {
-                    break;
+
+                    if (i >= (int)relevantItems.size())
+                    {
+                        break;
+                    };
+
+                    std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
+                    Item2D precalculatedItem = positionConstructor->getBaseItemByIndex(i);
+
+                    myItem->position_[constants::axis::WIDTH] = precalculatedItem.position_[constants::axis::WIDTH];
+                    myItem->position_[constants::axis::DEPTH] = precalculatedItem.position_[constants::axis::DEPTH];
+                    myItem->position_[constants::axis::HEIGHT] = positionConstructor->getHeightAddition();
+
+                    myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem.rotationType_));
+
+                    // std::cout << myItem->id_ << " " << myItem->allowedRotations_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
+
+                    bool fits = PackingCluster::fitPrecalculatedItem(myItem->transientSysId_);
+                    myItem->allowedRotations_.erase(0, 1);
+
+                    if (fits)
+                    {
+                        aItemsToBePacked.erase(std::remove(aItemsToBePacked.begin(), aItemsToBePacked.end(), myItem->transientSysId_), aItemsToBePacked.end());
+                        heightToIcrement = myItem->height_;
+                    }
+                    else
+                    {
+                        continueLayingLayers = false;
+                        // std::cout << myItem->id_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
+                        myItem->reset();
+                    }
                 };
 
-                std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
-                Item2D precalculatedItem = positionConstructor->getBaseItemByIndex(i);
-
-                myItem->position_[constants::axis::WIDTH] = precalculatedItem.position_[constants::axis::WIDTH];
-                myItem->position_[constants::axis::DEPTH] = precalculatedItem.position_[constants::axis::DEPTH];
-                myItem->position_[constants::axis::HEIGHT] = positionConstructor->getHeightAddition();
-
-                myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem.rotationType_));
-
-                // std::cout << myItem->id_ << " " << myItem->allowedRotations_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
-
-                bool fits = PackingCluster::fitPrecalculatedItem(myItem->transientSysId_);
-                myItem->allowedRotations_.erase(0, 1);
-
-                if (fits)
-                {
-                    aItemsToBePacked.erase(std::remove(aItemsToBePacked.begin(), aItemsToBePacked.end(), myItem->transientSysId_), aItemsToBePacked.end());
-                    heightToIcrement = myItem->height_;
-                }
-                else
-                {
-                    continueLayingLayers = false;
-                    // std::cout << myItem->id_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
-                    myItem->reset();
-                }
+                positionConstructor->addToHeightAddition(heightToIcrement);
+                positionConstructor->reconfigure(aItemsToBePacked);
             };
-
-            positionConstructor->addToHeightAddition(heightToIcrement);
-            positionConstructor->reconfigure(aItemsToBePacked);
         };
 
         for (auto &itemToPackKey : aItemsToBePacked)

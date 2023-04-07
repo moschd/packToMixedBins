@@ -66,6 +66,16 @@ public:
     };
 
     /**
+     * @brief Get the sort method applicable.
+     *
+     * @return const std::string
+     */
+    const std::string getItemSortMethod() const
+    {
+        return PackingContext::getItemRegister()->getSortMethod();
+    };
+
+    /**
      * @brief Add item to the item register.
      *
      * @param item

@@ -1,188 +1,432 @@
 {
 	"bin": {
 		"type": "PAL",
-		"width": 120.0,
-		"depth": 80.0,
-		"height": 180.0,
-		"maxWeight": 1200.0,
-		"gravityStrength": 1
+		"maxWeight": 3306,
+		"width": 48,
+		"height": 55,
+		"depth": 40
 	},
 	"items": [
 		{
-			"id": "CUSTOMER1-454383-0184500712",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-0101502035",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1731500045",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1706502033",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-0152502376",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1760500180",
-			"width": 55.0,
-			"depth": 52.0,
-			"height": 26.0,
-			"weight": 18.0,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1760500180",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1734500027",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1750502852",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1750502469",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1750502384",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1753502259",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1756500066",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1706502034",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1750502468",
-			"width": 55.0,
-			"depth": 35.0,
-			"height": 50.0,
-			"weight": 12.0,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1750502468",
-			"width": 55.0,
-			"depth": 35.0,
-			"height": 50.0,
-			"weight": 12.0,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1730502155",
-			"width": 55.0,
-			"depth": 52.0,
-			"height": 26.0,
-			"weight": 12.24,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-0152502322",
-			"width": 43.0,
-			"depth": 31.0,
-			"height": 45.0,
-			"weight": 6.0,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1760500086",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-0135501070",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1750502305",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
-		},
-		{
-			"id": "CUSTOMER1-454383-1760500164",
-			"width": 30,
-			"depth": 50,
-			"height": 30,
-			"weight": 10,
-			"itemConsKey": "454383"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		}
 	]
 }

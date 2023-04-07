@@ -17,7 +17,7 @@ public:
     int width_;
     int depth_;
     int height_;
-    int volume_;
+    double volume_;
     int original_width_;
     int original_depth_;
     int original_height_;
@@ -28,21 +28,22 @@ public:
     int furthestPointDepth_;
     int furthestPointHeight_;
 
-    GeometricShape2D(int aWidth = 0,
-                     int aDepth = 0,
-                     int aHeight = 0) : width_(aWidth),
-                                        depth_(aDepth),
-                                        height_(aHeight),
-                                        volume_(aWidth * aDepth * aHeight),
-                                        original_width_(aWidth),
-                                        original_depth_(aDepth),
-                                        original_height_(aHeight),
-                                        position_(constants::START_POSITION),
-                                        rotationType_(constants::rotation::type::WDH),
-                                        rotationTypeDescription_(""),
-                                        furthestPointWidth_(0),
-                                        furthestPointDepth_(0),
-                                        furthestPointHeight_(0){};
+    GeometricShape2D(int aWidth,
+                     int aDepth,
+                     int aHeight,
+                     double aVolume) : width_(aWidth),
+                                       depth_(aDepth),
+                                       height_(aHeight),
+                                       volume_(aVolume),
+                                       original_width_(aWidth),
+                                       original_depth_(aDepth),
+                                       original_height_(aHeight),
+                                       position_(constants::START_POSITION),
+                                       rotationType_(constants::rotation::type::WDH),
+                                       rotationTypeDescription_(""),
+                                       furthestPointWidth_(0),
+                                       furthestPointDepth_(0),
+                                       furthestPointHeight_(0){};
 
     const double getRealWidth() const { return (double)width_ / MULTIPLIER; };
     const double getRealDepth() const { return (double)depth_ / MULTIPLIER; };

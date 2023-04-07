@@ -159,15 +159,14 @@ public:
         Bin::zFreeItems_.reserve(aEstimatedNumberOfItemFits);
     };
 
-    const std::vector<int> &getFittedItems() const
-    {
-        return Bin::items_;
-    };
+    const double getRealActualVolumeUtilPercentage() const { return Bin::getRealActualVolumeUtil() / GeometricShape::volume_ * 100; };
+    const double getRealActualWeightUtilPercentage() const { return Bin::getRealActualWeightUtil() / Bin::maxWeight_ * 100; };
+    const double getRealActualVolumeUtil() const { return actualVolumeUtil_; };
+    const double getRealActualWeightUtil() const { return actualWeightUtil_; };
+    const double getRealMaxWeight() const { return maxWeight_; };
 
-    const std::vector<int> &getUnfittedItems() const
-    {
-        return Bin::unfittedItems_;
-    };
+    const std::vector<int> &getFittedItems() const { return Bin::items_; };
+    const std::vector<int> &getUnfittedItems() const { return Bin::unfittedItems_; };
 
     /**
      * @brief Reset the item to inital values and add to unfitted items.
@@ -179,12 +178,6 @@ public:
         Bin::context_->getModifiableItem(itemKey)->reset();
         Bin::unfittedItems_.push_back(itemKey);
     };
-
-    const double getRealActualVolumeUtilPercentage() const { return Bin::getRealActualVolumeUtil() / GeometricShape::volume_ * 100; };
-    const double getRealActualWeightUtilPercentage() const { return Bin::getRealActualWeightUtil() / Bin::maxWeight_ * 100; };
-    const double getRealActualVolumeUtil() const { return actualVolumeUtil_; };
-    const double getRealActualWeightUtil() const { return actualWeightUtil_; };
-    const double getRealMaxWeight() const { return maxWeight_; };
 
     /**
      * @brief Helper function to be able to update the bin without exposing the complete function.
@@ -211,6 +204,12 @@ public:
 
         for (const auto binAxis : Bin::context_->getPackingDirection())
         {
+
+            if (fitted)
+            {
+                break;
+            };
+
             switch (binAxis)
             {
             case constants::axis::WIDTH:
@@ -250,19 +249,12 @@ public:
                 if (Bin::placeItemInBin(itemToFitKey))
                 {
                     fitted = true;
-                }
-
-                if (fitted)
-                {
                     Bin::updateWithFittedItem(itemToFitKey, binAxis);
                     break;
                 }
             };
-            if (fitted)
-            {
-                break;
-            };
         };
+
         if (!fitted)
         {
             Bin::addUnfittedItem(itemToFitKey);
@@ -270,7 +262,7 @@ public:
     };
 
     /**
-     * @brief Tries to place an item inside a bin.
+     * @brief Tries to place an item inside a bin, on a specific location.
      *
      * @param it
      * @return true
@@ -324,11 +316,10 @@ public:
                 {
                     BinCalculationCache::addIntersection(itemBeingPlaced, intersectCandidate);
                     intersectionFound = true;
-                    // std::cout << "Being blocked here. intersection:" << itemBeingPlaced->rotationType_ << "\n";
-                    // std::cout << "Being blocked here. intersection with:" << intersectCandidate->id_ << "\n";
+                    // std::cout << "Being blocked here. intersection: " << itemBeingPlaced->id_ << " " << itemBeingPlaced->rotationType_ << "\n";
+                    // std::cout << "Being blocked here. intersection with: " << intersectCandidate->id_ << "\n";
                     // std::cout << itemBeingPlaced->id_ << " " << itemBeingPlaced->allowedRotations_ << " " << itemBeingPlaced->position_[0] << " " << itemBeingPlaced->position_[1] << " " << itemBeingPlaced->position_[2] << " " << itemBeingPlaced->width_ << " " << itemBeingPlaced->depth_ << " " << itemBeingPlaced->height_ << " " << itemBeingPlaced->furthestPointWidth_ << " " << itemBeingPlaced->furthestPointDepth_ << " " << itemBeingPlaced->furthestPointHeight_ << "\n";
                     // std::cout << intersectCandidate->id_ << " " << intersectCandidate->allowedRotations_ << " " << intersectCandidate->position_[0] << " " << intersectCandidate->position_[1] << " " << intersectCandidate->position_[2] << " " << intersectCandidate->width_ << " " << intersectCandidate->depth_ << " " << intersectCandidate->height_ << " " << intersectCandidate->furthestPointWidth_ << " " << intersectCandidate->furthestPointDepth_ << " " << intersectCandidate->furthestPointHeight_ << "\n";
-
                     break;
                 };
             };
@@ -341,17 +332,17 @@ public:
             };
 
             /*  Checks if gravity should be considered while placing this item.
-            This check is applied when an otherwise fitting item is found. */
+            This check is applied after an otherwise fitting item is found. */
             if (!Bin::context_->itemObeysGravity(itemBeingPlaced, Bin::getFittedItems()))
             {
                 continue;
             };
 
-            /* If this point is reached then the item fits in the bin. */
+            /* If this point is reached, the item fits in the bin. */
             return true;
         };
 
-        /* If this point is reached then the item didnt find a place. */
+        /* If this point is reached, the item did not fit in the bin. */
         return false;
     };
 };

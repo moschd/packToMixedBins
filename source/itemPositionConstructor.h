@@ -25,6 +25,7 @@ private:
     std::shared_ptr<Bin2D> precalculatedBin_;
     int heightAddition_;
     bool hasPrecalculatedBinAvailable_;
+    double minimumSurfaceArea_ = 75.0;
 
     /**
      * @brief Create a vector of arrays.
@@ -62,10 +63,23 @@ private:
         }
     }
 
+    /**
+     * @brief Return the percentage for which the item could cover the bin.
+     * This is purely done based on quantities. It is not checking if it can be packed.
+     *
+     * @param aItemSurface
+     * @param aQuantity
+     * @return true
+     * @return false
+     */
+    const double itemSurfaceCoverage(const double aItemSurface, const int aQuantity)
+    {
+        return (aItemSurface * aQuantity) / ItemPositionConstructor::context_->getRequestedBin()->getRealBottomSurfaceArea() * 100;
+    }
+
     void process()
     {
         int winningSurfaceArea = 0;
-        const double minimumSurfaceArea = 80.0;
         ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
 
         std::shared_ptr<RequestedBin2D> requestedBin2D = std::make_shared<RequestedBin2D>(ItemPositionConstructor::context_->getRequestedBin()->getType(),
@@ -85,42 +99,33 @@ private:
                             ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->depth_,
                             ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->height_,
                             ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->weight_,
-                            0);
+                            0,
+                            ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->getRealVolume());
 
-            if (minimumSurfaceArea > (baseItem.getReal2DSurfaceArea() * (int)distinctItemInfo->second.size()))
+            const double itemSurfaceArea = baseItem.getReal2DSurfaceArea();
+            const int availableItems = (int)distinctItemInfo->second.size();
+
+            // Filters without checking if a good layer can be build. Comparison based on percentage.
+            if (minimumSurfaceArea_ > ItemPositionConstructor::itemSurfaceCoverage(itemSurfaceArea, availableItems))
             {
                 continue;
             };
 
-            std::shared_ptr<ItemRegister2D> itemRegister2D = std::make_shared<ItemRegister2D>(baseItem);
-
-            std::shared_ptr<Bin2D> new2DBin = std::make_shared<Bin2D>(std::make_shared<PackingContext2D>(itemRegister2D, requestedBin2D));
-
+            std::shared_ptr<Bin2D> new2DBin = std::make_shared<Bin2D>(std::make_shared<PackingContext2D>(std::make_shared<ItemRegister2D>(baseItem), requestedBin2D));
             new2DBin->startPacking();
 
-            // std::cout << "Nr of items required for base layer " << new2DBin->getItemsPerLayer() << " " << distinctItemInfo->second.size() << " " << new2DBin->getCoveredSurfaceArea() << "\n";
+            const int itemsThatWillBePlaced = std::min(availableItems, (int)new2DBin->getBaseLayer()->getFittedItems().size());
+            const double realSurfaceCoverage = ItemPositionConstructor::itemSurfaceCoverage(itemSurfaceArea, itemsThatWillBePlaced);
 
-            // Continue if not enough items to build a layer.
-            // if (new2DBin->getItemsPerLayer() > (int)distinctItemInfo->second.size())
-            // {
-            //     continue;
-            // };
-
-            // Continue if the layer does not have good coverage.
-            if (new2DBin->getCoveredSurfaceArea() < minimumSurfaceArea)
-            {
-                continue;
-            }
-
+            // Layer has now been build.
+            // Continue if the layer is not more efficient than the minimum.
             // Continue if the layer is not more efficient than an already found layer.
-            if (winningSurfaceArea > new2DBin->getCoveredSurfaceArea())
+            if (minimumSurfaceArea_ > realSurfaceCoverage || winningSurfaceArea > realSurfaceCoverage)
             {
                 continue;
             }
 
-            const int itemsThatWillBePlaced = std::min((int)distinctItemInfo->second.size(), (int)new2DBin->getBaseLayer()->getFittedItems().size());
-            winningSurfaceArea = (baseItem.getReal2DSurfaceArea() * itemsThatWillBePlaced);
-            
+            winningSurfaceArea = realSurfaceCoverage;
             ItemPositionConstructor::hasPrecalculatedBinAvailable_ = true;
             ItemPositionConstructor::precalculatedBin_ = new2DBin;
         }

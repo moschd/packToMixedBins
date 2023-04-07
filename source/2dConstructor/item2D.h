@@ -6,20 +6,21 @@ class Item2D : public GeometricShape2D
 public:
     int transientSysId_;
     std::string id_;
-    int weight_;
+    double weight_;
     int layer_;
 
     Item2D(int aSystemId,
-         std::string aItemId,
-         int aWidth,
-         int aDepth,
-         int aHeight,
-         int aWeight,
-         int aLayerId) : transientSysId_(aSystemId),
-                         id_(aItemId.size() ? aItemId : "NA"),
-                         weight_(aWeight),
-                         layer_(aLayerId),
-                         GeometricShape2D(aWidth, aDepth, aHeight){};
+           std::string aItemId,
+           int aWidth,
+           int aDepth,
+           int aHeight,
+           double aWeight,
+           int aLayerId,
+           double aVolume) : transientSysId_(aSystemId),
+                             id_(aItemId.size() ? aItemId : "NA"),
+                             weight_(aWeight),
+                             layer_(aLayerId),
+                             GeometricShape2D(aWidth, aDepth, aHeight, aVolume){};
 
     /**
      * @brief Changes the attributes of the item according to the desired rotation.

@@ -81,6 +81,10 @@ public:
         RequestedBin::setPackingDirection(aPackingDirection);
     };
 
+    const double getRealWidth() const { return (double)maxWidth_ / MULTIPLIER; };
+    const double getRealDepth() const { return (double)maxDepth_ / MULTIPLIER; };
+    const double getRealBottomSurfaceArea() const { return getRealWidth() * getRealDepth(); };
+
     /**
      * @brief Get the requested bin type.
      *

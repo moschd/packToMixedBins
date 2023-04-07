@@ -18,6 +18,15 @@ namespace Geometry
                cuboidOne->position_[constants::axis::DEPTH] < cuboidTwo->furthestPointDepth_;
     }
 
+    /**
+     * @brief Returns true if the Z dimension is intersecting.
+     *
+     * @tparam T
+     * @param cuboidOne
+     * @param cuboidTwo
+     * @return true
+     * @return false
+     */
     template <class T>
     inline const bool intersectingZ(const T cuboidOne, const T cuboidTwo)
     {

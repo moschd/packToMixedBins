@@ -23,7 +23,8 @@ private:
             context_->getBaseItem().depth_,
             context_->getBaseItem().height_,
             context_->getBaseItem().weight_,
-            PackingLayer::id_);
+            PackingLayer::id_,
+            context_->getBaseItem().volume_);
 
         /* Set correct attributes. */
         newItem.position_ = {aXLocation, aYLocation, PackingLayer::position_[constants::axis::HEIGHT]};
@@ -40,9 +41,9 @@ public:
     PackingLayer(int aId,
                  std::shared_ptr<PackingContext2D> aContext,
                  std::array<int, 3> aPosition) : id_(aId),
-                                                    context_(aContext),
-                                                    position_(aPosition),
-                                                    fittedItems_()
+                                                 context_(aContext),
+                                                 position_(aPosition),
+                                                 fittedItems_()
     {
         PackingLayer::fittedItems_.reserve(25);
     }

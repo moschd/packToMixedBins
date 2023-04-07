@@ -116,7 +116,8 @@ public:
                                                         actualWeightUtil_(0),
                                                         GeometricShape2D(aContext->getRequestedBin()->getWidth(),
                                                                          aContext->getRequestedBin()->getDepth(),
-                                                                         aContext->getRequestedBin()->getHeight())
+                                                                         aContext->getRequestedBin()->getHeight(),
+                                                                         aContext->getRequestedBin()->getMaxVolume())
     {
         Bin2D::layers_.reserve(10);
         Bin2D::maxItemsWeightConstraint_ = (int)std::floor(aContext->getRequestedBin()->getMaxWeight() / aContext->getBaseItem().weight_);

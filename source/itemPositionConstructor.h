@@ -118,7 +118,9 @@ private:
                 continue;
             }
 
-            winningSurfaceArea = new2DBin->getCoveredSurfaceArea();
+            const int itemsThatWillBePlaced = std::min((int)distinctItemInfo->second.size(), (int)new2DBin->getBaseLayer()->getFittedItems().size());
+            winningSurfaceArea = (baseItem.getReal2DSurfaceArea() * itemsThatWillBePlaced);
+            
             ItemPositionConstructor::hasPrecalculatedBinAvailable_ = true;
             ItemPositionConstructor::precalculatedBin_ = new2DBin;
         }

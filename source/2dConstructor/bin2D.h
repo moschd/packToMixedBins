@@ -119,7 +119,7 @@ public:
                                                                          aContext->getRequestedBin()->getHeight())
     {
         Bin2D::layers_.reserve(10);
-        Bin2D::maxItemsWeightConstraint_ = std::floor(aContext->getRequestedBin()->getMaxWeight() / aContext->getBaseItem().weight_);
+        Bin2D::maxItemsWeightConstraint_ = (int)std::floor(aContext->getRequestedBin()->getMaxWeight() / aContext->getBaseItem().weight_);
     };
 
     Bin2D();

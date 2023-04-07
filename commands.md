@@ -2,8 +2,10 @@
 
 ## Compile to .so
 Switch COMPILE_TO_SO to 1 and run the command below.
+Statically link libstdc++ because make_shared requires GLIBCXX_3.4.26...
 
-    g++ source/main.cpp -shared -ffast-math -fno-exceptions -fno-rtti -fPIC -O3 -o libPackToBinAlgo.so.0 -l jsoncpp
+
+    g++ source/main.cpp -shared -ffast-math -fno-exceptions -fno-rtti -fPIC -O3 -o libPackToBinAlgo.so.0 -l jsoncpp -static-libstdc++
 
 ## Compile for local
 Switch COMPILE_TO_SO to 0 and run the command below.

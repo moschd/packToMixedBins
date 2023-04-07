@@ -14,33 +14,33 @@ private:
     int maxWidth_;
     int maxDepth_;
     int maxHeight_;
-    int maxWeight_;
-    int maxVolume_;
+    double maxWeight_;
+    double maxVolume_;
     int packingMarginWidth_;
     int packingMarginDepth_;
     int packingMarginHeight_;
 
 public:
     RequestedBin2D(std::string aBinType,
-                     int aBinWidth,
-                     int aBinDepth,
-                     int aBinHeight,
-                     int aBinMaxWeight,
-                     int aPackingMarginWidth,
-                     int aPackingMarginDepth,
-                     int aPackingMarginHeight) : type_(aBinType),
-                                                    maxWidth_(aBinWidth),
-                                                    maxDepth_(aBinDepth),
-                                                    maxHeight_(aBinHeight),
-                                                    maxWeight_(aBinMaxWeight),
-                                                    maxVolume_(0),
-                                                    packingMarginWidth_(aPackingMarginWidth),
-                                                    packingMarginDepth_(aPackingMarginDepth),
-                                                    packingMarginHeight_(aPackingMarginHeight)
+                   int aBinWidth,
+                   int aBinDepth,
+                   int aBinHeight,
+                   double aBinMaxWeight,
+                   int aPackingMarginWidth,
+                   int aPackingMarginDepth,
+                   int aPackingMarginHeight) : type_(aBinType),
+                                               maxWidth_(aBinWidth),
+                                               maxDepth_(aBinDepth),
+                                               maxHeight_(aBinHeight),
+                                               maxWeight_(aBinMaxWeight),
+                                               maxVolume_(0),
+                                               packingMarginWidth_(aPackingMarginWidth),
+                                               packingMarginDepth_(aPackingMarginDepth),
+                                               packingMarginHeight_(aPackingMarginHeight)
     {
         RequestedBin2D::maxVolume_ = ((RequestedBin2D::maxWidth_ + RequestedBin2D::packingMarginWidth_) *
-                                        (RequestedBin2D::maxDepth_ + RequestedBin2D::packingMarginDepth_) *
-                                        (RequestedBin2D::maxHeight_ + RequestedBin2D::packingMarginHeight_));
+                                      (RequestedBin2D::maxDepth_ + RequestedBin2D::packingMarginDepth_) *
+                                      (RequestedBin2D::maxHeight_ + RequestedBin2D::packingMarginHeight_));
     };
 
     /// @brief Get the type of the requested bin.
@@ -61,11 +61,11 @@ public:
 
     /// @brief Get the maximum weight of the requested bin.
     /// @return const int
-    const int getMaxWeight() const { return RequestedBin2D::maxWeight_; };
+    const double getMaxWeight() const { return RequestedBin2D::maxWeight_; };
 
     /// @brief Get the maximum volume of the requested bin.
     /// @return const int
-    const int getMaxVolume() const { return RequestedBin2D::maxVolume_; }
+    const double getMaxVolume() const { return RequestedBin2D::maxVolume_; }
 
     /// @brief Get the maximum distance on the x axis, this takes any allowed margin into account.
     /// @return const int

@@ -77,6 +77,10 @@ public:
 
     const std::string getSortMethod() const { return ItemRegister::sortMethod_; };
 
+    /// @brief Get a new, unique, transient item id.
+    /// @return const int
+    const int getNewItemId() const { return int(ItemRegister::completeItemVector_.size()); }
+
     /**
      * @brief Add item to the register.
      *

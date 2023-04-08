@@ -1,6 +1,10 @@
 #ifndef NEAT_PACKER_PACKING_ACTION_H
 #define NEAT_PACKER_PACKING_ACTION_H
 
+/**
+ * @brief Only used for the neatpacker algorithm.
+ *
+ */
 class PackingAction
 {
 private:

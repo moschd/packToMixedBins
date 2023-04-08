@@ -1,20 +1,14 @@
 #ifndef ITEM_POSITION_CONSTRUCTOR_H
 #define ITEM_POSITION_CONSTRUCTOR_H
 
-#define BASE_ITEM_KEY 0
-
-#include "2dConstructor/heuristicAlgorithms.h"
-#include "2dConstructor/rect.h"
-#include "2dConstructor/neatPacker/packingAction.h"
-#include "2dConstructor/neatPacker/neatPacker.h"
-#include "2dConstructor/spiralPacker.h"
-#include "2dConstructor/maxRectsBinPack.h"
-#include "2dConstructor/algorithmHandler.h"
-#include "2dConstructor/geometricShape2D.h"
-#include "2dConstructor/item2D.h"
-#include "2dConstructor/packingContext2D.h"
-#include "2dConstructor/packingLayer.h"
-#include "2dConstructor/bin2D.h"
+#include "homogenousLayerBuilder/heuristicAlgorithms.h"
+#include "homogenousLayerBuilder/rect.h"
+#include "homogenousLayerBuilder/packingAction.h"
+#include "homogenousLayerBuilder/neatPacker.h"
+#include "homogenousLayerBuilder/maxRectsBinPack.h"
+#include "homogenousLayerBuilder/algorithmHandler.h"
+#include "homogenousLayerBuilder/packingLayer.h"
+#include "homogenousLayerBuilder/bin2D.h"
 
 class ItemPositionConstructor
 {
@@ -38,7 +32,6 @@ private:
 
         for (const int &itemKey : ItemPositionConstructor::items_)
         {
-
             if (ItemPositionConstructor::distinctItems_.empty())
             {
                 ItemPositionConstructor::distinctItems_[itemKey] = {itemKey};
@@ -82,27 +75,20 @@ private:
         int winningSurfaceArea = 0;
         ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
 
-        std::shared_ptr<RequestedBin2D> requestedBin2D = std::make_shared<RequestedBin2D>(ItemPositionConstructor::context_->getRequestedBin()->getType(),
-                                                                                          ItemPositionConstructor::context_->getRequestedBin()->getWidth(),
-                                                                                          ItemPositionConstructor::context_->getRequestedBin()->getDepth(),
-                                                                                          ItemPositionConstructor::context_->getRequestedBin()->getHeight(),
-                                                                                          ItemPositionConstructor::context_->getRequestedBin()->getMaxWeight(),
-                                                                                          0,
-                                                                                          0,
-                                                                                          0);
-
         for (std::map<int, std::vector<int>>::iterator distinctItemInfo = distinctItems_.begin(); distinctItemInfo != distinctItems_.end(); ++distinctItemInfo)
         {
-            Item2D baseItem(BASE_ITEM_KEY,
-                            std::to_string(ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->transientSysId_),
-                            ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->width_,
-                            ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->depth_,
-                            ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->height_,
-                            ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->weight_,
-                            0,
-                            ItemPositionConstructor::context_->getItem(distinctItemInfo->first)->getRealVolume());
+            std::shared_ptr<Item> baseItem =
+                std::make_shared<Item>(BASE_ITEM_KEY,
+                                       std::to_string(context_->getItem(distinctItemInfo->first)->transientSysId_),
+                                       context_->getItem(distinctItemInfo->first)->width_,
+                                       context_->getItem(distinctItemInfo->first)->depth_,
+                                       context_->getItem(distinctItemInfo->first)->height_,
+                                       context_->getItem(distinctItemInfo->first)->weight_,
+                                       "none",
+                                       "01",
+                                       context_->getItem(distinctItemInfo->first)->gravityStrength_);
 
-            const double itemSurfaceArea = baseItem.getReal2DSurfaceArea();
+            const double itemSurfaceArea = baseItem->getRealBottomSurfaceArea();
             const int availableItems = (int)distinctItemInfo->second.size();
 
             // Filters without checking if a good layer can be build. Comparison based on percentage.
@@ -111,9 +97,17 @@ private:
                 continue;
             };
 
-            std::shared_ptr<Bin2D> new2DBin = std::make_shared<Bin2D>(std::make_shared<PackingContext2D>(std::make_shared<ItemRegister2D>(baseItem), requestedBin2D));
+            // Create fresh item register, and create a 2d bin instance to layer pack.
+            std::shared_ptr<ItemRegister> new2DItemRegister = std::make_shared<ItemRegister>(context_->getItemSortMethod(), 10);
+            new2DItemRegister->addItem(baseItem);
+
+            std::shared_ptr<Bin2D> new2DBin =
+                std::make_shared<Bin2D>(std::make_shared<PackingContext>(context_->getGravity(),
+                                                                         new2DItemRegister,
+                                                                         context_->getRequestedBin()));
             new2DBin->startPacking();
 
+            // Calculate the efficiency of this newly constructed layer.
             const int itemsThatWillBePlaced = std::min(availableItems, (int)new2DBin->getBaseLayer()->getFittedItems().size());
             const double realSurfaceCoverage = ItemPositionConstructor::itemSurfaceCoverage(itemSurfaceArea, itemsThatWillBePlaced);
 
@@ -159,7 +153,7 @@ public:
 
     /// @brief Returns the distinct item key for this packing.
     /// @return const int
-    const int getDistinctItemKey() const { return std::atoi(precalculatedBin_->getFittedItems()[0].id_.c_str()); };
+    const int getDistinctItemKey() const { return std::atoi(precalculatedBin_->getFittedItems()[0]->id_.c_str()); };
 
     /// @brief Returns the vector of item keys relevant to this distinct item key.
     /// @param aKey
@@ -172,8 +166,8 @@ public:
 
     /// @brief Get a precalculated item by index.
     /// @param aIndex
-    /// @return const Item2D
-    const Item2D getBaseItemByIndex(const int aIndex)
+    /// @return const std::shared_ptr<Item>
+    const std::shared_ptr<Item> getBaseItemByIndex(const int aIndex)
     {
         const int aItemKey = precalculatedBin_->getBaseLayer()->getFittedItems()[aIndex];
         return precalculatedBin_->getContext()->getItemRegister()->getConstItem(aItemKey);

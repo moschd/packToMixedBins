@@ -1,10 +1,10 @@
 #ifndef BIN_2D_H
 #define BIN_2D_H
 
-class Bin2D : public GeometricShape2D
+class Bin2D : public GeometricShape
 {
 private:
-    std::shared_ptr<PackingContext2D> context_;
+    std::shared_ptr<PackingContext> context_;
     std::vector<std::shared_ptr<PackingLayer>> layers_;
     int actualVolumeUtil_;
     int actualWeightUtil_;
@@ -21,10 +21,10 @@ private:
         std::shared_ptr<PackingLayer> winningLayer = std::make_shared<PackingLayer>();
 
         const bool allowRotation = true;
-        const int binWidth = Bin2D::context_->getRequestedBin()->getMaxAllowedPackingWidth();
-        const int binHeight = Bin2D::context_->getRequestedBin()->getMaxAllowedPackingDepth();
-        const int rectWidth = Bin2D::context_->getBaseItem().width_;
-        const int rectHeight = Bin2D::context_->getBaseItem().depth_;
+        const int binWidth = Bin2D::context_->getRequestedBin()->getWidth();
+        const int binHeight = Bin2D::context_->getRequestedBin()->getDepth();
+        const int rectWidth = Bin2D::context_->getItem(BASE_ITEM_KEY)->width_;
+        const int rectHeight = Bin2D::context_->getItem(BASE_ITEM_KEY)->depth_;
 
         std::unique_ptr<AlgorithmHandler> algorithmHandler = std::make_unique<AlgorithmHandler>(binWidth, binHeight, rectWidth, rectHeight, allowRotation);
 
@@ -85,10 +85,10 @@ private:
     {
         for (const auto &item : aItems)
         {
-            const Item2D it = Bin2D::context_->getItem(item);
-            Bin2D::furthestPointWidth_ = std::max(Bin2D::furthestPointWidth_, it.Item2D::furthestPointWidth_);
-            Bin2D::furthestPointDepth_ = std::max(Bin2D::furthestPointDepth_, it.Item2D::furthestPointDepth_);
-            Bin2D::furthestPointHeight_ = std::max(Bin2D::furthestPointHeight_, it.Item2D::furthestPointHeight_);
+            const std::shared_ptr<Item> it = Bin2D::context_->getItem(item);
+            Bin2D::furthestPointWidth_ = std::max(Bin2D::furthestPointWidth_, it->Item::furthestPointWidth_);
+            Bin2D::furthestPointDepth_ = std::max(Bin2D::furthestPointDepth_, it->Item::furthestPointDepth_);
+            Bin2D::furthestPointHeight_ = std::max(Bin2D::furthestPointHeight_, it->Item::furthestPointHeight_);
         }
     };
 
@@ -105,29 +105,26 @@ private:
     void updateBinTotals()
     {
         const int numberOfItemsInBin = int(Bin2D::getFittedItems().size());
-        Bin2D::actualVolumeUtil_ = (numberOfItemsInBin * Bin2D::context_->getBaseItem().volume_);
-        Bin2D::actualWeightUtil_ = (numberOfItemsInBin * Bin2D::context_->getBaseItem().weight_);
+        Bin2D::actualVolumeUtil_ = (numberOfItemsInBin * Bin2D::context_->getItem(BASE_ITEM_KEY)->volume_);
+        Bin2D::actualWeightUtil_ = (numberOfItemsInBin * Bin2D::context_->getItem(BASE_ITEM_KEY)->weight_);
     }
 
 public:
-    Bin2D(std::shared_ptr<PackingContext2D> aContext) : context_(aContext),
-                                                        layers_({}),
-                                                        actualVolumeUtil_(0),
-                                                        actualWeightUtil_(0),
-                                                        GeometricShape2D(aContext->getRequestedBin()->getWidth(),
-                                                                         aContext->getRequestedBin()->getDepth(),
-                                                                         aContext->getRequestedBin()->getHeight(),
-                                                                         aContext->getRequestedBin()->getMaxVolume())
+    Bin2D(std::shared_ptr<PackingContext> aContext) : context_(aContext),
+                                                      layers_({}),
+                                                      actualVolumeUtil_(0),
+                                                      actualWeightUtil_(0),
+                                                      GeometricShape(aContext->getRequestedBin()->getWidth(),
+                                                                     aContext->getRequestedBin()->getDepth(),
+                                                                     aContext->getRequestedBin()->getHeight())
     {
         Bin2D::layers_.reserve(10);
-        Bin2D::maxItemsWeightConstraint_ = (int)std::floor(aContext->getRequestedBin()->getMaxWeight() / aContext->getBaseItem().weight_);
+        Bin2D::maxItemsWeightConstraint_ = (int)std::floor(aContext->getRequestedBin()->getMaxWeight() / aContext->getItem(BASE_ITEM_KEY)->weight_);
     };
-
-    Bin2D();
 
     /// @brief Get the packing context.
     /// @return PackingContext*
-    const std::shared_ptr<PackingContext2D> getContext() const { return Bin2D::context_; }
+    const std::shared_ptr<PackingContext> getContext() const { return Bin2D::context_; }
 
     /// @brief Get all layers inside this bin.
     /// @return const std::vector<std::shared_ptr<PackingLayer>>
@@ -165,15 +162,15 @@ public:
     /// @return const double
     const double getCoveredSurfaceArea() const
     {
-        return (Bin2D::context_->getBaseItem().getRealWidth() * Bin2D::context_->getBaseItem().getRealDepth() * Bin2D::getItemsPerLayer()) /
-               Bin2D::getReal2DSurfaceArea() * 100;
+        return (Bin2D::context_->getItem(BASE_ITEM_KEY)->getRealWidth() * Bin2D::context_->getItem(BASE_ITEM_KEY)->getRealDepth() * Bin2D::getItemsPerLayer()) /
+               Bin2D::getRealBottomSurfaceArea() * 100;
     };
 
     /// @brief Aggregate items from layers and return them as a single vector.
-    /// @return const std::vector<int>&
-    const std::vector<Item2D> getFittedItems() const
+    /// @return const std::vector<std::shared_ptr<Item>>
+    const std::vector<std::shared_ptr<Item>> getFittedItems() const
     {
-        std::vector<Item2D> myItems;
+        std::vector<std::shared_ptr<Item>> myItems;
         for (const auto &itemKey : Bin2D::getBaseLayer()->getFittedItems())
         {
             myItems.push_back(Bin2D::context_->getItem(itemKey));

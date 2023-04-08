@@ -1,8 +1,13 @@
 
 /*
-Get rid of ints. algorithm only works with integers.
+Get rid of ints. item positions work with integers, integer comparison is more reliable.
 */
 #define MULTIPLIER 10000
+
+/*
+Set a base item key, used in the homogenous layer builder.
+*/
+#define BASE_ITEM_KEY 0
 
 /*
 Default parameters.

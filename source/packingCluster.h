@@ -184,13 +184,13 @@ private:
                     };
 
                     std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
-                    Item2D precalculatedItem = positionConstructor->getBaseItemByIndex(i);
+                    const std::shared_ptr<Item> precalculatedItem = positionConstructor->getBaseItemByIndex(i);
 
-                    myItem->position_[constants::axis::WIDTH] = precalculatedItem.position_[constants::axis::WIDTH];
-                    myItem->position_[constants::axis::DEPTH] = precalculatedItem.position_[constants::axis::DEPTH];
+                    myItem->position_[constants::axis::WIDTH] = precalculatedItem->position_[constants::axis::WIDTH];
+                    myItem->position_[constants::axis::DEPTH] = precalculatedItem->position_[constants::axis::DEPTH];
                     myItem->position_[constants::axis::HEIGHT] = positionConstructor->getHeightAddition();
 
-                    myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem.rotationType_));
+                    myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem->rotationType_));
 
                     // std::cout << myItem->id_ << " " << myItem->allowedRotations_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
 

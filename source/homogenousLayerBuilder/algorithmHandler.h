@@ -1,6 +1,7 @@
 #ifndef ALGORITHM_HANDLER_H
 #define ALGORITHM_HANDLER_H
 
+
 /**
  * This class handles the algorithm evaluation/iteration.
  * It provides an interface between the different algorithms and the bin packing.
@@ -15,7 +16,6 @@ private:
     bool allowRotation_;
     std::unique_ptr<MaxRectsBinPack> maxRectsPackingInstance_;
     std::unique_ptr<NeatPacker> neatPackingInstance_;
-    std::unique_ptr<SpiralPacker> spiralPackingInstance_;
 
     const Rect emptyNode() const
     {
@@ -36,7 +36,6 @@ public:
     {
         AlgorithmHandler::maxRectsPackingInstance_ = std::make_unique<MaxRectsBinPack>(binWidth_, binHeight_, rectWidth_, rectHeight_, allowRotation_);
         AlgorithmHandler::neatPackingInstance_ = std::make_unique<NeatPacker>(binWidth_, binHeight_, rectWidth_, rectHeight_);
-        AlgorithmHandler::spiralPackingInstance_ = std::make_unique<SpiralPacker>(binWidth_, binHeight_, rectWidth_, rectHeight_, allowRotation_);
     };
 
     Rect placeItem(HeuristicAlgorithmType aAlgorithm)
@@ -52,9 +51,6 @@ public:
         case RectBestAreaFit:
             newNode = maxRectsPackingInstance_->insert(aAlgorithm);
             break;
-        // case SpiralFitPacker:
-        //     newNode = spiralPackingInstance_->insert();
-        //     break;
         case NeatGroupFitPacker:
             newNode = neatPackingInstance_->insert();
             break;
@@ -84,7 +80,6 @@ public:
         /// These do not need to be cleaned since they only occur once.
         // AlgorithmHandler::spiralPackingInstance_->reset();
         // AlgorithmHandler::neatPackingInstance_->reset();
-        // AlgorithmHandler::diagonalPackingInstance_->reset();
     }
 };
 

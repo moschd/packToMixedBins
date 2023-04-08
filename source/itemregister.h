@@ -39,7 +39,7 @@ private:
      * Create separete vector for each distinct itemConsKey, the items within each vector are sorted according to the sortMethod argument.
      * Returns a vector of vectors, each inner vector contains itemKeys.
      */
-    const std::vector<std::vector<int>> getSortedItemConsKeyVectors(std::vector<std::shared_ptr<Item>> &aItemVector) const
+    const std::vector<std::vector<int>> createSortedItemConsKeyVectors(std::vector<std::shared_ptr<Item>> &aItemVector) const
     {
         if (ItemRegister::sortMethod_ == constants::itemRegister::parameter::WEIGHT)
         {
@@ -75,7 +75,7 @@ public:
         ItemRegister::completeItemVector_.reserve(nrOfItems);
     }
 
-    const std::string getSortMethod() const { return ItemRegister::sortMethod_; };
+    const std::string &getSortMethod() const { return ItemRegister::sortMethod_; };
 
     /// @brief Get a new, unique, transient item id.
     /// @return const int
@@ -120,9 +120,9 @@ public:
      *
      * @return const std::vector<std::vector<int>>
      */
-    const std::vector<std::vector<int>> getAllSortedItemConsKeyVectors()
+    const std::vector<std::vector<int>> getSortedItemConsKeyVectors()
     {
-        return ItemRegister::getSortedItemConsKeyVectors(ItemRegister::completeItemVector_);
+        return ItemRegister::createSortedItemConsKeyVectors(ItemRegister::completeItemVector_);
     };
 
     /**

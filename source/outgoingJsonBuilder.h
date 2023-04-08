@@ -139,10 +139,6 @@ public:
         outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = packedPacker.Packer::getTotalVolumeUtilPercentage();
         outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = packedPacker.Packer::getTotalWeightUtilPercentage();
 
-        /* Free allocated memory.
-        TODO Find a way to do this in a correct way, look for best practices. */
-        packedPacker.freeMemory();
-
         /* If includeBins parameter is false, skip generating json for the bins. */
         if (!ResponseBuilder::includeBins_)
         {

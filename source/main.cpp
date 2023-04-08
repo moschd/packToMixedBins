@@ -52,7 +52,6 @@ Include necessary files.
 #include "itemPositionConstructor.h"
 #include "packingCluster.h"
 #include "packer.h"
-#include "binSortMethods.h"
 #include "outgoingJsonBuilder.h"
 
 /*
@@ -98,14 +97,12 @@ int main()
                                                                                     incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble(),
                                                                                     incomingJsonBin[constants::json::inbound::bin::PACKING_DIRECTION].asString());
 
-        std::shared_ptr<PackingContext> context = std::make_shared<PackingContext>(masterGravity, itemRegister, requestedBin);
-
-        Packer packingProcessor(context);
+        Packer packingProcessor(std::make_shared<PackingContext>(masterGravity, itemRegister, requestedBin));
 
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
         {
-            packingProcessor.getModifiableContext()->addItemToRegister(
+            packingProcessor.getContext()->getItemRegister()->addItem(
                 std::make_shared<Item>(idx,
                                        incomingJsonItems[idx][constants::json::item::ID].asString(),
                                        incomingJsonItems[idx][constants::json::item::WIDTH].asDouble() * MULTIPLIER,
@@ -118,7 +115,7 @@ int main()
         };
 
         /* Split items by consolidation key and start packing. */
-        for (auto &sortedItemConsKeyVector : packingProcessor.getContext()->getSortedItemConsKeyVectors())
+        for (const std::vector<int> sortedItemConsKeyVector : packingProcessor.getContext()->getItemRegister()->getSortedItemConsKeyVectors())
         {
             packingProcessor.startPackingCluster(sortedItemConsKeyVector);
         };

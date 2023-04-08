@@ -33,7 +33,7 @@ private:
         aIsRotated ? newItem->rotate(constants::rotation::type::DWH) : newItem->rotate(constants::rotation::type::WDH);
 
         /* Add to register and add to this layer. */
-        PackingLayer::context_->addItemToRegister(newItem);
+        PackingLayer::context_->getItemRegister()->addItem(newItem);
         PackingLayer::fittedItems_.push_back(newItemId);
     }
 

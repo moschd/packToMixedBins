@@ -81,107 +81,27 @@ public:
         RequestedBin::setPackingDirection(aPackingDirection);
     };
 
+    const std::string getType() const { return RequestedBin::type_; };
+
+    const int getWidth() const { return RequestedBin::maxWidth_; };
+    const int getDepth() const { return RequestedBin::maxDepth_; };
+    const int getHeight() const { return RequestedBin::maxHeight_; };
+    const double getMaxWeight() const { return RequestedBin::maxWeight_; };
+    const double getMaxVolume() const { return RequestedBin::maxVolume_; };
+
+    const double getEstAvgVolumeUtil() const { return RequestedBin::estAvgVolumeUtil_; }
+    const double getEstAvgWeightUtil() const { return RequestedBin::estAvgWeightUtil_; }
+
     const double getRealWidth() const { return (double)maxWidth_ / MULTIPLIER; };
     const double getRealDepth() const { return (double)maxDepth_ / MULTIPLIER; };
     const double getRealBottomSurfaceArea() const { return getRealWidth() * getRealDepth(); };
 
-    /**
-     * @brief Get the requested bin type.
-     *
-     * @return const std::string
-     */
-    const std::string getType() const
-    {
-        return RequestedBin::type_;
-    };
+    const std::array<int, 3> &getPackingDirection() const { return RequestedBin::packingDirection_; }
 
-    /**
-     * @brief Get the requested width.
-     *
-     * @return const int
-     */
-    const int getWidth() const
-    {
-        return RequestedBin::maxWidth_;
-    };
-
-    /**
-     * @brief Get the requested depth.
-     *
-     * @return const int
-     */
-    const int getDepth() const
-    {
-        return RequestedBin::maxDepth_;
-    };
-
-    /**
-     * @brief Get the requested height.
-     *
-     * @return const int
-     */
-    const int getHeight() const
-    {
-        return RequestedBin::maxHeight_;
-    };
-
-    /**
-     * @brief Get the requested maxWeight.
-     *
-     * @return const double
-     */
-    const double getMaxWeight() const { return RequestedBin::maxWeight_; };
-
-    /**
-     * @brief Get the requested maxVolume.
-     *
-     * @return const double
-     */
-    const double getMaxVolume() const
-    {
-        return RequestedBin::maxVolume_;
-    };
-
-    /**
-     * @brief Public helper function to set the estimated numbers.
-     *
-     * @param aItemsToBePacked
-     * @param aItemRegister
-     */
     void setEstimatedAverages(const std::vector<int> aItemsToBePacked, std::shared_ptr<ItemRegister> aItemRegister)
     {
         RequestedBin::setEstAvgUtilPerBin(aItemsToBePacked, aItemRegister);
     };
-
-    /**
-     * @brief Get the estimated average volume utilization per bin.
-     *
-     * @return const double
-     */
-    const double getEstAvgVolumeUtil() const
-    {
-        return RequestedBin::estAvgVolumeUtil_;
-    }
-
-    /**
-     * @brief Get the estimated average weight utilization per bin.
-     *
-     * @return const double
-     */
-    const double getEstAvgWeightUtil() const
-    {
-        return RequestedBin::estAvgWeightUtil_;
-    }
-
-    /**
-     * @brief Get the desired packing direction of the bin.
-     *
-     * @return const std::array<int, 3>
-     */
-    const std::array<int, 3> getPackingDirection() const
-    {
-        return RequestedBin::packingDirection_;
-    }
 };
 
 #endif

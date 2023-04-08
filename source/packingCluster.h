@@ -11,6 +11,66 @@ private:
     bool optimizedPackingCompatible_;
 
     /**
+     * @brief Perform optimized layer packing, return a filtered list of the items to be packed once finished.
+     *
+     * @param aItemsToBePacked
+     * @return std::vector<int>
+     */
+    std::vector<int> &optimizedLayerPacking(std::vector<int> &aItemsToBePacked)
+    {
+        bool continueLayingLayers = true;
+
+        std::unique_ptr<ItemPositionConstructor> positionConstructor =
+            std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
+
+        while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
+        {
+            int heightToIncrement = 0;
+
+            const std::vector<int> relevantItems = positionConstructor->getRelevantItems();
+
+            for (int i = 0; i < positionConstructor->getNumberOfBaseItems(); i++)
+            {
+
+                if (i >= (int)relevantItems.size())
+                {
+                    break;
+                };
+
+                std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
+                const std::shared_ptr<Item> precalculatedItem = positionConstructor->getBaseItemByIndex(i);
+
+                myItem->position_[constants::axis::WIDTH] = precalculatedItem->position_[constants::axis::WIDTH];
+                myItem->position_[constants::axis::DEPTH] = precalculatedItem->position_[constants::axis::DEPTH];
+                myItem->position_[constants::axis::HEIGHT] = positionConstructor->getHeightAddition();
+
+                // Add and remove the chosen allowed rotation.
+                // This way the item gets packed with the precalculated rotation type.
+                myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem->rotationType_));
+                const bool fits = PackingCluster::placeItem(myItem->transientSysId_, false);
+                myItem->allowedRotations_.erase(0, 1);
+
+                if (fits)
+                {
+                    PackingCluster::getLastCreatedBin()->addFittedItem(myItem->transientSysId_, 99);
+                    aItemsToBePacked.erase(std::remove(aItemsToBePacked.begin(), aItemsToBePacked.end(), myItem->transientSysId_), aItemsToBePacked.end());
+                    heightToIncrement = myItem->height_;
+                }
+                else
+                {
+                    continueLayingLayers = false;
+                    myItem->reset();
+                }
+            };
+
+            positionConstructor->addToHeightAddition(heightToIncrement);
+            positionConstructor->reconfigure(aItemsToBePacked);
+        };
+
+        return aItemsToBePacked;
+    };
+
+    /**
      * @brief Sets the flag indicating if the packing cluster can used optimized packing order.
      *
      * Optimized packing is currenly not available for back to front packing direction.
@@ -19,68 +79,57 @@ private:
     void setOptimizedPackingCompatible()
     {
         PackingCluster::optimizedPackingCompatible_ =
-            (PackingCluster::context_->getItemSortMethod() == constants::itemRegister::parameter::OPTIMIZED &&
-             PackingCluster::context_->getPackingDirection() == constants::bin::parameter::BOTTOM_UP_ARRAY);
+            (PackingCluster::context_->getItemRegister()->getSortMethod() == constants::itemRegister::parameter::OPTIMIZED &&
+             PackingCluster::context_->getRequestedBin()->getPackingDirection() == constants::bin::parameter::BOTTOM_UP_ARRAY);
     }
 
     /**
-     * @brief Function to be used when placing the first item inside a bin.
+     * @brief Place item on its current position inside the bin.
      *
-     * @param aItemToPackKey
-     * @return const bool
-     */
-    const bool fitFirstItem(const int aItemToPackKey)
-    {
-        const bool itemFits = PackingCluster::bins_.back()->Bin::placeItemInBin(aItemToPackKey);
-
-        itemFits
-            ? PackingCluster::bins_.back()->Bin::updateWithFittedItemHelper(aItemToPackKey, 0)
-            : PackingCluster::addLastBinUnfittedItem(aItemToPackKey);
-
-        return itemFits;
-    };
-
-    /**
-     * @brief Place item in bin on a precalculated position.
+     * Use aCommit to add or not to add the item to the bin after evaluation.
      *
-     * @param aItemToPackKey
-     * @return const bool
+     * @param aItemKey
+     * @param aCommit
+     * @return true
+     * @return false
      */
-    const bool fitPrecalculatedItem(const int aItemToPackKey)
+    const bool placeItem(const int aItemKey, const bool aCommit = true)
     {
-        const bool itemFits = PackingCluster::bins_.back()->Bin::placeItemInBin(aItemToPackKey);
+        const bool itemFits = PackingCluster::bins_.back()->Bin::placeItem(aItemKey);
 
-        if (itemFits)
+        if (aCommit)
         {
-            PackingCluster::bins_.back()->Bin::updateWithFittedItemHelper(aItemToPackKey, 99);
-        };
+            itemFits
+                ? PackingCluster::bins_.back()->Bin::addFittedItem(aItemKey, 99)
+                : PackingCluster::getLastCreatedBin()->addUnfittedItem(aItemKey);
+        }
 
         return itemFits;
-    };
+    }
 
     /**
      * @brief Checks if adding the item would exceed the bins limits.
      *  Seperate function because this might be extended later by custom non-physical limits.
      *
-     * @param aItemToPackKey
+     * @param aItemKey
      * @return true
      * @return false
      */
-    const bool wouldExceedLimit(const int aItemToPackKey) const
+    const bool wouldExceedLimit(const int aItemKey) const
     {
-        return PackingCluster::wouldExceedPhysicalLimit(aItemToPackKey);
+        return PackingCluster::wouldExceedPhysicalLimit(aItemKey);
     };
 
     /**
      * @brief Checks if adding the item would exceed the bins physical limits.
      *
-     * @param aItemToPackKey
+     * @param aItemKey
      * @return true
      * @return false
      */
-    const bool wouldExceedPhysicalLimit(const int aItemToPackKey) const
+    const bool wouldExceedPhysicalLimit(const int aItemKey) const
     {
-        const std::shared_ptr<Item> aItemToPack = PackingCluster::context_->getItem(aItemToPackKey);
+        const std::shared_ptr<Item> aItemToPack = PackingCluster::context_->getItem(aItemKey);
         return (PackingCluster::getLastCreatedBin()->getRealActualVolumeUtil() + aItemToPack->Item::volume_) > context_->getRequestedBin()->getMaxVolume() ||
                (PackingCluster::getLastCreatedBin()->getRealActualWeightUtil() + aItemToPack->Item::weight_) > context_->getRequestedBin()->getMaxWeight();
     }
@@ -92,7 +141,7 @@ private:
      *
      * @param aItemsToBePacked  - vector containing itemKeys
      */
-    const int estNrOfItemsInBin(const std::vector<int> &aItemsToBePacked) const
+    const int estimatedNumberOfItemsToFit(const std::vector<int> &aItemsToBePacked) const
     {
         int volumeEstimatedNumberOfItems = 0;
         int weightEstimatedNumberOfItems = 0;
@@ -120,24 +169,11 @@ private:
     };
 
     /**
-     * @brief Add to last bin' unfitted items.
-     *
-     * @param aItemToPackKey
-     */
-    void addLastBinUnfittedItem(const int aItemToPackKey)
-    {
-        PackingCluster::bins_.back()->Bin::addUnfittedItem(aItemToPackKey);
-    };
-
-    /**
      * @brief Delete the last bin from the packing cluster.
      *
      */
     void deleteLastBin()
     {
-        std::shared_ptr<Bin> binToBeDeleted = PackingCluster::bins_.back();
-        binToBeDeleted->Bin::kdTree_->KdTree::deleteAllNodesHelper();
-
         PackingCluster::bins_.pop_back();
         PackingCluster::binIdCounter_ -= 1;
     };
@@ -147,7 +183,7 @@ private:
      *
      * @param aUnfittedItems
      */
-    void addToUnfittedItems(const std::vector<int> aUnfittedItems)
+    void addUnfittedItems(const std::vector<int> aUnfittedItems)
     {
         PackingCluster::unfittedItems_.insert(PackingCluster::unfittedItems_.end(), aUnfittedItems.begin(), aUnfittedItems.end());
     }
@@ -174,85 +210,51 @@ private:
 
         /* Create a new bin. */
         PackingCluster::binIdCounter_ += 1;
-        PackingCluster::bins_.push_back(std::make_shared<Bin>(PackingCluster::binIdCounter_,
-                                                              PackingCluster::context_,
-                                                              PackingCluster::estNrOfItemsInBin(aItemsToBePacked)));
+        PackingCluster::bins_.push_back(
+            std::make_shared<Bin>(PackingCluster::binIdCounter_,
+                                  PackingCluster::context_,
+                                  PackingCluster::estimatedNumberOfItemsToFit(aItemsToBePacked)));
 
-        /* Start packing evaluation process. */
-        std::unique_ptr<ItemPositionConstructor> positionConstructor = std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
-
+        /**
+         * Start packing evaluation process.
+         *
+         * First check if optimized layer packing is to be used.
+         *
+         * Then, perform iterative item position searching method on the left-over items.
+         *
+         */
         if (PackingCluster::optimizedPackingCompatible_)
         {
-            bool continueLayingLayers = true;
-            while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
-            {
-                int heightToIcrement = 0;
-                const std::vector<int> relevantItems = positionConstructor->getRelevantItems();
-
-                for (int i = 0; i < (int)positionConstructor->getNumberOfBaseItems(); i++)
-                {
-
-                    if (i >= (int)relevantItems.size())
-                    {
-                        break;
-                    };
-
-                    std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
-                    const std::shared_ptr<Item> precalculatedItem = positionConstructor->getBaseItemByIndex(i);
-
-                    myItem->position_[constants::axis::WIDTH] = precalculatedItem->position_[constants::axis::WIDTH];
-                    myItem->position_[constants::axis::DEPTH] = precalculatedItem->position_[constants::axis::DEPTH];
-                    myItem->position_[constants::axis::HEIGHT] = positionConstructor->getHeightAddition();
-
-                    myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem->rotationType_));
-
-                    bool fits = PackingCluster::fitPrecalculatedItem(myItem->transientSysId_);
-                    myItem->allowedRotations_.erase(0, 1);
-
-                    if (fits)
-                    {
-                        aItemsToBePacked.erase(std::remove(aItemsToBePacked.begin(), aItemsToBePacked.end(), myItem->transientSysId_), aItemsToBePacked.end());
-                        heightToIcrement = myItem->height_;
-                    }
-                    else
-                    {
-                        continueLayingLayers = false;
-                        myItem->reset();
-                    }
-                };
-
-                positionConstructor->addToHeightAddition(heightToIcrement);
-                positionConstructor->reconfigure(aItemsToBePacked);
-            };
+            aItemsToBePacked = PackingCluster::optimizedLayerPacking(aItemsToBePacked);
         };
 
-        for (auto &itemToPackKey : aItemsToBePacked)
+        for (const int itemToPackKey : aItemsToBePacked)
         {
-            if (!PackingCluster::lastBinHasFittedItems())
+            if (PackingCluster::getLastCreatedBin()->getFittedItems().empty())
             {
-                PackingCluster::fitFirstItem(itemToPackKey);
+                PackingCluster::placeItem(itemToPackKey);
             }
             // checks for weight constraint
             else if (PackingCluster::wouldExceedLimit(itemToPackKey))
             {
-                PackingCluster::addLastBinUnfittedItem(itemToPackKey);
+                PackingCluster::getLastCreatedBin()->addUnfittedItem(itemToPackKey);
             }
             // checks for unfitted items which are the same as current item.
-            else if (!PackingCluster::bins_.back()->Bin::getUnfittedItems().empty() &&
-                     PackingCluster::context_->itemsAreEqual(itemToPackKey, PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems().back()))
+            else if (!PackingCluster::getLastCreatedBin()->getUnfittedItems().empty() &&
+                     PackingCluster::context_->getItemRegister()->itemsAreEqual(itemToPackKey, PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems().back()))
             {
-                PackingCluster::addLastBinUnfittedItem(itemToPackKey);
+                PackingCluster::getLastCreatedBin()->addUnfittedItem(itemToPackKey);
             }
             else
             {
-                PackingCluster::bins_.back()->Bin::findItemPosition(itemToPackKey);
+                PackingCluster::getLastCreatedBin()->searchPositionAndPlaceItem(itemToPackKey);
             }
         };
 
         /* Delete the created bin if it contains no items. */
-        if (!PackingCluster::lastBinHasFittedItems())
+        if (PackingCluster::getLastCreatedBin()->getFittedItems().empty())
         {
-            PackingCluster::addToUnfittedItems(PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems());
+            PackingCluster::addUnfittedItems(PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems());
             PackingCluster::deleteLastBin();
             return;
         }
@@ -274,12 +276,9 @@ public:
     /**
      * @brief Get all packed bins.
      *
-     * @return const std::vector<Bin>&
+     * @return const std::vector<std::shared_ptr<Bin>>&
      */
-    const std::vector<std::shared_ptr<Bin>> &getPackedBins() const
-    {
-        return PackingCluster::bins_;
-    };
+    const std::vector<std::shared_ptr<Bin>> &getPackedBins() const { return PackingCluster::bins_; };
 
     /**
      * @brief Set the current bin id
@@ -288,60 +287,37 @@ public:
      *
      * @param aInteger
      */
-    void setBinIdCounter(unsigned int aInteger)
-    {
-        PackingCluster::binIdCounter_ = aInteger;
-    };
+    void setBinIdCounter(const int aInteger) { PackingCluster::binIdCounter_ = aInteger; };
 
     /**
      * @brief Retrieve current maximum bin id.
      *
      * @return const int
      */
-    const int getBinIdCounter() const
-    {
-        return PackingCluster::binIdCounter_;
-    }
+    const int getBinIdCounter() const { return PackingCluster::binIdCounter_; }
 
     /**
      * @brief Get the unfitted items belonging to this cluster.
      *
      * @return const std::vector<int>
      */
-    const std::vector<int> &getUnfittedItems() const
-    {
-        return PackingCluster::unfittedItems_;
-    };
+    const std::vector<int> &getUnfittedItems() const { return PackingCluster::unfittedItems_; };
 
     /**
      * @brief Get last bin.
      *
      * @return const std::vector<Bin>&
      */
-    const std::shared_ptr<Bin> &getLastCreatedBin() const
-    {
-        return PackingCluster::bins_.back();
-    };
-
-    /**
-     * @brief Returns true if the last bin has fitted items.
-     *
-     * @return true
-     * @return false
-     */
-    const bool lastBinHasFittedItems() const
-    {
-        return !getLastCreatedBin()->getFittedItems().empty();
-    }
+    const std::shared_ptr<Bin> &getLastCreatedBin() const { return PackingCluster::bins_.back(); };
 
     /**
      * @brief Prepare the cluster for packing bins and start.
      *
      * @param aItemsToBePacked
      */
-    void startPacking(const std::vector<int> aItemsToBePacked)
+    void startPacking(const std::vector<int> &aItemsToBePacked)
     {
-        PackingCluster::context_->setRequestedBinEstimatedAverages(aItemsToBePacked);
+        PackingCluster::context_->getRequestedBin()->setEstimatedAverages(aItemsToBePacked, PackingCluster::context_->getItemRegister());
         PackingCluster::startPackingBins(aItemsToBePacked);
     };
 };

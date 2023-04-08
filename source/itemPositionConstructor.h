@@ -41,7 +41,7 @@ private:
                 bool isDistinct = true;
                 for (std::map<int, std::vector<int>>::iterator mapIterator = distinctItems_.begin(); mapIterator != distinctItems_.end(); ++mapIterator)
                 {
-                    if (ItemPositionConstructor::context_->itemsAreEqual(itemKey, mapIterator->first))
+                    if (ItemPositionConstructor::context_->getItemRegister()->itemsAreEqual(itemKey, mapIterator->first))
                     {
                         isDistinct = false;
                         mapIterator->second.push_back(itemKey);
@@ -98,7 +98,7 @@ private:
             };
 
             // Create fresh item register, and create a 2d bin instance to layer pack.
-            std::shared_ptr<ItemRegister> new2DItemRegister = std::make_shared<ItemRegister>(context_->getItemSortMethod(), 10);
+            std::shared_ptr<ItemRegister> new2DItemRegister = std::make_shared<ItemRegister>(context_->getItemRegister()->getSortMethod(), 10);
             new2DItemRegister->addItem(baseItem);
 
             std::shared_ptr<Bin2D> new2DBin =
@@ -158,7 +158,7 @@ public:
     /// @brief Returns the vector of item keys relevant to this distinct item key.
     /// @param aKey
     /// @return const std::vector<int>
-    const std::vector<int> getRelevantItems() const { return distinctItems_.at(ItemPositionConstructor::getDistinctItemKey()); };
+    const std::vector<int> &getRelevantItems() const { return distinctItems_.at(ItemPositionConstructor::getDistinctItemKey()); };
 
     /// @brief Get a number of items in the base layer.
     /// @return const int
@@ -167,7 +167,7 @@ public:
     /// @brief Get a precalculated item by index.
     /// @param aIndex
     /// @return const std::shared_ptr<Item>
-    const std::shared_ptr<Item> getBaseItemByIndex(const int aIndex)
+    const std::shared_ptr<Item> &getBaseItemByIndex(const int aIndex)
     {
         const int aItemKey = precalculatedBin_->getBaseLayer()->getFittedItems()[aIndex];
         return precalculatedBin_->getContext()->getItemRegister()->getConstItem(aItemKey);

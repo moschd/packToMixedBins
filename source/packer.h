@@ -15,30 +15,14 @@ public:
      *
      * @return const PackingContext*
      */
-    const std::shared_ptr<PackingContext> getContext() const
-    {
-        return Packer::context_;
-    }
-
-    /**
-     * @brief Modify context.
-     *
-     * @return const PackingContext*
-     */
-    std::shared_ptr<PackingContext> getModifiableContext() const
-    {
-        return Packer::context_;
-    }
+    const std::shared_ptr<PackingContext> &getContext() const { return Packer::context_; }
 
     /**
      * @brief Get packing clusters.
      *
      * @return const std::vector<PackingCluster>
      */
-    const std::vector<std::shared_ptr<PackingCluster>> &getClusters() const
-    {
-        return Packer::clusters_;
-    }
+    const std::vector<std::shared_ptr<PackingCluster>> &getClusters() const { return Packer::clusters_; }
 
     /**
      * @brief Get the total number of bins required.
@@ -48,10 +32,12 @@ public:
     const int getNumberOfBins() const
     {
         int numberOfBins = 0;
-        for (auto &cluster : clusters_)
+
+        for (const std::shared_ptr<PackingCluster> &cluster : clusters_)
         {
-            numberOfBins += cluster->getPackedBins().size();
+            numberOfBins += (int)cluster->getPackedBins().size();
         };
+
         return numberOfBins;
     }
 
@@ -62,14 +48,16 @@ public:
      */
     const double getTotalVolumeUtilPercentage() const
     {
-        double runningUtilSum = 0;
-        for (auto &cluster : clusters_)
+        double runningUtilSum = 0.0;
+
+        for (const std::shared_ptr<PackingCluster> &cluster : clusters_)
         {
-            for (auto &bin : cluster->getPackedBins())
+            for (const std::shared_ptr<Bin> &bin : cluster->getPackedBins())
             {
                 runningUtilSum += bin->getRealActualVolumeUtilPercentage();
             };
         };
+
         return runningUtilSum / Packer::getNumberOfBins();
     };
 
@@ -81,9 +69,10 @@ public:
     const double getTotalWeightUtilPercentage() const
     {
         double runningUtilSum = 0.0;
-        for (auto &cluster : clusters_)
+
+        for (const std::shared_ptr<PackingCluster> &cluster : clusters_)
         {
-            for (auto &bin : cluster->getPackedBins())
+            for (const std::shared_ptr<Bin> &bin : cluster->getPackedBins())
             {
                 runningUtilSum += bin->getRealActualWeightUtilPercentage();
             };
@@ -104,7 +93,7 @@ public:
             return;
         };
 
-        std::shared_ptr<PackingCluster> newCluster = std::make_shared<PackingCluster>(Packer::clusters_.size() + 1, Packer::context_);
+        std::shared_ptr<PackingCluster> newCluster = std::make_shared<PackingCluster>((int)Packer::clusters_.size() + 1, Packer::context_);
 
         if (!Packer::clusters_.empty())
         {
@@ -114,22 +103,6 @@ public:
         newCluster->startPacking(aItemsToBePacked);
 
         Packer::clusters_.push_back(newCluster);
-    };
-
-    /**
-     * @brief Method called to free memory allocated to the trees for all bins.
-     *
-     */
-    void freeMemory()
-    {
-        for (auto &cluster : clusters_)
-        {
-            for (auto &bin : cluster->getPackedBins())
-            {
-                /* Free memory again, how to do this in a more structured way? */
-                bin->Bin::kdTree_->KdTree::deleteAllNodesHelper();
-            };
-        };
     };
 };
 

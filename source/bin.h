@@ -19,7 +19,7 @@ private:
      *
      * @param itemBeingPlaced
      */
-    void removeFromXFreeItems(const std::shared_ptr<Item> itemBeingPlaced)
+    void removeFromXFreeItems(const std::shared_ptr<Item> &itemBeingPlaced)
     {
         Bin::xFreeItems_.erase(
             std::remove_if(begin(Bin::xFreeItems_), end(Bin::xFreeItems_), [&](int &itemInBinKey) -> bool
@@ -36,7 +36,7 @@ private:
      *
      * @param itemBeingPlaced
      */
-    void removeFromYFreeItems(const std::shared_ptr<Item> itemBeingPlaced)
+    void removeFromYFreeItems(const std::shared_ptr<Item> &itemBeingPlaced)
     {
         Bin::yFreeItems_.erase(
             std::remove_if(begin(Bin::yFreeItems_), end(Bin::yFreeItems_), [&](int &itemInBinKey) -> bool
@@ -53,7 +53,7 @@ private:
      *
      * @param itemBeingPlaced
      */
-    void removeFromZFreeItems(const std::shared_ptr<Item> itemBeingPlaced)
+    void removeFromZFreeItems(const std::shared_ptr<Item> &itemBeingPlaced)
     {
         Bin::zFreeItems_.erase(
             std::remove_if(begin(Bin::zFreeItems_), end(Bin::zFreeItems_), [&](int &itemInBinKey) -> bool
@@ -93,39 +93,6 @@ private:
             Bin::placedItemsMaxDimensions_[constants::axis::DEPTH] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::DEPTH], it->Item::depth_);
             Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT] = std::max(Bin::placedItemsMaxDimensions_[constants::axis::HEIGHT], it->Item::height_);
         };
-    };
-
-    /**
-     * @brief Update everything that needs to be updated once an item has found a fitting spot inside the bin.
-     *
-     * @param it
-     * @param binAxis
-     */
-    void updateWithFittedItem(const int &it, const int binAxis)
-    {
-        const std::shared_ptr<Item> itemOb = context_->getItem(it);
-
-        Bin::items_.push_back(it);
-        Bin::actualWeightUtil_ += itemOb->Item::weight_;
-        Bin::actualVolumeUtil_ += itemOb->Item::volume_;
-        Bin::furthestPointWidth_ = std::max(Bin::furthestPointWidth_, itemOb->Item::furthestPointWidth_);
-        Bin::furthestPointDepth_ = std::max(Bin::furthestPointDepth_, itemOb->Item::furthestPointDepth_);
-        Bin::furthestPointHeight_ = std::max(Bin::furthestPointHeight_, itemOb->Item::furthestPointHeight_);
-        Bin::updatePlacedMaxItemDimensions(itemOb, binAxis);
-        Bin::kdTree_->KdTree::addItemKeyToLeafHelper(it,
-                                                     {itemOb->Item::furthestPointWidth_,
-                                                      itemOb->Item::furthestPointDepth_,
-                                                      itemOb->Item::furthestPointHeight_});
-
-        /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/
-        const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
-                                            { return context_->getItem(i1)->Item::furthestPointHeight_ < context_->getItem(i2)->Item::furthestPointHeight_; });
-        Bin::xFreeItems_.push_back(it);
-        Bin::yFreeItems_.push_back(it);
-        Bin::zFreeItems_.insert(hiter, it);
-        Bin::removeFromXFreeItems(itemOb);
-        Bin::removeFromZFreeItems(itemOb);
-        Bin::removeFromYFreeItems(itemOb);
     };
 
 public:
@@ -180,29 +147,20 @@ public:
     };
 
     /**
-     * @brief Helper function to be able to update the bin without exposing the complete function.
-     *
-     * @param it
-     * @param binAxis
-     */
-    void updateWithFittedItemHelper(const int &it, const int binAxis)
-    {
-        Bin::updateWithFittedItem(it, binAxis);
-    };
-
-    /**
      * @brief Look for a position inside the bin to place the item.
+     *
+     * This function automatically places the item in either the fitted, or unfitted items.
      *
      * @param itemToFitKey
      */
-    void findItemPosition(const int &itemToFitKey)
+    void searchPositionAndPlaceItem(const int itemToFitKey)
     {
         bool fitted = false;
 
         std::vector<int> itemsWithFreeCorrespondingAxis;
-        std::shared_ptr<Item> itemToFit = Bin::context_->getModifiableItem(itemToFitKey);
+        std::shared_ptr<Item> &itemToFit = Bin::context_->getModifiableItem(itemToFitKey);
 
-        for (const auto binAxis : Bin::context_->getPackingDirection())
+        for (const int binAxis : Bin::context_->getRequestedBin()->getPackingDirection())
         {
 
             if (fitted)
@@ -223,9 +181,9 @@ public:
                 break;
             };
 
-            for (const auto itemInBinKey : itemsWithFreeCorrespondingAxis)
+            for (const int itemInBinKey : itemsWithFreeCorrespondingAxis)
             {
-                const std::shared_ptr<Item> itemInBin = Bin::context_->getItem(itemInBinKey);
+                const std::shared_ptr<Item>& itemInBin = Bin::context_->getItem(itemInBinKey);
                 itemToFit->Item::position_ = itemInBin->Item::position_;
 
                 switch (binAxis)
@@ -246,10 +204,10 @@ public:
                     continue;
                 };
 
-                if (Bin::placeItemInBin(itemToFitKey))
+                if (Bin::placeItem(itemToFitKey))
                 {
                     fitted = true;
-                    Bin::updateWithFittedItem(itemToFitKey, binAxis);
+                    Bin::addFittedItem(itemToFitKey, binAxis);
                     break;
                 }
             };
@@ -268,10 +226,10 @@ public:
      * @return true
      * @return false
      */
-    const bool placeItemInBin(const unsigned int aItemBeingPlacedKey)
+    const bool placeItem(const int aItemBeingPlacedKey)
     {
         bool intersectionFound = false;
-        std::shared_ptr<Item> itemBeingPlaced = Bin::context_->getModifiableItem(aItemBeingPlacedKey);
+        std::shared_ptr<Item> &itemBeingPlaced = Bin::context_->getModifiableItem(aItemBeingPlacedKey);
 
         /* Loop over items allowed rotation in order to find a fitting place. */
         for (int stringCharCounter = 0;
@@ -300,9 +258,9 @@ public:
                                                  intersectCandidates);
 
             /* Iterate over candidates and check for collision. */
-            for (auto intersectCandidateKey : intersectCandidates)
+            for (const int intersectCandidateKey : intersectCandidates)
             {
-                const std::shared_ptr<Item> intersectCandidate = Bin::context_->getItem(intersectCandidateKey);
+                const std::shared_ptr<Item> &intersectCandidate = Bin::context_->getItem(intersectCandidateKey);
 
                 /*  Check if X and Y axis are intersecting with a item already placed in the bin. */
                 if (!Geometry::intersectingXY(itemBeingPlaced, intersectCandidate))
@@ -333,7 +291,7 @@ public:
 
             /*  Checks if gravity should be considered while placing this item.
             This check is applied after an otherwise fitting item is found. */
-            if (!Bin::context_->itemObeysGravity(itemBeingPlaced, Bin::getFittedItems()))
+            if (!Bin::context_->getGravity()->itemObeysGravity(itemBeingPlaced, Bin::getFittedItems(), Bin::context_->getItemRegister()))
             {
                 continue;
             };
@@ -344,6 +302,39 @@ public:
 
         /* If this point is reached, the item did not fit in the bin. */
         return false;
+    };
+
+    /**
+     * @brief Update everything that needs to be updated once an item has found a fitting spot inside the bin.
+     *
+     * @param it
+     * @param binAxis
+     */
+    void addFittedItem(const int &it, const int &binAxis)
+    {
+        const std::shared_ptr<Item> &itemOb = context_->getItem(it);
+
+        Bin::items_.push_back(it);
+        Bin::actualWeightUtil_ += itemOb->Item::weight_;
+        Bin::actualVolumeUtil_ += itemOb->Item::volume_;
+        Bin::furthestPointWidth_ = std::max(Bin::furthestPointWidth_, itemOb->Item::furthestPointWidth_);
+        Bin::furthestPointDepth_ = std::max(Bin::furthestPointDepth_, itemOb->Item::furthestPointDepth_);
+        Bin::furthestPointHeight_ = std::max(Bin::furthestPointHeight_, itemOb->Item::furthestPointHeight_);
+        Bin::updatePlacedMaxItemDimensions(itemOb, binAxis);
+        Bin::kdTree_->KdTree::addItemKeyToLeafHelper(it,
+                                                     {itemOb->Item::furthestPointWidth_,
+                                                      itemOb->Item::furthestPointDepth_,
+                                                      itemOb->Item::furthestPointHeight_});
+
+        /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/
+        const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
+                                            { return context_->getItem(i1)->Item::furthestPointHeight_ < context_->getItem(i2)->Item::furthestPointHeight_; });
+        Bin::xFreeItems_.push_back(it);
+        Bin::yFreeItems_.push_back(it);
+        Bin::zFreeItems_.insert(hiter, it);
+        Bin::removeFromXFreeItems(itemOb);
+        Bin::removeFromYFreeItems(itemOb);
+        Bin::removeFromZFreeItems(itemOb);
     };
 };
 

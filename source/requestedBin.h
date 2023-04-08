@@ -55,13 +55,13 @@ private:
 
         std::transform(aDirection.begin(), aDirection.end(), aDirection.begin(), ::toupper);
 
-        if (aDirection == constants::bin::parameter::BACK_TO_FRONT)
+        if (aDirection == constants::bin::parameter::BACK_TO_FRONT_TEXT)
         {
-            RequestedBin::packingDirection_ = {constants::axis::WIDTH, constants::axis::HEIGHT, constants::axis::DEPTH};
+            RequestedBin::packingDirection_ = constants::bin::parameter::BACK_TO_FRONT_ARRAY;
         }
         else
         {
-            RequestedBin::packingDirection_ = {constants::axis::WIDTH, constants::axis::DEPTH, constants::axis::HEIGHT};
+            RequestedBin::packingDirection_ = constants::bin::parameter::BOTTOM_UP_ARRAY;
         };
     }
 

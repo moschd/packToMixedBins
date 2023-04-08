@@ -65,8 +65,11 @@ namespace constants
     {
         namespace parameter
         {
-            const std::string BOTTOM_UP = "BOTTOMUP";
-            const std::string BACK_TO_FRONT = "BACKTOFRONT";
+            const std::string BOTTOM_UP_TEXT = "BOTTOMUP";
+            const std::string BACK_TO_FRONT_TEXT = "BACKTOFRONT";
+            const std::array<int, 3> BOTTOM_UP_ARRAY = {constants::axis::WIDTH, constants::axis::DEPTH, constants::axis::HEIGHT};
+            const std::array<int, 3> BACK_TO_FRONT_ARRAY = {constants::axis::WIDTH, constants::axis::HEIGHT, constants::axis::DEPTH};
+
         }
     }
 

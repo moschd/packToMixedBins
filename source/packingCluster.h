@@ -8,6 +8,20 @@ private:
     std::shared_ptr<PackingContext> context_;
     int binIdCounter_;
     std::vector<int> unfittedItems_;
+    bool optimizedPackingCompatible_;
+
+    /**
+     * @brief Sets the flag indicating if the packing cluster can used optimized packing order.
+     *
+     * Optimized packing is currenly not available for back to front packing direction.
+     *
+     */
+    void setOptimizedPackingCompatible()
+    {
+        PackingCluster::optimizedPackingCompatible_ =
+            (PackingCluster::context_->getItemSortMethod() == constants::itemRegister::parameter::OPTIMIZED &&
+             PackingCluster::context_->getPackingDirection() == constants::bin::parameter::BOTTOM_UP_ARRAY);
+    }
 
     /**
      * @brief Function to be used when placing the first item inside a bin.
@@ -167,7 +181,7 @@ private:
         /* Start packing evaluation process. */
         std::unique_ptr<ItemPositionConstructor> positionConstructor = std::make_unique<ItemPositionConstructor>(PackingCluster::context_, aItemsToBePacked);
 
-        if (PackingCluster::context_->getItemSortMethod() == constants::itemRegister::parameter::OPTIMIZED)
+        if (PackingCluster::optimizedPackingCompatible_)
         {
             bool continueLayingLayers = true;
             while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
@@ -192,8 +206,6 @@ private:
 
                     myItem->allowedRotations_.insert(0, std::to_string(precalculatedItem->rotationType_));
 
-                    // std::cout << myItem->id_ << " " << myItem->allowedRotations_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
-
                     bool fits = PackingCluster::fitPrecalculatedItem(myItem->transientSysId_);
                     myItem->allowedRotations_.erase(0, 1);
 
@@ -205,7 +217,6 @@ private:
                     else
                     {
                         continueLayingLayers = false;
-                        // std::cout << myItem->id_ << " " << myItem->position_[0] << " " << myItem->position_[1] << " " << myItem->position_[2] << " " << myItem->width_ << " " << myItem->depth_ << " " << myItem->height_ << "\n";
                         myItem->reset();
                     }
                 };
@@ -257,6 +268,7 @@ public:
                                                                context_(aContext)
     {
         PackingCluster::binIdCounter_ = 0;
+        PackingCluster::setOptimizedPackingCompatible();
     };
 
     /**

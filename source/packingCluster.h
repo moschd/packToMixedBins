@@ -37,6 +37,12 @@ private:
                     break;
                 };
 
+                if (PackingCluster::wouldExceedLimit(relevantItems[i]))
+                {
+                    continueLayingLayers = false;
+                    break;
+                };
+
                 std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
                 const std::shared_ptr<Item> precalculatedItem = positionConstructor->getBaseItemByIndex(i);
 
@@ -230,12 +236,9 @@ private:
 
         for (const int itemToPackKey : aItemsToBePacked)
         {
-            if (PackingCluster::getLastCreatedBin()->getFittedItems().empty())
-            {
-                PackingCluster::placeItem(itemToPackKey);
-            }
+
             // checks for weight constraint
-            else if (PackingCluster::wouldExceedLimit(itemToPackKey))
+            if (PackingCluster::wouldExceedLimit(itemToPackKey))
             {
                 PackingCluster::getLastCreatedBin()->addUnfittedItem(itemToPackKey);
             }
@@ -244,6 +247,10 @@ private:
                      PackingCluster::context_->getItemRegister()->itemsAreEqual(itemToPackKey, PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems().back()))
             {
                 PackingCluster::getLastCreatedBin()->addUnfittedItem(itemToPackKey);
+            }
+            else if (PackingCluster::getLastCreatedBin()->getFittedItems().empty())
+            {
+                PackingCluster::placeItem(itemToPackKey);
             }
             else
             {

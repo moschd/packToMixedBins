@@ -1,0 +1,320 @@
+{
+    "bin": {
+        "gravityStrength": 75,
+        "type": "Pallet",
+        "width": 0.70,
+        "depth": 1.2,
+        "height": 1.2,
+        "maxWeight": 1500
+    },
+    "items": [
+        {
+            "id": "DTM001",
+            "width": 0.9,
+            "depth": 0.2,
+            "height": 1,
+            "weight": 1
+        },
+        {
+            "id": "DTM002",
+            "width": 1.2,
+            "depth": 0.2,
+            "height": 0.75,
+            "weight": 1
+        },
+        {
+            "id": "DTM003",
+            "width": 1.2,
+            "depth": 0.12,
+            "height": 1,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 1.2,
+            "depth": 0.5,
+            "height": 0.01,
+            "weight": 1
+        }
+    ]
+}

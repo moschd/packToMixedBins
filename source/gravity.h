@@ -30,8 +30,10 @@ struct SupportPoint
                                      << "\n"; }
 
     /// @brief Get the opposite axis from where the support was found.
+    // Input of 1 returns 0, input of 0 returns 1.
+    // Only supports axis of 0 and 1.
     /// @return const int
-    const int getOppositeAxis() const { return (supportingAxis_ + 1) % 1; };
+    const int getOppositeAxis() const { return 1 - supportingAxis_; };
 
     /// @brief Get the distance between the two supporting points.
     /// @param aSecondPoint
@@ -201,13 +203,11 @@ private:
         {
 
             const std::shared_ptr<Item> &itemInSpace = aMyItems->ItemRegister::getConstItem(itemInSpaceKey);
-
             // std::cout << "Supporting item in space is: " << itemInSpace->id_ << "\n";
 
             int xBottomReach = std::max(xMin, itemInSpace->position_[constants::axis::WIDTH]);
             int xTopReach = std::min(xMax, itemInSpace->furthestPointWidth_);
             const double xCoverage = (double)(xTopReach - xBottomReach) / (xMax - xMin) * 100;
-            // std::cout << xCoverage << "\n";
             const bool xAxisCovered = xCoverage >= VERTICE_SUPPORT_THRESHOLD;
 
             int yBottomReach = std::max(yMin, itemInSpace->position_[constants::axis::DEPTH]);
@@ -316,8 +316,8 @@ public:
             return !OBEYS_GRAVITY;
         }
 
-        return Gravity::hasSurfaceSupport(aItemBeingPlaced, supportingItems, aItemRegister);
-        // ||               Gravity::hasVerticeSupport(aItemBeingPlaced, supportingItems, aItemRegister)
+        return Gravity::hasSurfaceSupport(aItemBeingPlaced, supportingItems, aItemRegister) ||
+               Gravity::hasVerticeSupport(aItemBeingPlaced, supportingItems, aItemRegister);
     }
 };
 

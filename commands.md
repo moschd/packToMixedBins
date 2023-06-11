@@ -12,9 +12,9 @@ Switch COMPILE_TO_SO to 0 and run the command below.
     g++ source/main.cpp -ffast-math -fno-exceptions -fno-rtti -O3 -o main -l jsoncpp
 
 ## Compile for code profling
-    g++ -o first -pg first.cpp -pg -l jsoncpp
-    ./first
-    gprof first > profile.txt
+    g++ -o main -pg source/main.cpp -l jsoncpp
+    ./main
+    gprof main > profile.txt
 
 
 ## Compile flags

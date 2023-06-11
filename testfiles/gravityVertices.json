@@ -315,6 +315,118 @@
             "depth": 0.5,
             "height": 0.01,
             "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.5,
+            "depth": 0.5,
+            "height": 0.02,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.5,
+            "depth": 0.5,
+            "height": 0.02,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.5,
+            "depth": 0.5,
+            "height": 0.02,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.5,
+            "depth": 0.5,
+            "height": 0.02,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.5,
+            "depth": 0.5,
+            "height": 0.02,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
+        },
+        {
+            "id": "DTM004",
+            "width": 0.2,
+            "depth": 0.2,
+            "height": 0.148,
+            "weight": 1
         }
     ]
 }

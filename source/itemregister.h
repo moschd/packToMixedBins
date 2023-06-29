@@ -142,6 +142,29 @@ public:
                 itemToCompare2->Item::height_ == itemToCompare1->Item::height_ &&
                 itemToCompare2->Item::allowedRotations_ == itemToCompare1->Item::allowedRotations_);
     };
+
+    /**
+     * @brief Returns the total volume of the complete packing request.
+     *
+     * @return const double
+     */
+    const std::unordered_map<std::string, double> getTotalVolumeMap()
+    {
+        std::unordered_map<std::string, double> volumeMap;
+
+        for (const std::vector<int> itemVector : ItemRegister::getSortedItemConsKeyVectors())
+        {
+            const std::string key = ItemRegister::getConstItem(itemVector.front())->itemConsolidationKey_;
+
+            volumeMap[key] = 0.0;
+            for (const int aItemKey : itemVector)
+            {
+                volumeMap[key] += ItemRegister::getConstItem(aItemKey)->getRealVolume();
+            }
+        };
+
+        return volumeMap;
+    };
 };
 
 #endif

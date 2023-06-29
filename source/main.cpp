@@ -24,7 +24,7 @@ Compile to a shared object file.
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennis/packingOptimizerCompany/algorithms/packToBin"
-#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/test1.json"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
 
@@ -53,6 +53,7 @@ Include necessary files.
 #include "packingCluster.h"
 #include "packer.h"
 #include "outgoingJsonBuilder.h"
+#include "packingResultEvaluator.h"
 
 /*
 Driver code.
@@ -145,6 +146,9 @@ int main()
     myfile << resultJson;
     myfile.close();
     std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
+    std::cout << "----\n\n";
+    std::unique_ptr<PackingResultEvaluator> evaluator = std::make_unique<PackingResultEvaluator>(packingProcessor);
+
     return 1;
 };
 #endif

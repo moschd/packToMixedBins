@@ -19,15 +19,15 @@ public:
 
   void evaluate()
   {
-    std::cout << "Evaluating.\n";
+    std::cout << "Running evaluation.\n";
 
     double totalVolumeOfItems = 0.0;
     for (const auto &consKeyVolumePair : PackingResultEvaluator::packingProcessor_.getContext()->getItemRegister()->getTotalVolumeMap())
     {
-      std::cout << consKeyVolumePair.first << "\n";
-      std::cout << consKeyVolumePair.second << "\n";
+      std::cout << "Key:" << consKeyVolumePair.first << " volume: " << consKeyVolumePair.second << "\n";
       totalVolumeOfItems += consKeyVolumePair.second;
     };
+    std::cout << "\n";
 
     const int totalBinsUsed = packingProcessor_.getNumberOfBins();
     const double availableVolumePerBin = packingProcessor_.getContext()->getRequestedBin()->getMaxVolume();

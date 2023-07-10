@@ -291,7 +291,7 @@ public:
 
             /*  Checks if gravity should be considered while placing this item.
             This check is applied after an otherwise fitting item is found. */
-            if (!Bin::context_->getGravity()->itemObeysGravity(itemBeingPlaced, Bin::getFittedItems(), Bin::context_->getItemRegister()))
+            if (!Bin::context_->getGravity()->itemObeysGravity(itemBeingPlaced, Bin::getFittedItems()))
             {
                 continue;
             };

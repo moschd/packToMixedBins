@@ -2,8 +2,8 @@
 #define GRAVITY_H
 
 #define OBEYS_GRAVITY true
-#define VERTICE_SUPPORT_THRESHOLD 65.0
-#define VERTICE_DISTANCE_THRESHOLD 50.0
+#define DEFAULT_VERTICE_SUPPORT_THRESHOLD 65.0
+#define DEFAULT_VERTICE_DISTANCE_THRESHOLD 50.0
 
 /*
     GRAVITY.
@@ -51,6 +51,7 @@ class Gravity
 {
 private:
     double gravityStrength_;
+    std::shared_ptr<ItemRegister> itemRegister_;
 
     /**
      * @brief Checks if the item is placed on the ground, if so, gravity will always be obeyed.
@@ -75,14 +76,13 @@ private:
      * @return const std::vector<int>
      */
     const std::vector<int> collectSupportingItems(const std::shared_ptr<Item> &aItemBeingPlaced,
-                                                  const std::vector<int> &aItemsInBin,
-                                                  const std::shared_ptr<ItemRegister> &aMyItems) const
+                                                  const std::vector<int> &aItemsInBin) const
     {
         std::vector<int> supportingItems;
 
         for (auto const &itemInSpaceKey : aItemsInBin)
         {
-            const std::shared_ptr<Item> &itemInSpace = aMyItems->ItemRegister::getConstItem(itemInSpaceKey);
+            const std::shared_ptr<Item> &itemInSpace = Gravity::itemRegister_->ItemRegister::getConstItem(itemInSpaceKey);
             if (aItemBeingPlaced->Item::position_[constants::axis::HEIGHT] == itemInSpace->Item::furthestPointHeight_ &&
                 Geometry::intersectingXY(aItemBeingPlaced, itemInSpace))
             {
@@ -149,15 +149,14 @@ private:
      * @return false
      */
     const bool hasSurfaceSupport(const std::shared_ptr<Item> &aItemBeingPlaced,
-                                 const std::vector<int> &aSupportingItems,
-                                 const std::shared_ptr<ItemRegister> &aMyItems) const
+                                 const std::vector<int> &aSupportingItems) const
     {
         bool gravityFit = !OBEYS_GRAVITY;
         double supportedSurfaceAreaPercentage = 0.0;
 
         for (const int &itemInSpaceKey : aSupportingItems)
         {
-            const std::shared_ptr<Item> &itemInSpace = aMyItems->ItemRegister::getConstItem(itemInSpaceKey);
+            const std::shared_ptr<Item> &itemInSpace = Gravity::itemRegister_->ItemRegister::getConstItem(itemInSpaceKey);
 
             if (gravityFit)
             {
@@ -185,8 +184,7 @@ private:
     };
 
     const bool hasVerticeSupport(const std::shared_ptr<Item> &aItemBeingPlaced,
-                                 const std::vector<int> &aSupportingItems,
-                                 const std::shared_ptr<ItemRegister> &aMyItems) const
+                                 const std::vector<int> &aSupportingItems) const
     {
         bool gravityFit = !OBEYS_GRAVITY;
 
@@ -195,25 +193,22 @@ private:
         const int yMin = aItemBeingPlaced->position_[constants::axis::DEPTH];
         const int yMax = aItemBeingPlaced->furthestPointDepth_;
 
-        // std::cout << "Item being placed: " << aItemBeingPlaced->id_ << "\n";
-
         std::vector<SupportPoint> supportPoints;
 
         for (const int &itemInSpaceKey : aSupportingItems)
         {
 
-            const std::shared_ptr<Item> &itemInSpace = aMyItems->ItemRegister::getConstItem(itemInSpaceKey);
-            // std::cout << "Supporting item in space is: " << itemInSpace->id_ << "\n";
+            const std::shared_ptr<Item> &itemInSpace = Gravity::itemRegister_->ItemRegister::getConstItem(itemInSpaceKey);
 
             int xBottomReach = std::max(xMin, itemInSpace->position_[constants::axis::WIDTH]);
             int xTopReach = std::min(xMax, itemInSpace->furthestPointWidth_);
             const double xCoverage = (double)(xTopReach - xBottomReach) / (xMax - xMin) * 100;
-            const bool xAxisCovered = xCoverage >= VERTICE_SUPPORT_THRESHOLD;
+            const bool xAxisCovered = xCoverage >= DEFAULT_VERTICE_SUPPORT_THRESHOLD;
 
             int yBottomReach = std::max(yMin, itemInSpace->position_[constants::axis::DEPTH]);
             int yTopReach = std::min(yMax, itemInSpace->furthestPointDepth_);
             const double yCoverage = (double)(yTopReach - yBottomReach) / (yMax - yMin) * 100;
-            const bool yAxisCovered = yCoverage >= VERTICE_SUPPORT_THRESHOLD;
+            const bool yAxisCovered = yCoverage >= DEFAULT_VERTICE_SUPPORT_THRESHOLD;
 
             if (xAxisCovered || yAxisCovered)
             {
@@ -240,17 +235,17 @@ private:
                     break;
                 };
 
+                // No need to check if supporting points are compatible if:
+                // 1. They are the same, i.e. same parent item.
+                // 2. They are not supporting along the same axis.
                 if (firstSupportPoint.parentItem_ == secondSupportPoint.parentItem_ ||
                     firstSupportPoint.supportingAxis_ != secondSupportPoint.supportingAxis_)
                 {
                     continue;
                 };
 
-                // firstSupportPoint.printMe();
-                // secondSupportPoint.printMe();
-
                 const int totalDistance = (firstSupportPoint.getOppositeAxis() == constants::axis::WIDTH ? aItemBeingPlaced->width_ : aItemBeingPlaced->depth_);
-                gravityFit = (firstSupportPoint.supportDistance(secondSupportPoint) / totalDistance * 100) >= VERTICE_DISTANCE_THRESHOLD;
+                gravityFit = (firstSupportPoint.supportDistance(secondSupportPoint) / totalDistance * 100) >= DEFAULT_VERTICE_DISTANCE_THRESHOLD;
             }
         };
 
@@ -260,7 +255,9 @@ private:
 public:
     bool highLevelGravityEnabled_;
 
-    Gravity(int aGravityStrengthPercentage) : gravityStrength_(aGravityStrengthPercentage)
+    Gravity(int aGravityStrengthPercentage,
+            std::shared_ptr<ItemRegister> &aItemRegister) : gravityStrength_(aGravityStrengthPercentage),
+                                                            itemRegister_(aItemRegister)
     {
         Gravity::highLevelGravityEnabled_ = (gravityStrength_ > 0.0);
     };
@@ -292,8 +289,7 @@ public:
      * @return false
      */
     const bool itemObeysGravity(const std::shared_ptr<Item> &aItemBeingPlaced,
-                                const std::vector<int> &aItemsInBin,
-                                const std::shared_ptr<ItemRegister> &aItemRegister) const
+                                const std::vector<int> &aItemsInBin) const
     {
 
         // If gravity is off, item is obeying gravity.
@@ -308,16 +304,18 @@ public:
             return OBEYS_GRAVITY;
         };
 
-        const std::vector<int> supportingItems = Gravity::collectSupportingItems(aItemBeingPlaced, aItemsInBin, aItemRegister);
+        const std::vector<int> supportingItems = Gravity::collectSupportingItems(aItemBeingPlaced, aItemsInBin);
 
         // If there are no supporting items, the item can not obey gravity.
+        // Return false.
         if (supportingItems.empty())
         {
             return !OBEYS_GRAVITY;
         }
 
-        return Gravity::hasSurfaceSupport(aItemBeingPlaced, supportingItems, aItemRegister) ||
-               Gravity::hasVerticeSupport(aItemBeingPlaced, supportingItems, aItemRegister);
+        // Evaluate the different types of gravity support.
+        return Gravity::hasSurfaceSupport(aItemBeingPlaced, supportingItems) ||
+               Gravity::hasVerticeSupport(aItemBeingPlaced, supportingItems);
     }
 };
 

@@ -20,11 +20,11 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE false
+#define COMPILE_TO_SHARED_OBJECT_FILE true
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennis/packingOptimizerCompany/algorithms/packToBin"
-#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/test1.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
 
@@ -90,7 +90,8 @@ int main()
 
         std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(incomingJsonBin[constants::json::inbound::bin::SORT_METHOD].asString(),
                                                                                     incomingJsonItems.size());
-        std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble());
+        std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(incomingJsonBin[constants::json::inbound::bin::GRAVITY_STRENGTH].asDouble(),
+                                                                           itemRegister);
         std::shared_ptr<RequestedBin> requestedBin = std::make_shared<RequestedBin>(incomingJsonBin[constants::json::inbound::bin::TYPE].asString(),
                                                                                     incomingJsonBin[constants::json::inbound::bin::WIDTH].asDouble() * MULTIPLIER,
                                                                                     incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble() * MULTIPLIER,

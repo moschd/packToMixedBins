@@ -103,7 +103,7 @@ private:
     /// @brief Determines in which direction rows will be added. (not in which direction boxes will be added...).
     /// First, check if there is an axis that would fit more boxes, if there is, it wins.
     /// If the max is equal for both axi, check the combined value, if one is higher, it wins.
-    /// If the combined value is equal, check which would have the lowest left over space, lowest wins.
+    /// If the combined value is equal, check which would have the least left over space, least wins.
     void determinePackingAxis()
     {
         int bestAxis = constants::axis::DEPTH;

@@ -20,7 +20,7 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE true
+#define COMPILE_TO_SHARED_OBJECT_FILE false
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennis/packingOptimizerCompany/algorithms/packToBin"
@@ -39,7 +39,7 @@ Include necessary files.
 #include <vector>
 #include <chrono>
 #include <ext/pb_ds/assoc_container.hpp>
-#include <jsoncpp/json/json.h>
+#include "../dist/jsoncpp.cpp"
 #include "constants.h"
 #include "geometry.h"
 #include "kd-tree.h"

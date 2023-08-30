@@ -183,7 +183,7 @@ public:
 
             for (const int itemInBinKey : itemsWithFreeCorrespondingAxis)
             {
-                const std::shared_ptr<Item>& itemInBin = Bin::context_->getItem(itemInBinKey);
+                const std::shared_ptr<Item> &itemInBin = Bin::context_->getItem(itemInBinKey);
                 itemToFit->Item::position_ = itemInBin->Item::position_;
 
                 switch (binAxis)

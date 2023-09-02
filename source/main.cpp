@@ -20,10 +20,10 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE false
+#define COMPILE_TO_SHARED_OBJECT_FILE true
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
-#define LOCAL_FOLDER "/home/dennis/packingOptimizerCompany/algorithms/packToBin"
+#define LOCAL_FOLDER "/home/dennismosch/packingOptimizerCompany/algorithms/packToBin"
 #define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/test1.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
@@ -34,12 +34,13 @@ Include necessary files.
 #include <memory>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <stack>
 #include <unordered_map>
 #include <vector>
 #include <chrono>
 #include <ext/pb_ds/assoc_container.hpp>
-#include "../dist/jsoncpp.cpp"
+#include "myjsoncpp/json/json.h"
 #include "constants.h"
 #include "geometry.h"
 #include "kd-tree.h"
@@ -81,9 +82,8 @@ int main()
     std::ifstream incomingJson(LOCAL_INPUT_FILE);
 #endif
 
-        Json::Reader reader;
         Json::Value inboundRoot;
-        reader.parse(incomingJson, inboundRoot);
+        std::stringstream(incomingJson) >> inboundRoot;
 
         const Json::Value incomingJsonBin = inboundRoot[constants::json::inbound::bin::BIN];
         const Json::Value incomingJsonItems = inboundRoot[constants::json::inbound::item::ITEMS];

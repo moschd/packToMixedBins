@@ -55,7 +55,7 @@ namespace constants
         {
             const std::string ALLOW_ALL = "ALLOWALL";
             const std::string NO_ITEMS_ON_TOP = "NOITEMSONTOP";
-            const std::string MUST_BE_BOTTOM_NO_ITEMS_ON_TOP = "MUSTBEBOTTOMNOITEMSONTOP";
+            const std::string BOTTOM_NO_ITEMS_ON_TOP = "BOTTOMNOITEMSONTOP";
         };
     }
 
@@ -165,7 +165,7 @@ namespace constants
             {
                 const std::string ALLOW_ALL = "allowAll";
                 const std::string NO_ITEMS_ON_TOP = "noItemsOnTop";
-                const std::string MUST_BE_BOTTOM_NO_ITEMS_ON_TOP = "mustBeBottomNoItemsOnTop";
+                const std::string BOTTOM_NO_ITEMS_ON_TOP = "bottomNoItemsOnTop";
             };
 
         };

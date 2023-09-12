@@ -331,7 +331,7 @@ public:
         Bin::yFreeItems_.push_back(it);
 
         // Only add the item for Z stacking if the item is allowed to be stacked on top of.
-        if (itemOb->stackingStyle_ != constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP &&
+        if (itemOb->stackingStyle_ != constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP &&
             itemOb->stackingStyle_ != constants::item::parameter::NO_ITEMS_ON_TOP)
         {
             /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/

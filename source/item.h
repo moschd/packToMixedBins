@@ -9,9 +9,9 @@ private:
   {
     std::transform(aStackingStyle.begin(), aStackingStyle.end(), aStackingStyle.begin(), ::toupper);
 
-    if (aStackingStyle == constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP)
+    if (aStackingStyle == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP)
     {
-      Item::stackingStyle_ = constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP;
+      Item::stackingStyle_ = constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP;
     }
     else if (aStackingStyle == constants::item::parameter::NO_ITEMS_ON_TOP)
     {

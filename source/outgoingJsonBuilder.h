@@ -60,9 +60,9 @@ private:
         {
             JsonItem[constants::json::item::STACKING_STYLE] = constants::json::item::stackingStyle::NO_ITEMS_ON_TOP;
         }
-        else if (item->Item::stackingStyle_ == constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP)
+        else if (item->Item::stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP)
         {
-            JsonItem[constants::json::item::STACKING_STYLE] = constants::json::item::stackingStyle::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP;
+            JsonItem[constants::json::item::STACKING_STYLE] = constants::json::item::stackingStyle::BOTTOM_NO_ITEMS_ON_TOP;
         }
 
         return JsonItem;

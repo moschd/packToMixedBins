@@ -68,7 +68,7 @@ private:
             {
 
                 // If mustBeBottomNoItemsOnTop, we pack the item as very first no matter the volume/weight. So we append this itemKey to the final vector later.
-                if (aItemVector[idx]->Item::stackingStyle_ == constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP)
+                if (aItemVector[idx]->Item::stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP)
                 {
                     mustBeBottomNoItemsOnTop.push_back(aItemVector[idx]->Item::transientSysId_);
                 }
@@ -250,7 +250,7 @@ public:
         bool containsItem = false;
         for (const int itemKey : aItemKeysToBeChecked)
         {
-            if (ItemRegister::getConstItem(itemKey)->stackingStyle_ == constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP)
+            if (ItemRegister::getConstItem(itemKey)->stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP)
             {
                 containsItem = true;
                 break;

@@ -20,11 +20,11 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE true
+#define COMPILE_TO_SHARED_OBJECT_FILE false
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennismosch/packingOptimizerCompany/algorithms/packToBin"
-#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/test1.json"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
 
@@ -79,7 +79,14 @@ int main()
     const bool includeItems = DEFAULT_INCLUDE_ITEMS;
     const bool itemDimensionsAfter = DEFAULT_ITEM_DIMENSIONS_AFTER;
     const int responsePrecision = DEFAULT_RESPONSE_PRECISION;
-    std::ifstream incomingJson(LOCAL_INPUT_FILE);
+    std::ifstream incomingJsonFile(LOCAL_INPUT_FILE);
+
+    std::string line, text;
+    while (std::getline(incomingJsonFile, line))
+    {
+        text += line + "\n";
+    }
+    const char *incomingJson = text.c_str();
 #endif
 
         Json::Value inboundRoot;
@@ -113,7 +120,8 @@ int main()
                                        incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
                                        incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
                                        incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
-                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble()));
+                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::STACKING_STYLE].asString()));
         };
 
         /* Split items by consolidation key and start packing. */

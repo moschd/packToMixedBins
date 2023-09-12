@@ -3,12 +3,33 @@
 
 class Item : public GeometricShape
 {
+
+private:
+  void setStackingStyle(std::string aStackingStyle)
+  {
+    std::transform(aStackingStyle.begin(), aStackingStyle.end(), aStackingStyle.begin(), ::toupper);
+
+    if (aStackingStyle == constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP)
+    {
+      Item::stackingStyle_ = constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP;
+    }
+    else if (aStackingStyle == constants::item::parameter::NO_ITEMS_ON_TOP)
+    {
+      Item::stackingStyle_ = constants::item::parameter::NO_ITEMS_ON_TOP;
+    }
+    else
+    {
+      Item::stackingStyle_ = constants::item::parameter::ALLOW_ALL;
+    };
+  }
+
 public:
   std::string id_;
   int transientSysId_;
   double weight_;
   std::string itemConsolidationKey_;
   double gravityStrength_;
+  std::string stackingStyle_;
 
   Item(int aSystemId,
        std::string aItemId,
@@ -18,13 +39,15 @@ public:
        double aWeight,
        std::string aItemConsKey,
        std::string aAllowedRotations,
-       double aGravityStrength) : transientSysId_(aSystemId),
-                                  weight_(aWeight),
-                                  itemConsolidationKey_(aItemConsKey),
-                                  gravityStrength_(aGravityStrength),
-                                  GeometricShape(aWidth, aDepth, aHeight, aAllowedRotations)
+       double aGravityStrength,
+       std::string aStackingStyle) : transientSysId_(aSystemId),
+                                     weight_(aWeight),
+                                     itemConsolidationKey_(aItemConsKey),
+                                     gravityStrength_(aGravityStrength),
+                                     GeometricShape(aWidth, aDepth, aHeight, aAllowedRotations)
   {
     id_ = aItemId.size() ? aItemId : "NA";
+    setStackingStyle(aStackingStyle);
   };
 
   const double getRealWeight() const { return weight_; };

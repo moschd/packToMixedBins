@@ -86,7 +86,8 @@ private:
                                        context_->getItem(distinctItemInfo->first)->weight_,
                                        "none",
                                        "01",
-                                       context_->getItem(distinctItemInfo->first)->gravityStrength_);
+                                       context_->getItem(distinctItemInfo->first)->gravityStrength_,
+                                       context_->getItem(distinctItemInfo->first)->stackingStyle_);
 
             const double itemSurfaceArea = baseItem->getRealBottomSurfaceArea();
             const int availableItems = (int)distinctItemInfo->second.size();

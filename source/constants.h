@@ -49,15 +49,28 @@ namespace constants
         }
     }
 
+    namespace item
+    {
+        namespace parameter
+        {
+            const std::string ALLOW_ALL = "ALLOWALL";
+            const std::string NO_ITEMS_ON_TOP = "NOITEMSONTOP";
+            const std::string MUST_BE_BOTTOM_NO_ITEMS_ON_TOP = "MUSTBEBOTTOMNOITEMSONTOP";
+        };
+    }
+
     constexpr const unsigned int R{constants::axis::ALL.size()};
 
     namespace itemRegister
     {
         namespace parameter
         {
-            const std::string VOLUME = "VOLUME";
-            const std::string WEIGHT = "WEIGHT";
-            const std::string OPTIMIZED = "OPTIMIZED";
+            namespace sortMethod
+            {
+                const std::string VOLUME = "VOLUME";
+                const std::string WEIGHT = "WEIGHT";
+                const std::string OPTIMIZED = "OPTIMIZED";
+            }
         }
     }
 
@@ -146,6 +159,15 @@ namespace constants
             const std::string ROTATION_TYPE = "rotationType";
             const std::string ROTATION_TYPE_DESCRIPTION = "rotationTypeDescription";
             const std::string GRAVITY_STRENGTH = "gravityStrength";
+            const std::string STACKING_STYLE = "stackingStyle";
+
+            namespace stackingStyle
+            {
+                const std::string ALLOW_ALL = "allowAll";
+                const std::string NO_ITEMS_ON_TOP = "noItemsOnTop";
+                const std::string MUST_BE_BOTTOM_NO_ITEMS_ON_TOP = "mustBeBottomNoItemsOnTop";
+            };
+
         };
     };
 }

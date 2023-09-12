@@ -77,7 +77,7 @@ private:
     };
 
     /**
-     * @brief Sets the flag indicating if the packing cluster can used optimized packing order.
+     * @brief Sets the flag indicating if the packing cluster can use optimized packing order.
      *
      * Optimized packing is currenly not available for back to front packing direction.
      *
@@ -85,7 +85,7 @@ private:
     void setOptimizedPackingCompatible()
     {
         PackingCluster::optimizedPackingCompatible_ =
-            (PackingCluster::context_->getItemRegister()->getSortMethod() == constants::itemRegister::parameter::OPTIMIZED &&
+            (PackingCluster::context_->getItemRegister()->getSortMethod() == constants::itemRegister::parameter::sortMethod::OPTIMIZED &&
              PackingCluster::context_->getRequestedBin()->getPackingDirection() == constants::bin::parameter::BOTTOM_UP_ARRAY);
     }
 
@@ -229,7 +229,7 @@ private:
          * Then, perform iterative item position searching method on the left-over items.
          *
          */
-        if (PackingCluster::optimizedPackingCompatible_)
+        if (PackingCluster::optimizedPackingCompatible_ && !PackingCluster::context_->getItemRegister()->containsItemWithStackingStyle(aItemsToBePacked))
         {
             aItemsToBePacked = PackingCluster::optimizedLayerPacking(aItemsToBePacked);
         };

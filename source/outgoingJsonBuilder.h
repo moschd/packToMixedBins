@@ -50,6 +50,21 @@ private:
         {
             JsonItem[constants::json::item::ITEM_CONS_KEY] = item->Item::itemConsolidationKey_;
         };
+
+        // Stacking style.
+        if (item->Item::stackingStyle_ == constants::item::parameter::ALLOW_ALL)
+        {
+            JsonItem[constants::json::item::STACKING_STYLE] = constants::json::item::stackingStyle::ALLOW_ALL;
+        }
+        else if (item->Item::stackingStyle_ == constants::item::parameter::NO_ITEMS_ON_TOP)
+        {
+            JsonItem[constants::json::item::STACKING_STYLE] = constants::json::item::stackingStyle::NO_ITEMS_ON_TOP;
+        }
+        else if (item->Item::stackingStyle_ == constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP)
+        {
+            JsonItem[constants::json::item::STACKING_STYLE] = constants::json::item::stackingStyle::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP;
+        }
+
         return JsonItem;
     };
 

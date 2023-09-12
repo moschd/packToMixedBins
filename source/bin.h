@@ -310,7 +310,7 @@ public:
      * @param it
      * @param binAxis
      */
-    void addFittedItem(const int &it, const int &binAxis)
+    void addFittedItem(const int &it, const int &aBinAxis)
     {
         const std::shared_ptr<Item> &itemOb = context_->getItem(it);
 
@@ -320,18 +320,26 @@ public:
         Bin::furthestPointWidth_ = std::max(Bin::furthestPointWidth_, itemOb->Item::furthestPointWidth_);
         Bin::furthestPointDepth_ = std::max(Bin::furthestPointDepth_, itemOb->Item::furthestPointDepth_);
         Bin::furthestPointHeight_ = std::max(Bin::furthestPointHeight_, itemOb->Item::furthestPointHeight_);
-        Bin::updatePlacedMaxItemDimensions(itemOb, binAxis);
+        Bin::updatePlacedMaxItemDimensions(itemOb, aBinAxis);
         Bin::kdTree_->KdTree::addItemKeyToLeafHelper(it,
                                                      {itemOb->Item::furthestPointWidth_,
                                                       itemOb->Item::furthestPointDepth_,
                                                       itemOb->Item::furthestPointHeight_});
 
-        /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/
-        const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
-                                            { return context_->getItem(i1)->Item::furthestPointHeight_ < context_->getItem(i2)->Item::furthestPointHeight_; });
+        // Add items to free axis vectors, allowing new items to be placed next/on top of it.
         Bin::xFreeItems_.push_back(it);
         Bin::yFreeItems_.push_back(it);
-        Bin::zFreeItems_.insert(hiter, it);
+
+        // Only add the item for Z stacking if the item is allowed to be stacked on top of.
+        if (itemOb->stackingStyle_ != constants::item::parameter::MUST_BE_BOTTOM_NO_ITEMS_ON_TOP &&
+            itemOb->stackingStyle_ != constants::item::parameter::NO_ITEMS_ON_TOP)
+        {
+            /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/
+            const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
+                                                { return context_->getItem(i1)->Item::furthestPointHeight_ < context_->getItem(i2)->Item::furthestPointHeight_; });
+            Bin::zFreeItems_.insert(hiter, it);
+        }
+
         Bin::removeFromXFreeItems(itemOb);
         Bin::removeFromYFreeItems(itemOb);
         Bin::removeFromZFreeItems(itemOb);

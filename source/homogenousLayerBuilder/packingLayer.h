@@ -26,7 +26,8 @@ private:
             context_->getItem(BASE_ITEM_KEY)->weight_,
             "none",
             "01",
-            context_->getItem(BASE_ITEM_KEY)->gravityStrength_);
+            context_->getItem(BASE_ITEM_KEY)->gravityStrength_,
+            context_->getItem(BASE_ITEM_KEY)->stackingStyle_);
 
         /* Set correct attributes. */
         newItem->position_ = {aXLocation, aYLocation, PackingLayer::position_[constants::axis::HEIGHT]};

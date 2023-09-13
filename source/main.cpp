@@ -20,7 +20,7 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE true
+#define COMPILE_TO_SHARED_OBJECT_FILE false
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennismosch/packingOptimizerCompany/algorithms/packToBin"
@@ -72,6 +72,7 @@ extern "C"
     {
 
 #else
+
 int main()
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -125,7 +126,7 @@ int main()
         };
 
         /* Split items by consolidation key and start packing. */
-        for (const std::vector<int> sortedItemConsKeyVector : packingProcessor.getContext()->getItemRegister()->getSortedItemConsKeyVectors())
+        for (const std::vector<int> sortedItemConsKeyVector : packingProcessor.getContext()->getItemRegister()->getNewSortedItemKeys())
         {
             packingProcessor.startPackingCluster(sortedItemConsKeyVector);
         };

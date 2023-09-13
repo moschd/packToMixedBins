@@ -2,9 +2,10 @@
 	"bin": {
 		"type": "Pallet",
 		"maxWeight": 1500,
-		"width": 1.2,
+		"width": 1.1,
 		"height": 1.65,
-		"depth": 0.8
+		"depth": 1.1,
+		"gravityStrength": 25
 	},
 	"items": [
 		{
@@ -21,8 +22,7 @@
 			"height": 0.32,
 			"depth": 0.49,
 			"weight": 10,
-			"allowedRotations": "012345",
-			"stackingStyle":"mustBeBottomNoItemsOnTop"
+			"allowedRotations": "012345"
 		},
 		{
 			"id": "DTM003",

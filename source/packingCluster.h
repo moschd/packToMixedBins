@@ -237,6 +237,7 @@ private:
         for (const int itemToPackKey : aItemsToBePacked)
         {
 
+            // std::cout << itemToPackKey << " " << context_->getItemRegister()->getConstItem(itemToPackKey)->id_ << " " << context_->getItemRegister()->getConstItem(itemToPackKey)->transientSysId_ << "\n";
             // checks for weight constraint
             if (PackingCluster::wouldExceedLimit(itemToPackKey))
             {

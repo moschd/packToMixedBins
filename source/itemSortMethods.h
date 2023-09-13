@@ -37,12 +37,12 @@ struct consKeyAndWeightSorter
 //     }
 // };
 
-// struct volumeSorter
-// {
-//     inline const bool operator()(const std::shared_ptr<Item> one, const std::shared_ptr<Item> two) const
-//     {
-//         return one->Item::volume_ < two->Item::volume_;
-//     }
-// };
+struct volumeSorter
+{
+    inline const bool operator()(const std::shared_ptr<Item> one, const std::shared_ptr<Item> two) const
+    {
+        return one->Item::volume_ > two->Item::volume_;
+    }
+};
 
 #endif

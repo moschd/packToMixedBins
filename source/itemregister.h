@@ -6,6 +6,7 @@ struct ItemRegister
 private:
     std::string sortMethod_;
     std::vector<std::shared_ptr<Item>> completeItemVector_;
+    std::vector<int> completeItemKeyVector_;
     std::unordered_map<int, std::shared_ptr<Item>> completeItemMap_;
 
     /**
@@ -34,69 +35,198 @@ private:
     }
 
     /**
+     * @brief Split the provided items based on itemConsKey.
+     *
+     * @param aItemVector
+     * @return const std::vector<std::vector<int>>
+     */
+    const std::vector<std::vector<int>> splitItemsByConsKey(std::vector<int> aItemKeyVector) const
+    {
+
+        std::sort(aItemKeyVector.begin(), aItemKeyVector.end(), [this](int &itemKeyLeft, int &itemKeyRight)
+                  { return ItemRegister::getConstItem(itemKeyLeft)->itemConsolidationKey_ < ItemRegister::getConstItem(itemKeyRight)->itemConsolidationKey_; });
+
+        std::vector<std::vector<int>> FinalSortedItemConsKeyVectors = {std::vector<int>{getConstItem(aItemKeyVector.front())->Item::transientSysId_}};
+
+        for (int idx = 1; idx < aItemKeyVector.size(); idx++)
+        {
+            if (ItemRegister::getConstItem(aItemKeyVector[idx])->itemConsolidationKey_ ==
+                ItemRegister::getConstItem(FinalSortedItemConsKeyVectors.back().back())->Item::itemConsolidationKey_)
+            {
+
+                FinalSortedItemConsKeyVectors.back().push_back(ItemRegister::getConstItem(aItemKeyVector[idx])->Item::transientSysId_);
+            }
+            else
+            {
+                FinalSortedItemConsKeyVectors.push_back(std::vector<int>{ItemRegister::getConstItem(aItemKeyVector[idx])->Item::transientSysId_});
+            };
+        };
+
+        return FinalSortedItemConsKeyVectors;
+    };
+
+    /**
+     * @brief Move items with stacking style bottomNoItemsOnTop to the front of the vector.
+     * This function modifies the original vector.
+     *
+     * @param aItemKeyVector
+     */
+    void moveBottomNoItemsUpToFrontOfVector(std::vector<int> &aItemKeyVector) const
+    {
+        std::vector<int> mustBeBottomNoItemsOnTop = {};
+
+        auto it = aItemKeyVector.begin();
+        while (it != aItemKeyVector.end())
+        {
+            ItemRegister::getConstItem(*it)->Item::stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP
+                ? mustBeBottomNoItemsOnTop.push_back(*it),
+                it = aItemKeyVector.erase(it)
+                : it++;
+        };
+
+        aItemKeyVector.insert(aItemKeyVector.begin(), mustBeBottomNoItemsOnTop.begin(), mustBeBottomNoItemsOnTop.end());
+    };
+
+    /**
+     * @brief Returns a itemKeyVector sorted according to the sort method of the itemRegister.
+     *
+     * @param aItemKeyVector
+     * @return const std::vector<int>
+     */
+    const std::vector<int> sortItemKeysBySortMethod(std::vector<int> &aItemKeyVector) const
+    {
+
+        ItemRegister::sortMethod_ == constants::itemRegister::parameter::sortMethod::WEIGHT
+            ? ItemRegister::sortItemKeysBasedOnWeight(aItemKeyVector)
+            : ItemRegister::sortItemKeysBasedOnVolume(aItemKeyVector);
+
+        return aItemKeyVector;
+    }
+
+    /**
+     * @brief Sorts the give itemKeyVector based on the volume of the items inside.
+     * This function modifies the original vector.
+     *
+     * @param aItemKeyVector
+     */
+    void sortItemKeysBasedOnVolume(std::vector<int> &aItemKeyVector) const
+    {
+        std::sort(aItemKeyVector.begin(), aItemKeyVector.end(), [this](int &itemKeyLeft, int &itemKeyRight)
+                  { return ItemRegister::getConstItem(itemKeyLeft)->volume_ > ItemRegister::getConstItem(itemKeyRight)->volume_ ||
+                           (ItemRegister::getConstItem(itemKeyLeft)->volume_ == ItemRegister::getConstItem(itemKeyRight)->volume_ &&
+                            ItemRegister::getConstItem(itemKeyLeft)->transientSysId_ < ItemRegister::getConstItem(itemKeyRight)->transientSysId_); });
+    }
+
+    /**
+     * @brief Sorts the given itemKeyVector based on the weight of the items inside.
+     * This function modifies the original vector.
+     *
+     * @param aItemKeyVector
+     */
+    void sortItemKeysBasedOnWeight(std::vector<int> &aItemKeyVector) const
+    {
+        std::sort(aItemKeyVector.begin(), aItemKeyVector.end(), [this](int &itemKeyLeft, int &itemKeyRight)
+                  { return ItemRegister::getConstItem(itemKeyLeft)->weight_ > ItemRegister::getConstItem(itemKeyRight)->weight_ ||
+                           (ItemRegister::getConstItem(itemKeyLeft)->weight_ == ItemRegister::getConstItem(itemKeyRight)->weight_ &&
+                            ItemRegister::getConstItem(itemKeyLeft)->transientSysId_ < ItemRegister::getConstItem(itemKeyRight)->transientSysId_); });
+    }
+
+    /**
+     * @brief Get the Final Sorted Item Keys object
+     *
+     * @return const std::vector<std::vector<int>>
+     */
+    const std::vector<std::vector<int>> getFinalSortedItemKeys(std::vector<int> aItemKeyVector) const
+    {
+
+        std::vector<std::vector<int>> sortedByConsKeyAndSortMethod = {};
+
+        for (std::vector<int> itemKeysPerConsKey : ItemRegister::splitItemsByConsKey(aItemKeyVector))
+        {
+            sortedByConsKeyAndSortMethod.push_back(ItemRegister::sortItemKeysBySortMethod(itemKeysPerConsKey));
+        };
+
+        for (std::vector<int> &itemKeysPerConsKey : sortedByConsKeyAndSortMethod)
+        {
+            moveBottomNoItemsUpToFrontOfVector(itemKeysPerConsKey);
+        }
+
+        // for (std::vector<int> x : sortedByConsKeyAndSortMethod)
+        // {
+        //     std::cout << x.size() << "\n";
+        //     for (int y : x)
+        //     {
+        //         std::cout << y << "\n";
+        //     };
+        // };
+        return sortedByConsKeyAndSortMethod;
+    }
+
+    /**
      * @brief Create sorted item input vectors split by consolidation key.
      *
      * Create separete vector for each distinct itemConsKey, the items within each vector are sorted according to the sortMethod argument.
      * Returns a vector of vectors, each inner vector contains itemKeys.
      */
-    const std::vector<std::vector<int>> createSortedItemConsKeyVectors(std::vector<std::shared_ptr<Item>> &aItemVector) const
-    {
+    // const std::vector<std::vector<int>> createSortedItemConsKeyVectors(std::vector<std::shared_ptr<Item>> &aItemVector) const
+    // {
 
-        if (ItemRegister::sortMethod_ == constants::itemRegister::parameter::sortMethod::WEIGHT)
-        {
-            std::sort(aItemVector.begin(), aItemVector.end(), consKeyAndWeightSorter());
-        }
-        else
-        {
-            std::sort(aItemVector.begin(), aItemVector.end(), consKeyAndVolumeSorter());
-        };
+    //     getFinalSortedItemKeys(ItemRegister::completeItemKeyVector_);
+    //     if (ItemRegister::sortMethod_ == constants::itemRegister::parameter::sortMethod::WEIGHT)
+    //     {
+    //         std::sort(aItemVector.begin(), aItemVector.end(), consKeyAndWeightSorter());
+    //     }
+    //     else
+    //     {
+    //         std::sort(aItemVector.begin(), aItemVector.end(), consKeyAndVolumeSorter());
+    //     };
 
-        std::vector<std::vector<int>> FinalSortedItemConsKeyVectors = {std::vector<int>{aItemVector[0]->Item::transientSysId_}};
+    //     std::vector<std::vector<int>> FinalSortedItemConsKeyVectors = {std::vector<int>{aItemVector[0]->Item::transientSysId_}};
 
-        /**
-         * Vector to contain items with this particular stackingStyle, we collect them while iterating and then add them to the front
-         * of the vector once all items with that item cons key have been found
-         */
-        std::vector<int> mustBeBottomNoItemsOnTop = {};
+    //     /**
+    //      * Vector to contain items with this particular stackingStyle, we collect them while iterating and then add them to the front
+    //      * of the vector once all items with that item cons key have been found
+    //      */
+    //     std::vector<int> mustBeBottomNoItemsOnTop = {};
 
-        for (int idx = 1; idx < aItemVector.size(); idx++)
-        {
+    //     for (int idx = 1; idx < aItemVector.size(); idx++)
+    //     {
 
-            // If this is true, it means the current item in the loop belongs in the current active vector.
-            if (aItemVector[idx]->itemConsolidationKey_ ==
-                ItemRegister::getConstItem(FinalSortedItemConsKeyVectors.back().back())->Item::itemConsolidationKey_)
-            {
+    //         // If this is true, it means the current item in the loop belongs in the current active vector.
+    //         if (aItemVector[idx]->itemConsolidationKey_ ==
+    //             ItemRegister::getConstItem(FinalSortedItemConsKeyVectors.back().back())->Item::itemConsolidationKey_)
+    //         {
 
-                // If mustBeBottomNoItemsOnTop, we pack the item as very first no matter the volume/weight. So we append this itemKey to the final vector later.
-                if (aItemVector[idx]->Item::stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP)
-                {
-                    mustBeBottomNoItemsOnTop.push_back(aItemVector[idx]->Item::transientSysId_);
-                }
-                else
-                {
-                    FinalSortedItemConsKeyVectors.back().push_back(aItemVector[idx]->Item::transientSysId_);
-                }
-            }
-            // A new itemConsKey is encountered, we create a new vector.
-            else
-            {
-                // Insert the stackingStyle specific items to the front of the current (finalized) vector.
-                FinalSortedItemConsKeyVectors.back().insert(FinalSortedItemConsKeyVectors.back().begin(), mustBeBottomNoItemsOnTop.begin(), mustBeBottomNoItemsOnTop.end());
+    //             // If mustBeBottomNoItemsOnTop, we pack the item as very first no matter the volume/weight. So we append this itemKey to the final vector later.
+    //             if (aItemVector[idx]->Item::stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP)
+    //             {
+    //                 mustBeBottomNoItemsOnTop.push_back(aItemVector[idx]->Item::transientSysId_);
+    //             }
+    //             else
+    //             {
+    //                 FinalSortedItemConsKeyVectors.back().push_back(aItemVector[idx]->Item::transientSysId_);
+    //             }
+    //         }
+    //         // A new itemConsKey is encountered, we create a new vector.
+    //         else
+    //         {
+    //             // Insert the stackingStyle specific items to the front of the current (finalized) vector.
+    //             FinalSortedItemConsKeyVectors.back().insert(FinalSortedItemConsKeyVectors.back().begin(), mustBeBottomNoItemsOnTop.begin(), mustBeBottomNoItemsOnTop.end());
 
-                // Empty the vector so we can capture new items for the next consKey.
-                mustBeBottomNoItemsOnTop.clear();
+    //             // Empty the vector so we can capture new items for the next consKey.
+    //             mustBeBottomNoItemsOnTop.clear();
 
-                // Create next vector.
-                FinalSortedItemConsKeyVectors.push_back(std::vector<int>{aItemVector[idx]->Item::transientSysId_});
-            };
-        };
+    //             // Create next vector.
+    //             FinalSortedItemConsKeyVectors.push_back(std::vector<int>{aItemVector[idx]->Item::transientSysId_});
+    //         };
+    //     };
 
-        // Repeat here one more time because the last item cons key does not reach the 'else' condition written above.
-        FinalSortedItemConsKeyVectors.back().insert(FinalSortedItemConsKeyVectors.back().begin(), mustBeBottomNoItemsOnTop.begin(), mustBeBottomNoItemsOnTop.end());
-        mustBeBottomNoItemsOnTop.clear();
+    //     // Repeat here one more time because the last item cons key does not reach the 'else' condition written above.
+    //     FinalSortedItemConsKeyVectors.back().insert(FinalSortedItemConsKeyVectors.back().begin(), mustBeBottomNoItemsOnTop.begin(), mustBeBottomNoItemsOnTop.end());
+    //     mustBeBottomNoItemsOnTop.clear();
 
-        return FinalSortedItemConsKeyVectors;
-    };
+    //     return FinalSortedItemConsKeyVectors;
+    // };
 
 public:
     ItemRegister(std::string aSortMethod, unsigned int nrOfItems)
@@ -116,10 +246,11 @@ public:
      *
      * @param item
      */
-    inline void addItem(std::shared_ptr<Item> item)
+    inline void addItem(std::shared_ptr<Item> aItem)
     {
-        ItemRegister::completeItemVector_.push_back(item);
-        ItemRegister::completeItemMap_.insert(std::make_pair(item->Item::transientSysId_, std::move(item)));
+        ItemRegister::completeItemVector_.push_back(aItem);
+        ItemRegister::completeItemKeyVector_.push_back(aItem->Item::transientSysId_);
+        ItemRegister::completeItemMap_.insert(std::make_pair(aItem->Item::transientSysId_, std::move(aItem)));
     };
 
     /**
@@ -150,9 +281,14 @@ public:
      *
      * @return const std::vector<std::vector<int>>
      */
-    const std::vector<std::vector<int>> getSortedItemConsKeyVectors()
+    // const std::vector<std::vector<int>> getSortedItemConsKeyVectors()
+    // {
+    //     return ItemRegister::createSortedItemConsKeyVectors(ItemRegister::completeItemVector_);
+    // };
+
+    const std::vector<std::vector<int>> getNewSortedItemKeys() const
     {
-        return ItemRegister::createSortedItemConsKeyVectors(ItemRegister::completeItemVector_);
+        return ItemRegister::getFinalSortedItemKeys(ItemRegister::completeItemKeyVector_);
     };
 
     /**
@@ -183,7 +319,7 @@ public:
     {
         std::unordered_map<std::string, double> volumeMap;
 
-        for (const std::vector<int> itemVector : ItemRegister::getSortedItemConsKeyVectors())
+        for (const std::vector<int> itemVector : ItemRegister::getNewSortedItemKeys())
         {
             const std::string key = ItemRegister::getConstItem(itemVector.front())->itemConsolidationKey_;
 

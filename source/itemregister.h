@@ -114,7 +114,7 @@ private:
         std::sort(aItemKeyVector.begin(), aItemKeyVector.end(), [this](int &itemKeyLeft, int &itemKeyRight)
                   { return ItemRegister::getConstItem(itemKeyLeft)->volume_ > ItemRegister::getConstItem(itemKeyRight)->volume_ ||
                            (ItemRegister::getConstItem(itemKeyLeft)->volume_ == ItemRegister::getConstItem(itemKeyRight)->volume_ &&
-                            ItemRegister::getConstItem(itemKeyLeft)->transientSysId_ < ItemRegister::getConstItem(itemKeyRight)->transientSysId_); });
+                            ItemRegister::getConstItem(itemKeyLeft)->weight_ > ItemRegister::getConstItem(itemKeyRight)->weight_); });
     }
 
     /**
@@ -128,7 +128,7 @@ private:
         std::sort(aItemKeyVector.begin(), aItemKeyVector.end(), [this](int &itemKeyLeft, int &itemKeyRight)
                   { return ItemRegister::getConstItem(itemKeyLeft)->weight_ > ItemRegister::getConstItem(itemKeyRight)->weight_ ||
                            (ItemRegister::getConstItem(itemKeyLeft)->weight_ == ItemRegister::getConstItem(itemKeyRight)->weight_ &&
-                            ItemRegister::getConstItem(itemKeyLeft)->transientSysId_ < ItemRegister::getConstItem(itemKeyRight)->transientSysId_); });
+                            ItemRegister::getConstItem(itemKeyLeft)->volume_ > ItemRegister::getConstItem(itemKeyRight)->volume_); });
     }
 
     /**

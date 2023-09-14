@@ -46,7 +46,6 @@ Include necessary files.
 #include "kd-tree.h"
 #include "geometricShape.h"
 #include "item.h"
-#include "itemSortMethods.h"
 #include "packingContext.h"
 #include "binCalculationCache.h"
 #include "bin.h"

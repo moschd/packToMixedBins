@@ -27,7 +27,6 @@ private:
 
         while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
         {
-
             // Stop further iterations, only create 1 layer.
             if (positionConstructor->containsItemsWithNoItemsOnTopStackingStyle())
             {
@@ -38,7 +37,6 @@ private:
             std::vector<int> relevantItems = positionConstructor->getRelevantItems();
 
             const int nrOfRelevantItems = (int)relevantItems.size();
-
             const int startingIndexCorrection = std::max(0, (nrOfRelevantItems - positionConstructor->getNumberOfBaseItems()));
 
             for (int i = 0; i < positionConstructor->getNumberOfBaseItems(); i++)
@@ -86,6 +84,7 @@ private:
             if (continueLayingLayers)
             {
                 positionConstructor->reconfigure(aItemsToBePacked);
+                // std::cout << "has bin:" << positionConstructor->hasPrecalculatedBinAvailable() << "\n";
             }
         };
 

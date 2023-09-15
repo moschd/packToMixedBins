@@ -227,8 +227,7 @@ public:
         const std::shared_ptr<Item> itemToCompare2 = ItemRegister::getConstItem(aItemToCompare2);
         return (itemToCompare2->Item::width_ == itemToCompare1->Item::width_ &&
                 itemToCompare2->Item::depth_ == itemToCompare1->Item::depth_ &&
-                itemToCompare2->Item::height_ == itemToCompare1->Item::height_ &&
-                itemToCompare2->Item::weight_ == itemToCompare1->Item::weight_);
+                itemToCompare2->Item::height_ == itemToCompare1->Item::height_);
     };
 
     /**

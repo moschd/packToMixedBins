@@ -20,7 +20,7 @@ private:
     int heightAddition_;
     bool hasPrecalculatedBinAvailable_;
     bool containsItemsWithNoItemsOnTopStackingStyle_;
-    double minimumSurfaceArea_ = 75.0;
+    double minimumSurfaceArea_ = 74.0;
 
     /**
      * @brief Create a map of unique items.
@@ -120,7 +120,7 @@ private:
                                       context_->getItem(aItemKey)->weight_,
                                       "none",
                                       "01",
-                                      0,
+                                      context_->getItem(aItemKey)->gravityStrength_,
                                       context_->getItem(aItemKey)->stackingStyle_);
     }
 

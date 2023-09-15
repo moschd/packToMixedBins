@@ -1,363 +1,502 @@
 {
 	"bin": {
-		"type": "Pallet",
-		"maxWeight": 1500,
-		"width": 1.1,
-		"height": 1.65,
-		"depth": 1.1,
-		"gravityStrength": 25
+		"type": "PAL",
+		"maxWeight": 3306,
+		"width": 48,
+		"height": 55,
+		"depth": 40
 	},
 	"items": [
 		{
 			"id": "DTM001",
-			"width": 0.1,
-			"height": 1.62,
-			"depth": 0.2,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM002",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM003",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM004",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM005",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM006",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM007",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM008",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM009",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM010",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM011",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM012",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM013",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM014",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM015",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM016",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM017",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM018",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM019",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM020",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM021",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM02",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM023",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM024",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM025",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM026",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM027",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM028",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM029",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM030",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM031",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM032",
-			"width": 0.600,
-			"height": 0.300,
-			"depth": 0.40,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM033",
-			"width": 0.600,
-			"height": 0.300,
-			"depth": 0.40,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM034",
-			"width": 1.200,
-			"height": 0.600,
-			"depth": 0.80,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM035",
-			"width": 1.200,
-			"height": 0.600,
-			"depth": 0.80,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM036",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM037",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM038",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM039",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM040",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10,
-			"allowedRotations": "012345"
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM041",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM042",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM043",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM044",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM045",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM046",
-			"width": 0.29,
-			"height": 0.32,
-			"depth": 0.49,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
 		},
 		{
-			"id": "DTM047",
-			"width": 0.19,
-			"height": 0.22,
-			"depth": 0.29,
-			"weight": 10
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM001",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1
+		},
+		{
+			"id": "DTM00x",
+			"depth": 17.15,
+			"height": 7.75,
+			"width": 9.8,
+			"weight": 1,
+			"stackingStyle": "bottomNoItemsOnTop"
 		}
 	]
 }

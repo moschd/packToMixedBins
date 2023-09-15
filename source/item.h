@@ -78,6 +78,8 @@ public:
     Item::rotate(constants::rotation::type::WDH);
     Item::position_ = constants::START_POSITION;
   }
+
+  const bool allowsItemsOnTop() const { return Item::stackingStyle_ == constants::item::parameter::ALLOW_ALL; };
 };
 
 #endif

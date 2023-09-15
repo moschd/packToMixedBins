@@ -19,17 +19,18 @@ private:
     std::shared_ptr<Bin2D> precalculatedBin_;
     int heightAddition_;
     bool hasPrecalculatedBinAvailable_;
+    bool containsItemsWithNoItemsOnTopStackingStyle_;
     double minimumSurfaceArea_ = 75.0;
 
     /**
-     * @brief Create a vector of arrays.
+     * @brief Create a map of unique items.
      *
-     * The inner arrays hold a item with the unique dimensions, and the nr of occurence.
+     * The key is the key of the first unique item of that kind.
+     * The values are then the keys of the items which are equal to the first one.
      *
      */
     void filterDistinctItems()
     {
-
         for (const int &itemKey : ItemPositionConstructor::items_)
         {
             if (ItemPositionConstructor::distinctItems_.empty())
@@ -41,7 +42,7 @@ private:
                 bool isDistinct = true;
                 for (std::map<int, std::vector<int>>::iterator mapIterator = distinctItems_.begin(); mapIterator != distinctItems_.end(); ++mapIterator)
                 {
-                    if (ItemPositionConstructor::context_->getItemRegister()->itemsAreEqual(itemKey, mapIterator->first))
+                    if (ItemPositionConstructor::context_->getItemRegister()->itemsAreLooselyEqual(itemKey, mapIterator->first))
                     {
                         isDistinct = false;
                         mapIterator->second.push_back(itemKey);
@@ -53,7 +54,40 @@ private:
                     ItemPositionConstructor::distinctItems_[itemKey] = {itemKey};
                 }
             }
+
+            ItemPositionConstructor::setContainsItemsWithNoItemsOnTopStackingStyle(itemKey);
         }
+    }
+
+    /**
+     * @brief Set sontainsItemsWithNoItemsOnTopStackingStyle_
+     *
+     * If already true, keep true.
+     * If false, check the provided item.
+     *
+     * @param aItemKey
+     */
+    void setContainsItemsWithNoItemsOnTopStackingStyle(const int aItemKey)
+    {
+
+        if (ItemPositionConstructor::containsItemsWithNoItemsOnTopStackingStyle_)
+        {
+            return;
+        }
+
+        ItemPositionConstructor::containsItemsWithNoItemsOnTopStackingStyle_ = (context_->getItemRegister()->getConstItem(aItemKey)->stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP);
+    };
+
+    /**
+     * @brief If the calculated layer contains items with a bottomNoItemsUp stacking style, they should be placed first.
+     *
+     */
+    void sortDistinctItems()
+    {
+        for (std::map<int, std::vector<int>>::iterator distinctItemInfo = distinctItems_.begin(); distinctItemInfo != distinctItems_.end(); ++distinctItemInfo)
+        {
+            context_->getItemRegister()->moveBottomNoItemsUpToBackOfVector(distinctItemInfo->second);
+        };
     }
 
     /**
@@ -70,24 +104,47 @@ private:
         return (aItemSurface * aQuantity) / ItemPositionConstructor::context_->getRequestedBin()->getRealBottomSurfaceArea() * 100;
     }
 
+    /**
+     * @brief Create a base item based on the item Key.
+     *
+     * @param aItemKey
+     * @return const std::shared_ptr<Item>
+     */
+    const std::shared_ptr<Item> createBaseItem(const int aItemKey) const
+    {
+        return std::make_shared<Item>(BASE_ITEM_KEY,
+                                      std::to_string(context_->getItem(aItemKey)->transientSysId_),
+                                      context_->getItem(aItemKey)->width_,
+                                      context_->getItem(aItemKey)->depth_,
+                                      context_->getItem(aItemKey)->height_,
+                                      context_->getItem(aItemKey)->weight_,
+                                      "none",
+                                      "01",
+                                      0,
+                                      context_->getItem(aItemKey)->stackingStyle_);
+    }
+
+    /**
+     * @brief Perform optimized 2D layer packing. Store the precalculated 2D bin if solution is found.
+     *
+     */
     void process()
     {
+
         int winningSurfaceArea = 0;
-        ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
 
         for (std::map<int, std::vector<int>>::iterator distinctItemInfo = distinctItems_.begin(); distinctItemInfo != distinctItems_.end(); ++distinctItemInfo)
         {
-            std::shared_ptr<Item> baseItem =
-                std::make_shared<Item>(BASE_ITEM_KEY,
-                                       std::to_string(context_->getItem(distinctItemInfo->first)->transientSysId_),
-                                       context_->getItem(distinctItemInfo->first)->width_,
-                                       context_->getItem(distinctItemInfo->first)->depth_,
-                                       context_->getItem(distinctItemInfo->first)->height_,
-                                       context_->getItem(distinctItemInfo->first)->weight_,
-                                       "none",
-                                       "01",
-                                       context_->getItem(distinctItemInfo->first)->gravityStrength_,
-                                       context_->getItem(distinctItemInfo->first)->stackingStyle_);
+
+            const std::shared_ptr<Item> baseItem = ItemPositionConstructor::createBaseItem(distinctItemInfo->first);
+
+            if (ItemPositionConstructor::containsItemsWithNoItemsOnTopStackingStyle_)
+            {
+                if (context_->getItemRegister()->getConstItem(distinctItemInfo->second.back())->stackingStyle_ != constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP)
+                {
+                    continue;
+                };
+            };
 
             const double itemSurfaceArea = baseItem->getRealBottomSurfaceArea();
             const int availableItems = (int)distinctItemInfo->second.size();
@@ -113,8 +170,8 @@ private:
             const double realSurfaceCoverage = ItemPositionConstructor::itemSurfaceCoverage(itemSurfaceArea, itemsThatWillBePlaced);
 
             // Layer has now been build.
-            // Continue if the layer is not more efficient than the minimum.
-            // Continue if the layer is not more efficient than an already found layer.
+            // Continue search if the layer is not more efficient than the minimum.
+            // Continue search if the layer is not more efficient than an already found layer.
             if (minimumSurfaceArea_ > realSurfaceCoverage || winningSurfaceArea > realSurfaceCoverage)
             {
                 continue;
@@ -135,6 +192,10 @@ public:
     {
         ItemPositionConstructor::reconfigure(aItems);
     };
+
+    /// @brief Checks if the ItemPositionConstructor contains such an item, if so, it can build 1 layer at max. That one layer can only be of this particular stackingStyle.
+    /// @return const bool
+    const bool containsItemsWithNoItemsOnTopStackingStyle() const { return containsItemsWithNoItemsOnTopStackingStyle_; };
 
     /// @brief True if there are precalculated items available for packing.
     /// @return const bool
@@ -177,8 +238,11 @@ public:
     void reconfigure(std::vector<int> aItems)
     {
         ItemPositionConstructor::items_ = aItems;
+        ItemPositionConstructor::hasPrecalculatedBinAvailable_ = false;
+        ItemPositionConstructor::containsItemsWithNoItemsOnTopStackingStyle_ = false;
         ItemPositionConstructor::distinctItems_.clear();
         ItemPositionConstructor::filterDistinctItems();
+        ItemPositionConstructor::sortDistinctItems();
         ItemPositionConstructor::process();
     };
 };

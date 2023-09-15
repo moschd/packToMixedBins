@@ -21,31 +21,6 @@ private:
     std::array<int, 3> packingDirection_;
 
     /**
-     * @brief Set the estimated number of bin values for the weight and volume dimension.
-     *
-     * @param aItemsToBePacked
-     */
-    void setEstAvgUtilPerBin(const std::vector<int> aItemsToBePacked, std::shared_ptr<ItemRegister> aItemRegister)
-    {
-        double totalItemVolume = 0.0;
-        double totalItemWeight = 0.0;
-
-        for (auto itemKey : aItemsToBePacked)
-        {
-            const std::shared_ptr<Item> itemToCheck = aItemRegister->getConstItem(itemKey);
-
-            totalItemVolume += itemToCheck->volume_;
-            totalItemWeight += itemToCheck->weight_;
-        };
-
-        const int estNrOfBins = std::max(std::ceil(totalItemVolume / RequestedBin::maxVolume_),
-                                         std::ceil(totalItemWeight / RequestedBin::maxWeight_));
-
-        RequestedBin::estAvgVolumeUtil_ = totalItemVolume / (estNrOfBins * RequestedBin::maxVolume_) * 100;
-        RequestedBin::estAvgWeightUtil_ = totalItemWeight / (estNrOfBins * RequestedBin::maxWeight_) * 100;
-    };
-
-    /**
      * @brief Set the desired packing direction of the bin.
      *
      * @param aDirection
@@ -89,19 +64,12 @@ public:
     const double getMaxWeight() const { return RequestedBin::maxWeight_; };
     const double getMaxVolume() const { return RequestedBin::maxVolume_; };
 
-    const double getEstAvgVolumeUtil() const { return RequestedBin::estAvgVolumeUtil_; }
-    const double getEstAvgWeightUtil() const { return RequestedBin::estAvgWeightUtil_; }
-
     const double getRealWidth() const { return (double)maxWidth_ / MULTIPLIER; };
     const double getRealDepth() const { return (double)maxDepth_ / MULTIPLIER; };
     const double getRealBottomSurfaceArea() const { return getRealWidth() * getRealDepth(); };
 
     const std::array<int, 3> &getPackingDirection() const { return RequestedBin::packingDirection_; }
 
-    void setEstimatedAverages(const std::vector<int> aItemsToBePacked, std::shared_ptr<ItemRegister> aItemRegister)
-    {
-        RequestedBin::setEstAvgUtilPerBin(aItemsToBePacked, aItemRegister);
-    };
 };
 
 #endif

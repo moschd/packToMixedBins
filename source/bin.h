@@ -9,6 +9,7 @@ private:
     std::vector<int> xFreeItems_;
     std::vector<int> yFreeItems_;
     std::vector<int> zFreeItems_;
+    std::vector<int> itemsWithStackingStyle_;
     std::array<int, 3> placedItemsMaxDimensions_;
     double actualVolumeUtil_;
     double actualWeightUtil_;
@@ -63,6 +64,35 @@ private:
                         itemBeingPlaced->Item::position_[constants::axis::HEIGHT] == itemInBin->Item::furthestPointHeight_ &&
                         Geometry::intersectingX(itemBeingPlaced,itemInBin) && Geometry::intersectingY(itemBeingPlaced,itemInBin)); }),
             end(Bin::zFreeItems_));
+    };
+
+    /**
+     * @brief Checks if the item being placed complies with the stackingStyle of other items which cannot accept any items on top of them.
+     *
+     * @param aItemBeingPlaced
+     * @return true
+     * @return false
+     */
+    const bool noTopStackingStyleCompliant(const std::shared_ptr<Item> &aItemBeingPlaced) const
+    {
+
+        bool complies = true;
+        for (const int aItemInBinWithStackingStyle : Bin::itemsWithStackingStyle_)
+        {
+
+            const std::shared_ptr<Item> &intersectCandidate = Bin::context_->getItem(aItemInBinWithStackingStyle);
+            if (intersectCandidate->stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP ||
+                intersectCandidate->stackingStyle_ == constants::item::parameter::NO_ITEMS_ON_TOP)
+            {
+                if (Geometry::intersectingXY(aItemBeingPlaced, intersectCandidate))
+                {
+                    complies = false;
+                    break;
+                };
+            };
+        };
+
+        return complies;
     };
 
     /**
@@ -296,6 +326,11 @@ public:
                 continue;
             };
 
+            if (!Bin::noTopStackingStyleCompliant(itemBeingPlaced))
+            {
+                continue;
+            }
+
             /* If this point is reached, the item fits in the bin. */
             return true;
         };
@@ -329,6 +364,11 @@ public:
         // Add items to free axis vectors, allowing new items to be placed next/on top of it.
         Bin::xFreeItems_.push_back(it);
         Bin::yFreeItems_.push_back(it);
+
+        if (itemOb->stackingStyle_ != constants::item::parameter::ALLOW_ALL)
+        {
+            Bin::itemsWithStackingStyle_.push_back(it);
+        };
 
         // Only add the item for Z stacking if the item is allowed to be stacked on top of.
         if (itemOb->stackingStyle_ != constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP &&

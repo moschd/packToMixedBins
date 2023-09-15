@@ -11,7 +11,9 @@ private:
     bool optimizedPackingCompatible_;
 
     /**
-     * @brief Perform optimized layer packing, return a filtered list of the items to be packed once finished.
+     * @brief Perform optimized layer packing, return a filtered list of the items to be packed.
+     *
+     * This filtered lists are the items left to be packed, the optimized layer has then already been created.
      *
      * @param aItemsToBePacked
      * @return std::vector<int>
@@ -25,25 +27,35 @@ private:
 
         while (positionConstructor->hasPrecalculatedBinAvailable() && continueLayingLayers)
         {
-            int heightToIncrement = 0;
 
-            const std::vector<int> relevantItems = positionConstructor->getRelevantItems();
+            // Stop further iterations, only create 1 layer.
+            if (positionConstructor->containsItemsWithNoItemsOnTopStackingStyle())
+            {
+                continueLayingLayers = false;
+            };
+
+            int heightToIncrement = 0;
+            std::vector<int> relevantItems = positionConstructor->getRelevantItems();
+
+            const int nrOfRelevantItems = (int)relevantItems.size();
+
+            const int startingIndexCorrection = std::max(0, (nrOfRelevantItems - positionConstructor->getNumberOfBaseItems()));
 
             for (int i = 0; i < positionConstructor->getNumberOfBaseItems(); i++)
             {
-
-                if (i >= (int)relevantItems.size())
+                const int startingIndex = i + startingIndexCorrection;
+                if (startingIndex >= (int)relevantItems.size())
                 {
                     break;
                 };
 
-                if (PackingCluster::wouldExceedLimit(relevantItems[i]))
+                if (PackingCluster::wouldExceedLimit(relevantItems[startingIndex]))
                 {
                     continueLayingLayers = false;
                     break;
                 };
 
-                std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[i]);
+                std::shared_ptr<Item> myItem = PackingCluster::context_->getModifiableItem(relevantItems[startingIndex]);
                 const std::shared_ptr<Item> precalculatedItem = positionConstructor->getBaseItemByIndex(i);
 
                 myItem->position_[constants::axis::WIDTH] = precalculatedItem->position_[constants::axis::WIDTH];
@@ -69,8 +81,12 @@ private:
                 }
             };
 
+            // Layer has been build, now add the height of the layer and decide if we should attempt to build a second layer.
             positionConstructor->addToHeightAddition(heightToIncrement);
-            positionConstructor->reconfigure(aItemsToBePacked);
+            if (continueLayingLayers)
+            {
+                positionConstructor->reconfigure(aItemsToBePacked);
+            }
         };
 
         return aItemsToBePacked;
@@ -229,7 +245,7 @@ private:
          * Then, perform iterative item position searching method on the left-over items.
          *
          */
-        if (PackingCluster::optimizedPackingCompatible_ && !PackingCluster::context_->getItemRegister()->containsItemWithStackingStyle(aItemsToBePacked))
+        if (PackingCluster::optimizedPackingCompatible_)
         {
             aItemsToBePacked = PackingCluster::optimizedLayerPacking(aItemsToBePacked);
         };
@@ -325,7 +341,6 @@ public:
      */
     void startPacking(const std::vector<int> &aItemsToBePacked)
     {
-        PackingCluster::context_->getRequestedBin()->setEstimatedAverages(aItemsToBePacked, PackingCluster::context_->getItemRegister());
         PackingCluster::startPackingBins(aItemsToBePacked);
     };
 };

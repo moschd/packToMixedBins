@@ -111,8 +111,9 @@ int main()
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
         {
+
             packingProcessor.getContext()->getItemRegister()->addItem(
-                std::make_shared<Item>(idx,
+                std::make_shared<Item>(idx + 1,
                                        incomingJsonItems[idx][constants::json::item::ID].asString(),
                                        incomingJsonItems[idx][constants::json::item::WIDTH].asDouble() * MULTIPLIER,
                                        incomingJsonItems[idx][constants::json::item::DEPTH].asDouble() * MULTIPLIER,

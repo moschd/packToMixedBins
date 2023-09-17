@@ -79,7 +79,14 @@ public:
     Item::position_ = constants::START_POSITION;
   }
 
-  const bool allowsItemsOnTop() const { return Item::stackingStyle_ == constants::item::parameter::ALLOW_ALL; };
+  /**
+   * @brief Return boolean indicating if another item can be placed on top of this item.
+   *
+   * @return true
+   * @return false
+   */
+  const bool doesNotAllowItemsOnTop() const { return Item::stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP ||
+                                                     Item::stackingStyle_ == constants::item::parameter::NO_ITEMS_ON_TOP; };
 };
 
 #endif

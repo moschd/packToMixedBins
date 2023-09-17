@@ -77,10 +77,10 @@ private:
     {
 
         bool complies = true;
-        for (const int aItemInBinWithStackingStyle : Bin::itemsWithStackingStyle_)
+        for (const int aItemKeyInBinWithStackingStyle : Bin::itemsWithStackingStyle_)
         {
 
-            const std::shared_ptr<Item> &intersectCandidate = Bin::context_->getItem(aItemInBinWithStackingStyle);
+            const std::shared_ptr<Item> &intersectCandidate = Bin::context_->getItem(aItemKeyInBinWithStackingStyle);
             if (intersectCandidate->stackingStyle_ == constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP ||
                 intersectCandidate->stackingStyle_ == constants::item::parameter::NO_ITEMS_ON_TOP)
             {
@@ -94,6 +94,32 @@ private:
 
         return complies;
     };
+
+    /**
+     * @brief Checks if the item being placed does not violate any stackingStyle restriction of any item already inside the bin.
+     *
+     * @param aItemBeingPlaced
+     * @return true
+     * @return false
+     */
+    const bool stackingStyleCompliant(const std::shared_ptr<Item> &aItemBeingPlaced) const
+    {
+        bool complies = true;
+
+        // Bin contains no items with stackingStyle, so the item being placed always complies.
+        if (Bin::itemsWithStackingStyle_.empty())
+        {
+            return complies;
+        };
+
+        // Check if item being placed violates any no-items-on-top constraint of another item.
+        if (!Bin::noTopStackingStyleCompliant(aItemBeingPlaced))
+        {
+            complies = false;
+        };
+
+        return complies;
+    }
 
     /**
      * @brief Keep track of the maximum dimensions that have been placed inside the bin.
@@ -326,7 +352,8 @@ public:
                 continue;
             };
 
-            if (!Bin::noTopStackingStyleCompliant(itemBeingPlaced))
+            /* Check if item stacking styles are respected. */
+            if (!Bin::stackingStyleCompliant(itemBeingPlaced))
             {
                 continue;
             }
@@ -347,42 +374,42 @@ public:
      */
     void addFittedItem(const int &it, const int &aBinAxis)
     {
-        const std::shared_ptr<Item> &itemOb = context_->getItem(it);
+        const std::shared_ptr<Item> &newlyAddedItem = context_->getItem(it);
 
         Bin::items_.push_back(it);
-        Bin::actualWeightUtil_ += itemOb->Item::weight_;
-        Bin::actualVolumeUtil_ += itemOb->Item::volume_;
-        Bin::furthestPointWidth_ = std::max(Bin::furthestPointWidth_, itemOb->Item::furthestPointWidth_);
-        Bin::furthestPointDepth_ = std::max(Bin::furthestPointDepth_, itemOb->Item::furthestPointDepth_);
-        Bin::furthestPointHeight_ = std::max(Bin::furthestPointHeight_, itemOb->Item::furthestPointHeight_);
-        Bin::updatePlacedMaxItemDimensions(itemOb, aBinAxis);
+        Bin::actualWeightUtil_ += newlyAddedItem->Item::weight_;
+        Bin::actualVolumeUtil_ += newlyAddedItem->Item::volume_;
+        Bin::furthestPointWidth_ = std::max(Bin::furthestPointWidth_, newlyAddedItem->Item::furthestPointWidth_);
+        Bin::furthestPointDepth_ = std::max(Bin::furthestPointDepth_, newlyAddedItem->Item::furthestPointDepth_);
+        Bin::furthestPointHeight_ = std::max(Bin::furthestPointHeight_, newlyAddedItem->Item::furthestPointHeight_);
+        Bin::updatePlacedMaxItemDimensions(newlyAddedItem, aBinAxis);
         Bin::kdTree_->KdTree::addItemKeyToLeafHelper(it,
-                                                     {itemOb->Item::furthestPointWidth_,
-                                                      itemOb->Item::furthestPointDepth_,
-                                                      itemOb->Item::furthestPointHeight_});
+                                                     {newlyAddedItem->Item::furthestPointWidth_,
+                                                      newlyAddedItem->Item::furthestPointDepth_,
+                                                      newlyAddedItem->Item::furthestPointHeight_});
 
         // Add items to free axis vectors, allowing new items to be placed next/on top of it.
         Bin::xFreeItems_.push_back(it);
         Bin::yFreeItems_.push_back(it);
 
-        if (itemOb->stackingStyle_ != constants::item::parameter::ALLOW_ALL)
+        if (newlyAddedItem->stackingStyle_ != constants::item::parameter::ALLOW_ALL)
         {
             Bin::itemsWithStackingStyle_.push_back(it);
         };
 
         // Only add the item for Z stacking if the item is allowed to be stacked on top of.
-        if (itemOb->stackingStyle_ != constants::item::parameter::BOTTOM_NO_ITEMS_ON_TOP &&
-            itemOb->stackingStyle_ != constants::item::parameter::NO_ITEMS_ON_TOP)
+        if (!newlyAddedItem->doesNotAllowItemsOnTop())
         {
             /* Insert the new item based on sorted height, this is to evaluate lowest height first when stacking upwards.*/
-            const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it, [&](const int i1, const int i2)
+            const auto hiter = std::upper_bound(Bin::zFreeItems_.cbegin(), Bin::zFreeItems_.cend(), it,
+                                                [&](const int i1, const int i2)
                                                 { return context_->getItem(i1)->Item::furthestPointHeight_ < context_->getItem(i2)->Item::furthestPointHeight_; });
             Bin::zFreeItems_.insert(hiter, it);
         }
 
-        Bin::removeFromXFreeItems(itemOb);
-        Bin::removeFromYFreeItems(itemOb);
-        Bin::removeFromZFreeItems(itemOb);
+        Bin::removeFromXFreeItems(newlyAddedItem);
+        Bin::removeFromYFreeItems(newlyAddedItem);
+        Bin::removeFromZFreeItems(newlyAddedItem);
     };
 };
 

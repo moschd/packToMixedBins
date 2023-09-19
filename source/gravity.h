@@ -75,11 +75,10 @@ private:
      * @param aMyItems
      * @return const std::vector<int>
      */
-    const std::vector<int> collectSupportingItems(const std::shared_ptr<Item> &aItemBeingPlaced,
-                                                  const std::vector<int> &aItemsInBin) const
+    void collectSupportingItems(const std::shared_ptr<Item> &aItemBeingPlaced,
+                                const std::vector<int> &aItemsInBin,
+                                std::vector<int> &supportingItems) const
     {
-        std::vector<int> supportingItems;
-
         for (auto const &itemInSpaceKey : aItemsInBin)
         {
             const std::shared_ptr<Item> &itemInSpace = Gravity::itemRegister_->ItemRegister::getConstItem(itemInSpaceKey);
@@ -89,8 +88,6 @@ private:
                 supportingItems.push_back(itemInSpace->transientSysId_);
             };
         };
-
-        return supportingItems;
     };
 
     /**
@@ -289,7 +286,8 @@ public:
      * @return false
      */
     const bool itemObeysGravity(const std::shared_ptr<Item> &aItemBeingPlaced,
-                                const std::vector<int> &aItemsInBin) const
+                                const std::vector<int> &aItemsInBin,
+                                const bool preFiltered = false) const
     {
 
         // If gravity is off, item is obeying gravity.
@@ -304,7 +302,15 @@ public:
             return OBEYS_GRAVITY;
         };
 
-        const std::vector<int> supportingItems = Gravity::collectSupportingItems(aItemBeingPlaced, aItemsInBin);
+        std::vector<int> supportingItems;
+        if (!preFiltered)
+        {
+            Gravity::collectSupportingItems(aItemBeingPlaced, aItemsInBin, supportingItems);
+        }
+        else
+        {
+            supportingItems = aItemsInBin;
+        };
 
         // If there are no supporting items, the item can not obey gravity.
         // Return false.

@@ -304,7 +304,8 @@ public:
             };
 
             /* Search kdTree to find items which could be intersecting. */
-            std::vector<int> intersectCandidates;
+            std::vector<int> intersectCandidates = {};
+            std::vector<int> gravitySupportCandidates = {};
             Bin::kdTree_->getIntersectCandidates(Bin::kdTree_->KdTree::getRoot(),
                                                  Bin::kdTree_->KdTree::getRoot()->Node::myDepth_,
                                                  itemBeingPlaced->Item::position_,
@@ -335,6 +336,14 @@ public:
                     // std::cout << itemBeingPlaced->id_ << " " << itemBeingPlaced->allowedRotations_ << " " << itemBeingPlaced->position_[0] << " " << itemBeingPlaced->position_[1] << " " << itemBeingPlaced->position_[2] << " " << itemBeingPlaced->width_ << " " << itemBeingPlaced->depth_ << " " << itemBeingPlaced->height_ << " " << itemBeingPlaced->furthestPointWidth_ << " " << itemBeingPlaced->furthestPointDepth_ << " " << itemBeingPlaced->furthestPointHeight_ << "\n";
                     // std::cout << intersectCandidate->id_ << " " << intersectCandidate->allowedRotations_ << " " << intersectCandidate->position_[0] << " " << intersectCandidate->position_[1] << " " << intersectCandidate->position_[2] << " " << intersectCandidate->width_ << " " << intersectCandidate->depth_ << " " << intersectCandidate->height_ << " " << intersectCandidate->furthestPointWidth_ << " " << intersectCandidate->furthestPointDepth_ << " " << intersectCandidate->furthestPointHeight_ << "\n";
                     break;
+                }
+                else
+                {
+                    // Store the item as a gravity candidate. Saves computation. This is always performed but is only actually relevant if gravity is enabled.
+                    if (itemBeingPlaced->Item::position_[constants::axis::HEIGHT] == intersectCandidate->Item::furthestPointHeight_)
+                    {
+                        gravitySupportCandidates.push_back(intersectCandidate->transientSysId_);
+                    };
                 };
             };
 
@@ -347,7 +356,9 @@ public:
 
             /*  Checks if gravity should be considered while placing this item.
             This check is applied after an otherwise fitting item is found. */
-            if (!Bin::context_->getGravity()->itemObeysGravity(itemBeingPlaced, Bin::getFittedItems()))
+
+            // TODO - test this with intersectCandidates instead of getFittedItems()
+            if (!Bin::context_->getGravity()->itemObeysGravity(itemBeingPlaced, gravitySupportCandidates, true))
             {
                 continue;
             };

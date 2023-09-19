@@ -14,7 +14,7 @@ Switch COMPILE_TO_SO to 0 and run the command below.
     g++ source/myjsoncpp/jsoncpp.cpp source/main.cpp -ffast-math -fno-exceptions -fno-rtti -O3 -o main
 
 ## Compile for code profling
-    g++ -o main -pg source/main.cpp -l jsoncpp
+    g++ -o main -pg source/myjsoncpp/jsoncpp.cpp source/main.cpp
     ./main
     gprof main > profile.txt
 

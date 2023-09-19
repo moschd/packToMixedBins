@@ -46,6 +46,17 @@ inline std::shared_ptr<Node> generateNode(const std::array<int, 3> aPartitionPoi
     return std::make_shared<Node>(aPartitionPoint, aMins, aMaxs, aCurrentDepth);
 };
 
+/**
+ * @brief Represents the bin in tree form.
+ *
+ * Contains all items currently inside the bin.
+ * The items are stored by their furthest possible point in space.
+ * This way, when inputting the smallest possible point of an item, we can find all items which are relevant to this particular item.
+ * We can then check for intersection, gravity, stackingStyle restrictions etc...
+ *
+ * This allows for efficient 3D search and improves performance of the algorithm by a huge amount.
+ *
+ */
 class KdTree
 {
 private:

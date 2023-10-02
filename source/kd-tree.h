@@ -84,9 +84,9 @@ private:
      *
      * @param aRoot             - root of the tree
      * @param aDepth            - the current depth of the tree
-     * @param aPartitionPoint   - the 3R point that the node will be representating and splitting.
-     * @param aMins             - 3R point marking the minimum border of the search area point for which this node will be responsable.
-     * @param aMaxs             - 3R point marking the maximum border of the search area point for which this node will be responsable.
+     * @param aPartitionPoint   - the 3R point that the node will be representing, and splitting.
+     * @param aMins             - 3R point marking the minimum border of the search area for which this node will be responsable.
+     * @param aMaxs             - 3R point marking the maximum border of the search area for which this node will be responsable.
      * @param aRequestedDepth   - the requested maximum depth of the tree to be generated.
      */
     void generateTree(std::shared_ptr<Node> aRoot,

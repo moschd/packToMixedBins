@@ -160,10 +160,11 @@ public:
             return;
         };
 
-        for (const auto &cluster : packedPacker.Packer::getClusters())
+        for (const std::shared_ptr<PackingCluster> &cluster : packedPacker.Packer::getClusters())
         {
-            for (const auto &bin : cluster->PackingCluster::getPackedBins())
+            for (const std::shared_ptr<Bin> &bin : cluster->PackingCluster::getPackedBins())
             {
+
                 Json::Value mappedBin = ResponseBuilder::binToJson(bin);
 
                 /* If includeItems parameter is false, skip generating json for the items. */

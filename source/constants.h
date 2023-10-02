@@ -101,6 +101,7 @@ namespace constants
                 const std::string SORT_METHOD = "sortMethod";
                 const std::string GRAVITY_STRENGTH = "gravityStrength";
                 const std::string PACKING_DIRECTION = "packingDirection";
+                const std::string NR_OF_AVAILABLE_BINS = "nrOfAvailableBins";
             };
 
             namespace item

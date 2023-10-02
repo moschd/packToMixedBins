@@ -24,7 +24,7 @@ Compile to a shared object file.
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennismosch/packingOptimizerCompany/algorithms/packToBin"
-#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo2.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
 
@@ -104,6 +104,7 @@ int main()
                                                                                     incomingJsonBin[constants::json::inbound::bin::DEPTH].asDouble() * MULTIPLIER,
                                                                                     incomingJsonBin[constants::json::inbound::bin::HEIGHT].asDouble() * MULTIPLIER,
                                                                                     incomingJsonBin[constants::json::inbound::bin::MAX_WEIGHT].asDouble(),
+                                                                                    incomingJsonBin[constants::json::inbound::bin::NR_OF_AVAILABLE_BINS].asInt(),
                                                                                     incomingJsonBin[constants::json::inbound::bin::PACKING_DIRECTION].asString());
 
         Packer packingProcessor(std::make_shared<PackingContext>(masterGravity, itemRegister, requestedBin));

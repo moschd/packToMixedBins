@@ -14,6 +14,7 @@ private:
     int maxWidth_;
     int maxDepth_;
     int maxHeight_;
+    int nrOfAvailableBins_;
     double maxVolume_;
     double maxWeight_;
     double estAvgVolumeUtil_;
@@ -38,7 +39,7 @@ private:
         {
             RequestedBin::packingDirection_ = constants::bin::parameter::BOTTOM_UP_ARRAY;
         };
-    }
+    };
 
 public:
     RequestedBin(std::string aBinType,
@@ -46,11 +47,13 @@ public:
                  int aBinDepth,
                  int aBinHeight,
                  double aBinMaxWeight,
+                 int aNrOfAvailableBins,
                  std::string aPackingDirection) : type_(aBinType),
                                                   maxWidth_(aBinWidth),
                                                   maxDepth_(aBinDepth),
                                                   maxHeight_(aBinHeight),
-                                                  maxWeight_(aBinMaxWeight)
+                                                  maxWeight_(aBinMaxWeight),
+                                                  nrOfAvailableBins_(aNrOfAvailableBins)
     {
         RequestedBin::maxVolume_ = ((double)RequestedBin::maxWidth_ / MULTIPLIER) * ((double)RequestedBin::maxDepth_ / MULTIPLIER) * ((double)RequestedBin::maxHeight_ / MULTIPLIER);
         RequestedBin::setPackingDirection(aPackingDirection);
@@ -70,6 +73,26 @@ public:
 
     const std::array<int, 3> &getPackingDirection() const { return RequestedBin::packingDirection_; }
 
+    /**
+     * @brief Compares integer to the available number of bins as specified by the input.
+     *
+     * Default value of this attribute is 0, so if availableBins is 0 it means the user did not provide any limitation.
+     *
+     * @param aInteger
+     * @return true
+     * @return false
+     */
+    const bool exceedsNrOfAvailableBins(const int aInteger) const
+    {
+
+        // Default value is 0, so if 0, we do not enforce any limit on the availableBins.
+        if (RequestedBin::nrOfAvailableBins_ == 0)
+        {
+            return false;
+        }
+
+        return RequestedBin::nrOfAvailableBins_ < aInteger;
+    }
 };
 
 #endif

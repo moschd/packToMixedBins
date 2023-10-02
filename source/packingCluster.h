@@ -10,6 +10,26 @@ private:
     std::vector<int> unfittedItems_;
     bool optimizedPackingCompatible_;
 
+    void decrementBinCounter() { PackingCluster::binIdCounter_ -= 1; };
+    void incrementBinCounter() { PackingCluster::binIdCounter_ += 1; };
+
+    /**
+     * @brief Checks if the packing cluster is trying to pack more bins than is allowed.
+     *
+     * @return true
+     * @return false
+     */
+    const bool compliesWithNrOfAvailableBins() const { return !PackingCluster::context_->getRequestedBin()->exceedsNrOfAvailableBins(PackingCluster::binIdCounter_); }
+
+    /**
+     * @brief Called once packing for the cluster is finished.
+     *
+     */
+    void closeCluster()
+    {
+        PackingCluster::addUnfittedItems(PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems());
+    }
+
     /**
      * @brief Perform optimized layer packing, return a filtered list of the items to be packed.
      *
@@ -190,13 +210,24 @@ private:
     };
 
     /**
+     * @brief Add bin to the cluster.
+     *
+     * @param aEstimatedNumberOfItemsToFit
+     */
+    void addBin(const int aEstimatedNumberOfItemsToFit)
+    {
+        PackingCluster::incrementBinCounter();
+        PackingCluster::bins_.push_back(std::make_shared<Bin>(PackingCluster::binIdCounter_, PackingCluster::context_, aEstimatedNumberOfItemsToFit));
+    }
+
+    /**
      * @brief Delete the last bin from the packing cluster.
      *
      */
     void deleteLastBin()
     {
+        PackingCluster::decrementBinCounter();
         PackingCluster::bins_.pop_back();
-        PackingCluster::binIdCounter_ -= 1;
     };
 
     /**
@@ -206,7 +237,10 @@ private:
      */
     void addUnfittedItems(const std::vector<int> aUnfittedItems)
     {
-        PackingCluster::unfittedItems_.insert(PackingCluster::unfittedItems_.end(), aUnfittedItems.begin(), aUnfittedItems.end());
+        if (!aUnfittedItems.empty())
+        {
+            PackingCluster::unfittedItems_.insert(PackingCluster::unfittedItems_.end(), aUnfittedItems.begin(), aUnfittedItems.end());
+        };
     }
 
     /**
@@ -226,23 +260,29 @@ private:
         /* All items have been packed. */
         if (aItemsToBePacked.empty())
         {
+            PackingCluster::closeCluster();
             return;
         };
 
         /* Create a new bin. */
-        PackingCluster::binIdCounter_ += 1;
-        PackingCluster::bins_.push_back(
-            std::make_shared<Bin>(PackingCluster::binIdCounter_,
-                                  PackingCluster::context_,
-                                  PackingCluster::estimatedNumberOfItemsToFit(aItemsToBePacked)));
+        PackingCluster::addBin(PackingCluster::estimatedNumberOfItemsToFit(aItemsToBePacked));
+
+        /*
+            Check if the nr of bins created complies with the number of bins available as specified in the input.
+            If this is exceeded, packing is stopped and we return early.
+            First delete the newly created bin since we will not perform any packing, then close the cluster. */
+        if (!PackingCluster::compliesWithNrOfAvailableBins())
+        {
+            PackingCluster::deleteLastBin();
+            PackingCluster::closeCluster();
+            return;
+        }
 
         /**
          * Start packing evaluation process.
          *
          * First check if optimized layer packing is to be used.
-         *
          * Then, perform iterative item position searching method on the left-over items.
-         *
          */
         if (PackingCluster::optimizedPackingCompatible_)
         {
@@ -252,7 +292,6 @@ private:
         for (const int itemToPackKey : aItemsToBePacked)
         {
 
-            // std::cout << itemToPackKey << " " << context_->getItemRegister()->getConstItem(itemToPackKey)->id_ << " " << context_->getItemRegister()->getConstItem(itemToPackKey)->transientSysId_ << "\n";
             // checks for weight constraint
             if (PackingCluster::wouldExceedLimit(itemToPackKey))
             {
@@ -274,15 +313,17 @@ private:
             }
         };
 
-        /* Delete the created bin if it contains no items. */
+        /*  No items could be packed, so we can close the cluster.
+        First call closeCluster, this way we copy the unfitted items to the cluster.
+        Then delete bin, since it is empty. */
         if (PackingCluster::getLastCreatedBin()->getFittedItems().empty())
         {
-            PackingCluster::addUnfittedItems(PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems());
+            PackingCluster::closeCluster();
             PackingCluster::deleteLastBin();
             return;
         }
 
-        /* Bin has been packed, recurse. */
+        /*  Bin has been packed. Recurse with the unfitted items of the previous bin. */
         PackingCluster::startPackingBins(PackingCluster::getLastCreatedBin()->Bin::getUnfittedItems());
     };
 

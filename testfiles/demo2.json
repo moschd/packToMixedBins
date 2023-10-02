@@ -2,7 +2,7 @@
 	"bin": {
 		"type": "Pallet",
 		"maxWeight": 1500,
-		"width": 1.2,
+		"width": 0.1,
 		"height": 1.65,
 		"depth": 0.1
 	},

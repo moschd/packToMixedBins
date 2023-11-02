@@ -9,10 +9,10 @@
 class PackingResultEvaluator
 {
 private:
-  Packer packingProcessor_;
+  std::shared_ptr<Packer> packingProcessor_;
 
 public:
-  PackingResultEvaluator(Packer aPackingProcessor) : packingProcessor_(aPackingProcessor)
+  PackingResultEvaluator(std::shared_ptr<Packer> aPackingProcessor) : packingProcessor_(aPackingProcessor)
   {
     evaluate();
   };
@@ -22,15 +22,15 @@ public:
     std::cout << "Running evaluation.\n";
 
     double totalVolumeOfItems = 0.0;
-    for (const auto &consKeyVolumePair : PackingResultEvaluator::packingProcessor_.getContext()->getItemRegister()->getTotalVolumeMap())
+    for (const auto &consKeyVolumePair : PackingResultEvaluator::packingProcessor_->getContext()->getItemRegister()->getTotalVolumeMap())
     {
       std::cout << "Key:" << consKeyVolumePair.first << " volume: " << consKeyVolumePair.second << "\n";
       totalVolumeOfItems += consKeyVolumePair.second;
     };
     std::cout << "\n";
 
-    const int totalBinsUsed = packingProcessor_.getNumberOfBins();
-    const double availableVolumePerBin = packingProcessor_.getContext()->getRequestedBin()->getMaxVolume();
+    const int totalBinsUsed = packingProcessor_->getNumberOfBins();
+    const double availableVolumePerBin = packingProcessor_->getContext()->getRequestedBin()->getMaxVolume();
     const double totalAvailableVolume = totalBinsUsed * availableVolumePerBin;
     const double availableVolumeWithOneBinLess = totalAvailableVolume - availableVolumePerBin;
 

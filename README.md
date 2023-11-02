@@ -1,12 +1,9 @@
-# packToBin
-Algorithm to place multiple rectangles in another rectangle in the most desired way possible. 
+# packToMixedBins
+Variant of the packToBin algorithm except it accepts multiple bins.
 
-## Dependencies
-1. jsoncpp  
-libjsoncpp.so.1
+Largely a copy, adds a bin selector object which orchestrates bin selection.
 
 
-## document packingDirection
 
 
 input supports 4 decimals

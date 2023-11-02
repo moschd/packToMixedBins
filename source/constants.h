@@ -90,9 +90,9 @@ namespace constants
     {
         namespace inbound
         {
-            namespace bin
+            namespace bins
             {
-                const std::string BIN = "bin";
+                const std::string BINS = "bins";
                 const std::string TYPE = "type";
                 const std::string WIDTH = "width";
                 const std::string DEPTH = "depth";

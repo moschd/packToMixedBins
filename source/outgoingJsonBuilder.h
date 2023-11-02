@@ -117,7 +117,7 @@ public:
      *
      * @param packedPacker
      */
-    void generate(Packer packedPacker)
+    void generate(std::shared_ptr<Packer> packedPacker)
     {
 
         /*
@@ -126,7 +126,7 @@ public:
         */
 
         std::vector<int> myUnfittedItems;
-        for (const auto &cluster : packedPacker.getClusters())
+        for (const auto &cluster : packedPacker->getClusters())
         {
             myUnfittedItems.insert(myUnfittedItems.end(), cluster->getUnfittedItems().begin(),
                                    cluster->getUnfittedItems().end());
@@ -139,20 +139,20 @@ public:
             {
                 outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(
                     ResponseBuilder::itemToJson(
-                        packedPacker.Packer::getContext()->getItem(it)));
+                        packedPacker->Packer::getContext()->getItem(it)));
             };
         };
 
         /* Return if no bins were packed. Happens if none of the items fit. */
-        if (packedPacker.Packer::getNumberOfBins() == 0)
+        if (packedPacker->Packer::getNumberOfBins() == 0)
         {
             return;
         }
 
         /* Header information. */
-        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = packedPacker.Packer::getNumberOfBins();
-        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = packedPacker.Packer::getTotalVolumeUtilPercentage();
-        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = packedPacker.Packer::getTotalWeightUtilPercentage();
+        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = packedPacker->Packer::getNumberOfBins();
+        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = packedPacker->Packer::getTotalVolumeUtilPercentage();
+        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = packedPacker->Packer::getTotalWeightUtilPercentage();
 
         /* If includeBins parameter is false, skip generating json for the bins. */
         if (!ResponseBuilder::includeBins_)
@@ -160,7 +160,7 @@ public:
             return;
         };
 
-        for (const std::shared_ptr<PackingCluster> &cluster : packedPacker.Packer::getClusters())
+        for (const std::shared_ptr<PackingCluster> &cluster : packedPacker->Packer::getClusters())
         {
             for (const std::shared_ptr<Bin> &bin : cluster->PackingCluster::getPackedBins())
             {
@@ -173,7 +173,7 @@ public:
                     for (const auto &item : bin->Bin::getFittedItems())
                     {
                         mappedBin[constants::json::outbound::bin::FITTED_ITEMS].append(
-                            ResponseBuilder::itemToJson(packedPacker.Packer::getContext()->getItem(item)));
+                            ResponseBuilder::itemToJson(packedPacker->Packer::getContext()->getItem(item)));
                     };
                 };
 

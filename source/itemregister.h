@@ -160,6 +160,13 @@ public:
     };
 
     /**
+     * @brief Get all items.
+     *
+     * @return std::vector<std::shared_ptr<Item>>&
+     */
+    std::vector<std::shared_ptr<Item>> &getCompleteItemVector() { return ItemRegister::completeItemVector_; };
+
+    /**
      * @brief Get a Item object.
      *
      * @param key

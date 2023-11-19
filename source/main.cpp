@@ -52,6 +52,7 @@ Include necessary files.
 #include "itemPositionConstructor.h"
 #include "packingCluster.h"
 #include "packer.h"
+#include "mixedBinPackerHandler.h"
 #include "binComposer.h"
 #include "outgoingJsonBuilder.h"
 #include "packingResultEvaluator.h"

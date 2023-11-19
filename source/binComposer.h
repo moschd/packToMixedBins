@@ -9,25 +9,38 @@ class BinComposer
 {
 private:
     std::vector<std::shared_ptr<Packer>> packers_;
-    int binIndex_;
-    int nrOfBins_;
-    std::shared_ptr<Packer> composedPacker_;
+    std::shared_ptr<MixedBinPackerHandler> mixedBinPackerHandler_;
+    bool finalized_;
 
+    /**
+     * @brief Sort bins so they get evaluated lowest volume first.
+     *
+     */
     void sortBinsOnVolume()
     {
-
         std::sort(packers_.begin(), packers_.end(), [this](std::shared_ptr<Packer> &packerLeft, std::shared_ptr<Packer> &packerRight)
                   { return packerLeft->getContext()->getRequestedBin()->getMaxVolume() < packerRight->getContext()->getRequestedBin()->getMaxVolume(); });
-    }
-
-public:
-    BinComposer(std::vector<std::shared_ptr<Packer>> aPackers) : packers_(aPackers)
-    {
-        BinComposer::sortBinsOnVolume();
     };
 
-    const std::shared_ptr<Packer> getPacker() { return BinComposer::composedPacker_; };
+    /**
+     * @brief Add a winning bin to the mixed bin handler.
+     *
+     * @param aPacker
+     */
+    void addWinningBin(const std::shared_ptr<Packer> aPacker){
 
+    };
+
+public:
+    BinComposer(std::vector<std::shared_ptr<Packer>> aPackers) : packers_(aPackers), finalized_(false)
+    {
+        BinComposer::mixedBinPackerHandler_ = std::make_shared<MixedBinPackerHandler>();
+    };
+
+    /**
+     * @brief Start constructing winning bins.
+     *
+     */
     void compose()
     {
 
@@ -46,9 +59,20 @@ public:
 
             if (packingProcessor->getNumberOfBins() == 1)
             {
-                BinComposer::composedPacker_ = packingProcessor;
-                break;
+                std::cout << "One bin.\n";
+                BinComposer::mixedBinPackerHandler_->appendWinningBin(packingProcessor);
+                BinComposer::finalized_ = true;
             };
+
+            if (BinComposer::finalized_)
+            {
+                std::cout << "Composer is finalized.\n";
+                break;
+            }
+        };
+
+        if(!BinComposer::finalized_){
+            
         };
     }
 };

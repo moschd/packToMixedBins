@@ -31,7 +31,7 @@ namespace Geometry
         return intersectingX(cuboidOne, cuboidTwo) && intersectingY(cuboidOne, cuboidTwo);
     }
 
-    /**
+   /**
      * @brief Return the smallest distance between item starting points.
      * Ignores zeros unless all distances are 0.
      *
@@ -53,59 +53,27 @@ namespace Geometry
         const int heightDistance = std::max(objectOne->position_[constants::axis::HEIGHT], objectTwo->position_[constants::axis::HEIGHT]) -
                                    std::min(objectOne->position_[constants::axis::HEIGHT], objectTwo->position_[constants::axis::HEIGHT]);
 
-        if (widthDistance == 0 && depthDistance == 0 && heightDistance == 0)
-        {
-            return 0;
-        };
+        std::vector<int> distances = {widthDistance, depthDistance, heightDistance};
+        std::sort(distances.begin(), distances.end());
 
-        int smallestNonZero = 0;
-        const bool widthIsZero = widthDistance == 0;
-        const bool depthIsZero = depthDistance == 0;
-        const bool heightIsZero = heightDistance == 0;
-
-        if (!widthIsZero && !depthIsZero && !heightIsZero)
+        for (int distance : distances)
         {
-            smallestNonZero = std::min(heightDistance, std::min(widthDistance, heightDistance));
-        }
-        else
-        {
+            // if (objectOne->id_ == "DTM002" && objectTwo->id_ == "DTM012")
+            // {
+            //     std::cout << " distance of " << distance << "\n";
+            // }
+            if (distance > 0)
+            {
 
-            if (!widthIsZero)
-            {
-                if (depthIsZero && heightIsZero)
-                {
-                    smallestNonZero = widthDistance;
-                }
-                else if (depthIsZero)
-                {
-                    smallestNonZero = std::min(widthDistance, heightDistance);
-                }
-            }
-            else if (!depthIsZero)
-            {
-                if (widthIsZero && heightIsZero)
-                {
-                    smallestNonZero = depthDistance;
-                }
-                else if (widthIsZero)
-                {
-                    smallestNonZero = std::min(depthDistance, heightDistance);
-                }
-            }
-            else if (!heightIsZero)
-            {
-                if (widthIsZero && depthIsZero)
-                {
-                    smallestNonZero = heightDistance;
-                }
-                else if (widthIsZero)
-                {
-                    smallestNonZero = std::min(depthDistance, heightDistance);
-                }
+                // if (objectOne->id_ == "DTM002" && objectTwo->id_ == "DTM012")
+                // {
+                //     std::cout << "Returning smallest distance of " << distance << "\n";
+                // }
+                return distance;
             };
         };
 
-        return smallestNonZero;
+        return 0;
     }
 }
 #endif

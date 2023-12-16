@@ -76,6 +76,7 @@ public:
 
     void addPackedBin(std::shared_ptr<Bin> aBin)
     {
+        aBin->id_ = (int)BinComposer::packedBins_.size() + 1;
         std::cout << "Adding packed bin " << aBin->type_ << " to composer.\n";
         BinComposer::packedBins_.push_back(aBin);
         BinComposer::updateItemsToBePacked();
@@ -148,7 +149,6 @@ public:
             {
                 std::shared_ptr<Item> copiedItem = std::make_shared<Item>(*BinComposer::getMasterItemRegister()->getConstItem(aItemKeyToBePacked));
                 itemRegister->addItem(copiedItem);
-                copiedItem->reset();
             };
 
             std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(requestedBin->getBinGravityStrength(), itemRegister);
@@ -182,7 +182,6 @@ public:
             // If there is no winningPacker yet, set it to the packer which reached this point.
             if (!winningPacker)
             {
-
                 winningPacker = processedPacker;
                 std::cout << "Here0\n";
                 std::cout << "Winning " << winningPacker->getBins().size() << "\n";
@@ -199,22 +198,6 @@ public:
                 winningPacker = processedPacker;
                 continue;
             };
-
-            // // Current packer requires the same amount of bins, check which packer has a higher utilized bin.
-            // if (processedPacker->getBins().size() == winningPacker->getBins().size())
-            // {
-            //     if (BinComposer::mixedBinPackerHandler_->getWinningBin(processedPacker)->getRealActualVolumeUtil() >
-            //         BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getRealActualVolumeUtil())
-            //     {
-
-            //         std::cout << "Here2\n";
-            //         std::cout << "Winning " << BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getRealActualVolumeUtil() << "\n";
-            //         std::cout << "processedPacker " << BinComposer::mixedBinPackerHandler_->getWinningBin(processedPacker)->getRealActualVolumeUtil() << "\n";
-
-            //         winningPacker = processedPacker;
-            //         continue;
-            //     };
-            // };
         }
 
         BinComposer::addPackedBin(BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker));
@@ -222,10 +205,6 @@ public:
         if (!BinComposer::itemsToBePacked_.empty())
         {
             BinComposer::compose();
-        }
-        else
-        {
-            std::cout << "All items have been packed into bins.\n";
         }
     }
 };

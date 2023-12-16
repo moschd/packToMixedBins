@@ -117,7 +117,6 @@ int main()
                                                incomingJsonBins[idx][constants::json::inbound::bins::GRAVITY_STRENGTH].asDouble());
 
             binComposer->addRequestedBin(requestedBin);
-            std::cout << "Added requested bin from json\n";
         };
 
         /* Initialize items and add them to the master register */
@@ -136,7 +135,6 @@ int main()
                                        incomingJsonItems[idx][constants::json::item::STACKING_STYLE].asString()));
 
             binComposer->addItem(idx + 1);
-            std::cout << "Added item from json\n";
         };
 
         binComposer->compose();

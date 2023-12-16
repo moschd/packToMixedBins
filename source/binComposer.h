@@ -137,6 +137,8 @@ public:
     void compose()
     {
 
+        // TODO add a check here for items that only fit in a particular bin. Those items should be packed first.
+
         std::vector<std::shared_ptr<Packer>> processedPackers;
 
         // Execute packing for each requestedbin size.

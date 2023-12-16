@@ -41,7 +41,7 @@ public:
         return numberOfBins;
     }
 
-        /**
+    /**
      * @brief Get the total number of bins required.
      *
      * @return const int
@@ -52,52 +52,14 @@ public:
 
         for (const std::shared_ptr<PackingCluster> &cluster : clusters_)
         {
-            for(std::shared_ptr<Bin> bin : cluster->getPackedBins()){
+            for (std::shared_ptr<Bin> bin : cluster->getPackedBins())
+            {
                 bins.push_back(bin);
             };
         };
 
         return bins;
     }
-
-    // /**
-    //  * @brief Get the total volume utilization across bins.
-    //  *
-    //  * @return const double
-    //  */
-    // const double getTotalVolumeUtilPercentage() const
-    // {
-    //     double runningUtilSum = 0.0;
-
-    //     for (const std::shared_ptr<PackingCluster> &cluster : clusters_)
-    //     {
-    //         for (const std::shared_ptr<Bin> &bin : cluster->getPackedBins())
-    //         {
-    //             runningUtilSum += bin->getRealActualVolumeUtilPercentage();
-    //         };
-    //     };
-
-    //     return runningUtilSum / Packer::getNumberOfBins();
-    // };
-
-    // /**
-    //  * @brief Get the total weight utilization across bins.
-    //  *
-    //  * @return const int
-    //  */
-    // const double getTotalWeightUtilPercentage() const
-    // {
-    //     double runningUtilSum = 0.0;
-
-    //     for (const std::shared_ptr<PackingCluster> &cluster : clusters_)
-    //     {
-    //         for (const std::shared_ptr<Bin> &bin : cluster->getPackedBins())
-    //         {
-    //             runningUtilSum += bin->getRealActualWeightUtilPercentage();
-    //         };
-    //     };
-    //     return runningUtilSum / Packer::getNumberOfBins();
-    // };
 
     /**
      * @brief Start packing, create a new cluster per item vector to be packed.

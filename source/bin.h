@@ -190,6 +190,7 @@ public:
 
     const std::vector<int> &getFittedItems() const { return Bin::items_; };
     const std::vector<int> &getUnfittedItems() const { return Bin::unfittedItems_; };
+    const std::shared_ptr<PackingContext> getContext() const { return Bin::context_; };
 
     /**
      * @brief Reset the item to inital values and add to unfitted items.

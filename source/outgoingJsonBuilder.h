@@ -113,11 +113,11 @@ public:
     /**
      * @brief Generates the outgoing JSON.
      *
-     * It takes a packed packing processor as input and converts its content to the outgoing json.
+     * It takes a binComposer as input and converts its content to the outgoing json.
      *
-     * @param packedPacker
+     * @param aBinComposer
      */
-    void generate(std::shared_ptr<Packer> packedPacker)
+    void generate(std::shared_ptr<BinComposer> aBinComposer)
     {
 
         /*
@@ -126,11 +126,8 @@ public:
         */
 
         std::vector<int> myUnfittedItems;
-        for (const auto &cluster : packedPacker->getClusters())
-        {
-            myUnfittedItems.insert(myUnfittedItems.end(), cluster->getUnfittedItems().begin(),
-                                   cluster->getUnfittedItems().end());
-        };
+        myUnfittedItems.insert(myUnfittedItems.end(), aBinComposer->getItemsToBePacked().begin(),
+                               aBinComposer->getItemsToBePacked().end());
 
         if (!myUnfittedItems.empty())
         {
@@ -139,20 +136,20 @@ public:
             {
                 outboundRoot_[constants::json::outbound::header::UNFITTED_ITEMS].append(
                     ResponseBuilder::itemToJson(
-                        packedPacker->Packer::getContext()->getItem(it)));
+                        aBinComposer->getMasterItemRegister()->getItem(it)));
             };
         };
 
         /* Return if no bins were packed. Happens if none of the items fit. */
-        if (packedPacker->Packer::getNumberOfBins() == 0)
+        if (aBinComposer->getNumberOfBins() == 0)
         {
             return;
         }
 
         /* Header information. */
-        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = packedPacker->Packer::getNumberOfBins();
-        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = packedPacker->Packer::getTotalVolumeUtilPercentage();
-        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = packedPacker->Packer::getTotalWeightUtilPercentage();
+        outboundRoot_[constants::json::outbound::header::REQUIRED_NR_OF_BINS] = aBinComposer->getNumberOfBins();
+        outboundRoot_[constants::json::outbound::header::TOTAL_VOLUME_UTIL] = aBinComposer->getTotalVolumeUtilPercentage();
+        outboundRoot_[constants::json::outbound::header::TOTAL_WEIGHT_UTIL] = aBinComposer->getTotalWeightUtilPercentage();
 
         /* If includeBins parameter is false, skip generating json for the bins. */
         if (!ResponseBuilder::includeBins_)
@@ -160,25 +157,22 @@ public:
             return;
         };
 
-        for (const std::shared_ptr<PackingCluster> &cluster : packedPacker->Packer::getClusters())
+        for (const std::shared_ptr<Bin> &bin : aBinComposer->getPackedBins())
         {
-            for (const std::shared_ptr<Bin> &bin : cluster->PackingCluster::getPackedBins())
+
+            Json::Value mappedBin = ResponseBuilder::binToJson(bin);
+
+            /* If includeItems parameter is false, skip generating json for the items. */
+            if (ResponseBuilder::includeItems_)
             {
-
-                Json::Value mappedBin = ResponseBuilder::binToJson(bin);
-
-                /* If includeItems parameter is false, skip generating json for the items. */
-                if (ResponseBuilder::includeItems_)
+                for (const auto &item : bin->Bin::getFittedItems())
                 {
-                    for (const auto &item : bin->Bin::getFittedItems())
-                    {
-                        mappedBin[constants::json::outbound::bin::FITTED_ITEMS].append(
-                            ResponseBuilder::itemToJson(packedPacker->Packer::getContext()->getItem(item)));
-                    };
+                    mappedBin[constants::json::outbound::bin::FITTED_ITEMS].append(
+                        ResponseBuilder::itemToJson(bin->getContext()->getItem(item)));
                 };
-
-                ResponseBuilder::outboundRoot_[constants::json::outbound::PACKED_BINS].append(mappedBin);
             };
+
+            ResponseBuilder::outboundRoot_[constants::json::outbound::PACKED_BINS].append(mappedBin);
         };
     };
 };

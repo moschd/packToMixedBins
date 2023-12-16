@@ -97,11 +97,14 @@ int main()
         const Json::Value incomingJsonBins = inboundRoot[constants::json::inbound::bins::BINS];
         const Json::Value incomingJsonItems = inboundRoot[constants::json::inbound::item::ITEMS];
 
-        std::vector<std::shared_ptr<Packer>> packers;
+        std::shared_ptr<ItemRegister> itemRegister =
+            std::make_shared<ItemRegister>(constants::itemRegister::parameter::sortMethod::OPTIMIZED,
+                                           incomingJsonItems.size());
+
+        std::shared_ptr<BinComposer> binComposer = std::make_unique<BinComposer>(itemRegister);
 
         for (int idx = incomingJsonBins.size(); idx--;)
         {
-
             std::shared_ptr<RequestedBin> requestedBin =
                 std::make_shared<RequestedBin>(incomingJsonBins[idx][constants::json::inbound::bins::TYPE].asString(),
                                                incomingJsonBins[idx][constants::json::inbound::bins::WIDTH].asDouble() * MULTIPLIER,
@@ -109,47 +112,38 @@ int main()
                                                incomingJsonBins[idx][constants::json::inbound::bins::HEIGHT].asDouble() * MULTIPLIER,
                                                incomingJsonBins[idx][constants::json::inbound::bins::MAX_WEIGHT].asDouble(),
                                                incomingJsonBins[idx][constants::json::inbound::bins::NR_OF_AVAILABLE_BINS].asInt(),
-                                               incomingJsonBins[idx][constants::json::inbound::bins::PACKING_DIRECTION].asString());
+                                               incomingJsonBins[idx][constants::json::inbound::bins::PACKING_DIRECTION].asString(),
+                                               incomingJsonBins[idx][constants::json::inbound::bins::SORT_METHOD].asString(),
+                                               incomingJsonBins[idx][constants::json::inbound::bins::GRAVITY_STRENGTH].asDouble());
 
-            std::shared_ptr<ItemRegister> itemRegister =
-                std::make_shared<ItemRegister>(incomingJsonBins[idx][constants::json::inbound::bins::SORT_METHOD].asString(), incomingJsonItems.size());
-
-            std::shared_ptr<Gravity> masterGravity =
-                std::make_shared<Gravity>(incomingJsonBins[idx][constants::json::inbound::bins::GRAVITY_STRENGTH].asDouble(), itemRegister);
-
-            std::shared_ptr<Packer> packingProcessor =
-                std::make_shared<Packer>(std::make_shared<PackingContext>(
-                    masterGravity,
-                    itemRegister,
-                    requestedBin));
-
-            /* Initialize items and add them to the master register */
-            for (int idx = incomingJsonItems.size(); idx--;)
-            {
-                packingProcessor->getContext()->getItemRegister()->addItem(
-                    std::make_shared<Item>(idx + 1,
-                                           incomingJsonItems[idx][constants::json::item::ID].asString(),
-                                           incomingJsonItems[idx][constants::json::item::WIDTH].asDouble() * MULTIPLIER,
-                                           incomingJsonItems[idx][constants::json::item::DEPTH].asDouble() * MULTIPLIER,
-                                           incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble() * MULTIPLIER,
-                                           incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
-                                           incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
-                                           incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
-                                           incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble(),
-                                           incomingJsonItems[idx][constants::json::item::STACKING_STYLE].asString()));
-            };
-
-            packers.push_back(packingProcessor);
+            binComposer->addRequestedBin(requestedBin);
+            std::cout << "Added requested bin from json\n";
         };
 
-        std::unique_ptr<BinComposer> binComposer = std::make_unique<BinComposer>(packers);
+        /* Initialize items and add them to the master register */
+        for (int idx = incomingJsonItems.size(); idx--;)
+        {
+            binComposer->getMasterItemRegister()->addItem(
+                std::make_shared<Item>(idx + 1,
+                                       incomingJsonItems[idx][constants::json::item::ID].asString(),
+                                       incomingJsonItems[idx][constants::json::item::WIDTH].asDouble() * MULTIPLIER,
+                                       incomingJsonItems[idx][constants::json::item::DEPTH].asDouble() * MULTIPLIER,
+                                       incomingJsonItems[idx][constants::json::item::HEIGHT].asDouble() * MULTIPLIER,
+                                       incomingJsonItems[idx][constants::json::item::WEIGHT].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
+                                       incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
+                                       incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble(),
+                                       incomingJsonItems[idx][constants::json::item::STACKING_STYLE].asString()));
+
+            binComposer->addItem(idx + 1);
+            std::cout << "Added item from json\n";
+        };
+
         binComposer->compose();
 
         /* Initialize outgoing json builder */
         ResponseBuilder outgoingJsonBuilder(responsePrecision, includeBins, includeItems, itemDimensionsAfter);
-
-        outgoingJsonBuilder.generate(binComposer->getPacker());
-
+        outgoingJsonBuilder.generate(binComposer);
         std::string resultJson(Json::writeString(outgoingJsonBuilder.getBuilder(), outgoingJsonBuilder.getMessage()));
 
 #if COMPILE_TO_SHARED_OBJECT_FILE
@@ -171,7 +165,7 @@ int main()
     myfile.close();
     std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
     std::cout << "----\n\n";
-    std::unique_ptr<PackingResultEvaluator> evaluator = std::make_unique<PackingResultEvaluator>(binComposer->getPacker());
+    // std::unique_ptr<PackingResultEvaluator> evaluator = std::make_unique<PackingResultEvaluator>(binComposer->getPacker());
 
     return 1;
 };

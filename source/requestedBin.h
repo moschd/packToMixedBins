@@ -20,6 +20,8 @@ private:
     double estAvgVolumeUtil_;
     double estAvgWeightUtil_;
     std::array<int, 3> packingDirection_;
+    std::string itemSortMethod_;
+    double binGravityStrength_;
 
     /**
      * @brief Set the desired packing direction of the bin.
@@ -48,12 +50,16 @@ public:
                  int aBinHeight,
                  double aBinMaxWeight,
                  int aNrOfAvailableBins,
-                 std::string aPackingDirection) : type_(aBinType),
-                                                  maxWidth_(aBinWidth),
-                                                  maxDepth_(aBinDepth),
-                                                  maxHeight_(aBinHeight),
-                                                  maxWeight_(aBinMaxWeight),
-                                                  nrOfAvailableBins_(aNrOfAvailableBins)
+                 std::string aPackingDirection,
+                 std::string aItemSortMethod,
+                 double aBinGravityStrength) : type_(aBinType),
+                                               maxWidth_(aBinWidth),
+                                               maxDepth_(aBinDepth),
+                                               maxHeight_(aBinHeight),
+                                               maxWeight_(aBinMaxWeight),
+                                               nrOfAvailableBins_(aNrOfAvailableBins),
+                                               itemSortMethod_(aItemSortMethod),
+                                               binGravityStrength_(aBinGravityStrength)
     {
         RequestedBin::maxVolume_ = ((double)RequestedBin::maxWidth_ / MULTIPLIER) * ((double)RequestedBin::maxDepth_ / MULTIPLIER) * ((double)RequestedBin::maxHeight_ / MULTIPLIER);
         RequestedBin::setPackingDirection(aPackingDirection);
@@ -72,6 +78,8 @@ public:
     const double getRealBottomSurfaceArea() const { return getRealWidth() * getRealDepth(); };
 
     const std::array<int, 3> &getPackingDirection() const { return RequestedBin::packingDirection_; }
+    const std::string &getItemSortMethod() const { return RequestedBin::itemSortMethod_; }
+    const double &getBinGravityStrength() const { return RequestedBin::binGravityStrength_; }
 
     /**
      * @brief Compares integer to the available number of bins as specified by the input.

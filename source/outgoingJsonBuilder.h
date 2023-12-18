@@ -120,11 +120,7 @@ public:
     void generate(std::shared_ptr<BinComposer> aBinComposer)
     {
 
-        /*
-        Aggregate unfitted items across packing clusters.
-        If there are unfitted items, create unfitted items json section.
-        */
-
+        /* If there are unfitted items, create unfitted items json section. */
         std::vector<int> myUnfittedItems;
         myUnfittedItems.insert(myUnfittedItems.end(), aBinComposer->getItemsToBePacked().begin(),
                                aBinComposer->getItemsToBePacked().end());

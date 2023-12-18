@@ -3,15 +3,15 @@
 		{
 			"type": "Pallet1",
 			"maxWeight": 1500,
-			"width": 1.2,
-			"height": 1.65,
+			"width": 0.1,
+			"height": 1.6,
 			"depth": 0.8
 		},
 		{
 			"type": "Pallet2",
 			"maxWeight": 1500,
-			"width": 0.9,
-			"height": 1.70,
+			"width": 0.1,
+			"height": 1.5,
 			"depth": 1
 		}
 	],

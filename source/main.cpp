@@ -63,7 +63,7 @@ Driver code.
 #if COMPILE_TO_SHARED_OBJECT_FILE
 extern "C"
 {
-    char *packToBinAlgorithm(char *result,
+    char *packToMixedBinsAlgorithm(char *result,
                              const int bufferSize,
                              const char *incomingJson,
                              const bool includeBins = DEFAULT_INCLUDE_BINS,

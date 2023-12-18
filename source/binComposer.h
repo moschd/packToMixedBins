@@ -32,9 +32,6 @@ private:
      */
     void updateItemsToBePacked()
     {
-
-        std::cout << "Items before: " << BinComposer::itemsToBePacked_.size() << "\n";
-
         BinComposer::itemsToBePacked_.erase(
             std::remove_if(begin(BinComposer::itemsToBePacked_),
                            end(BinComposer::itemsToBePacked_),
@@ -53,8 +50,6 @@ private:
                                return isPacked;
                            }),
             end(BinComposer::itemsToBePacked_));
-
-        std::cout << "Items after: " << BinComposer::itemsToBePacked_.size() << "\n";
     }
 
 public:
@@ -83,7 +78,7 @@ public:
     };
 
     void addItem(const int aItemKey) { BinComposer::itemsToBePacked_.push_back(aItemKey); };
-    const std::vector<int> getItemsToBePacked() { return BinComposer::itemsToBePacked_; };
+    const std::vector<int> &getItemsToBePacked() { return BinComposer::itemsToBePacked_; };
     const int getNumberOfBins() const { return (int)BinComposer::packedBins_.size(); };
     const std::vector<std::shared_ptr<Bin>> getPackedBins() const { return BinComposer::packedBins_; };
 
@@ -145,7 +140,7 @@ public:
         for (std::shared_ptr<RequestedBin> requestedBin : BinComposer::requestedBins_)
         {
 
-            std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(requestedBin->getItemSortMethod(), BinComposer::itemsToBePacked_.size());
+            std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(requestedBin->getItemSortMethod(), (int)BinComposer::itemsToBePacked_.size());
 
             for (const int aItemKeyToBePacked : BinComposer::itemsToBePacked_)
             {
@@ -182,7 +177,7 @@ public:
             }
 
             // If there is no winningPacker yet, set it to the packer which reached this point.
-            if (!winningPacker)
+            if (!winningPacker && (int)processedPacker->getBins().size() > 1)
             {
                 winningPacker = processedPacker;
                 std::cout << "Here0\n";
@@ -191,7 +186,7 @@ public:
             }
 
             // Current packer requires less bins than the current winningPacker, set new winner.
-            if (processedPacker->getBins().size() < winningPacker->getBins().size())
+            if (winningPacker && processedPacker->getBins().size() < winningPacker->getBins().size())
             {
                 std::cout << "Here1\n";
                 std::cout << "Winning " << winningPacker->getBins().size() << "\n";
@@ -201,6 +196,13 @@ public:
                 continue;
             };
         }
+
+        // No items were fitted.
+        if (!winningPacker)
+        {
+            std::cout << "No items were fitted.\n";
+            return;
+        };
 
         BinComposer::addPackedBin(BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker));
 

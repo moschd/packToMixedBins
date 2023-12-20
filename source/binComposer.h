@@ -227,17 +227,15 @@ public:
             }
             else
             {
-                winningPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getRealActualVolumeUtilPercentage();
-                processedPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(processedPacker)->getRealActualVolumeUtilPercentage();
-                // winningPacker->getBins().size() * winningPacker->getContext()->getRequestedBin()->getMaxVolume();
-                // processedPackerValue = processedPacker->getBins().size() * processedPacker->getContext()->getRequestedBin()->getMaxVolume();
+                winningPackerValue = winningPacker->getBins().size() * winningPacker->getContext()->getRequestedBin()->getMaxVolume();
+                processedPackerValue = processedPacker->getBins().size() * processedPacker->getContext()->getRequestedBin()->getMaxVolume();
             }
 #if DEBUG
             std::cout << "Compare values are: winningPacker " << winningPackerValue << " processedPacker " << processedPackerValue << "\n";
 #endif
 
             // Current packer requires less bins than the current winningPacker, set new winner.
-            if (winningPacker && processedPackerValue > winningPackerValue)
+            if (winningPacker && processedPackerValue < winningPackerValue)
             {
 #if DEBUG
                 std::cout << "Setting new winner.\n";
@@ -251,6 +249,16 @@ public:
         if (!winningPacker)
         {
             return;
+        };
+
+        std::vector<int> fittedItems = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getFittedItems();
+
+        for (std::vector<int> sortedItemConsKeyVector : winningPacker->getContext()->getItemRegister()->getNewSortedItemKeys())
+        {
+            fittedItems.insert(fittedItems.end(), sortedItemConsKeyVector.begin(), sortedItemConsKeyVector.end());
+            winningPacker->startPackingCluster(fittedItems);
+            // Change sort method to Volume for this second packing iteration. The problem is it might use OPTIMIZED.
+            // By using optimized it does not take the order of fittedItems into account and that makes our insert useless.
         };
 
         BinComposer::addPackedBin(BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker));

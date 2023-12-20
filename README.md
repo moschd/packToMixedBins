@@ -31,3 +31,10 @@ call packToBin for all bins.
         pack it
     if there are multiple with 1:
         pack smallest one
+
+
+
+Add a second packing iteration,
+    This is needed because the winningBin can be the 2nd, 3rd bin that has been packed. The bins before it may have items on them which could fit ontop of the winningBin.
+    But because the winningBin was packed later, these items are not seen.
+    So, the winning bin should get a second packing iteration with the items which are packed on previous bins of the packer.

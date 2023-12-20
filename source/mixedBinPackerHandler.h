@@ -17,20 +17,8 @@ public:
     {
         std::vector<std::shared_ptr<Bin>> packedBins = aPacker->getBins();
 
-        // for (const std::shared_ptr<Bin> bin : packedBins)
-        // {
-
-        //     std::cout << bin->getRealActualVolumeUtilPercentage() << "\n";
-        // };
         std::sort(packedBins.begin(), packedBins.end(), [this](std::shared_ptr<Bin> &binLeft, std::shared_ptr<Bin> &binRight)
                   { return binLeft->getRealActualVolumeUtilPercentage() < binRight->getRealActualVolumeUtilPercentage(); });
-
-        // std::cout << "after:\n";
-        // for (const std::shared_ptr<Bin> bin : packedBins)
-        // {
-
-        //     std::cout << bin->getRealActualVolumeUtilPercentage() << "\n";
-        // };
 
         return packedBins.back();
     }

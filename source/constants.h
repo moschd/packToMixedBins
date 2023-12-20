@@ -49,6 +49,15 @@ namespace constants
         }
     }
 
+    namespace binComposer
+    {
+        namespace minimizationStrategy
+        {
+            constexpr const unsigned int VOLUME{10};
+            constexpr const unsigned int BINS{20};
+        }
+    }
+
     namespace item
     {
         namespace parameter

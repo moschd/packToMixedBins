@@ -261,6 +261,29 @@ public:
     };
 
     /**
+     * @brief Returns the total weight of the complete packing request.
+     *
+     * @return const double
+     */
+    const std::unordered_map<std::string, double> getTotalWeightMap()
+    {
+        std::unordered_map<std::string, double> weightMap;
+
+        for (const std::vector<int> itemVector : ItemRegister::getNewSortedItemKeys())
+        {
+            const std::string key = ItemRegister::getConstItem(itemVector.front())->itemConsolidationKey_;
+
+            weightMap[key] = 0.0;
+            for (const int aItemKey : itemVector)
+            {
+                weightMap[key] += ItemRegister::getConstItem(aItemKey)->getRealWeight();
+            }
+        };
+
+        return weightMap;
+    };
+
+    /**
      * @brief Checks if any item has a specific stacking style.
      *
      * @return const bool

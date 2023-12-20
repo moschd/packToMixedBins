@@ -41,6 +41,23 @@ public:
         return numberOfBins;
     }
 
+    const int getNumberOfUnfittedItems()
+    {
+        int nrOfUnfittedItems = 0;
+        for (const std::shared_ptr<PackingCluster> &cluster : clusters_)
+        {
+            nrOfUnfittedItems += (int)cluster->getUnfittedItems().size();
+        };
+        return nrOfUnfittedItems;
+    }
+
+    /**
+     * @brief Returns a bool indicating if there are unfitted items.
+     *
+     * @return const bool
+     */
+    const bool hasUnfittedItems() { return Packer::getNumberOfUnfittedItems() > 0; };
+
     /**
      * @brief Get the total number of bins required.
      *

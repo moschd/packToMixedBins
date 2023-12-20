@@ -13,6 +13,20 @@ private:
     std::vector<std::shared_ptr<Bin>> packedBins_;
     std::shared_ptr<ItemRegister> masterItemRegister_;
     std::vector<int> itemsToBePacked_;
+    int minimizationStrategy_;
+
+    void setMinimizationStrategy(const int aStrategy)
+    {
+
+        if (constants::binComposer::minimizationStrategy::BINS == aStrategy)
+        {
+            BinComposer::minimizationStrategy_ = constants::binComposer::minimizationStrategy::BINS;
+        }
+        else
+        {
+            BinComposer::minimizationStrategy_ = constants::binComposer::minimizationStrategy::VOLUME;
+        }
+    }
 
     /**
      * @brief Sort requestedBins so they get evaluated lowest volume first.
@@ -53,16 +67,17 @@ private:
     }
 
 public:
-    BinComposer(std::shared_ptr<ItemRegister> aItemRegister) : masterItemRegister_(aItemRegister)
+    BinComposer(std::shared_ptr<ItemRegister> aItemRegister, int aMinimizationStrategy) : masterItemRegister_(aItemRegister)
     {
         BinComposer::mixedBinPackerHandler_ = std::make_shared<MixedBinPackerHandler>();
+        BinComposer::setMinimizationStrategy(aMinimizationStrategy);
     };
 
-    /**
-     * @brief Add a requested bin, these will be used during packing.
-     *
-     * @param aRequestedBin
-     */
+    void addItem(const int aItemKey) { BinComposer::itemsToBePacked_.push_back(aItemKey); };
+    const std::vector<int> &getItemsToBePacked() { return BinComposer::itemsToBePacked_; };
+    const int getNumberOfBins() const { return (int)BinComposer::packedBins_.size(); };
+    const std::vector<std::shared_ptr<Bin>> getPackedBins() const { return BinComposer::packedBins_; };
+
     void addRequestedBin(const std::shared_ptr<RequestedBin> aRequestedBin)
     {
         BinComposer::requestedBins_.push_back(aRequestedBin);
@@ -72,50 +87,44 @@ public:
     void addPackedBin(std::shared_ptr<Bin> aBin)
     {
         aBin->id_ = (int)BinComposer::packedBins_.size() + 1;
-        std::cout << "Adding packed bin " << aBin->type_ << " to composer.\n";
         BinComposer::packedBins_.push_back(aBin);
         BinComposer::updateItemsToBePacked();
     };
 
-    void addItem(const int aItemKey) { BinComposer::itemsToBePacked_.push_back(aItemKey); };
-    const std::vector<int> &getItemsToBePacked() { return BinComposer::itemsToBePacked_; };
-    const int getNumberOfBins() const { return (int)BinComposer::packedBins_.size(); };
-    const std::vector<std::shared_ptr<Bin>> getPackedBins() const { return BinComposer::packedBins_; };
-
-    /**
-     * @brief Get the total volume utilization across bins.
-     *
-     * @return const double
-     */
     const double getTotalVolumeUtilPercentage() const
     {
-        double runningUtilSum = 0.0;
+        double totalAvailableVolume = 0.0;
+        double totalItemVolume = 0.0;
+
+        for (auto const &itemConsKeyVolume : BinComposer::masterItemRegister_->getTotalVolumeMap())
+        {
+            totalItemVolume += itemConsKeyVolume.second;
+        }
 
         for (const std::shared_ptr<Bin> &bin : BinComposer::packedBins_)
         {
-
-            runningUtilSum += bin->getRealActualVolumeUtilPercentage();
+            totalAvailableVolume += bin->getRealVolume();
         };
 
-        return runningUtilSum / BinComposer::packedBins_.size();
+        return totalItemVolume / totalAvailableVolume * 100;
     };
 
-    /**
-     * @brief Get the total weight utilization across bins.
-     *
-     * @return const int
-     */
     const double getTotalWeightUtilPercentage() const
     {
-        double runningUtilSum = 0.0;
+        double totalAvailableWeight = 0.0;
+        double totalItemWeight = 0.0;
+
+        for (auto const &itemConsKeyWeight : BinComposer::masterItemRegister_->getTotalWeightMap())
+        {
+            totalItemWeight += itemConsKeyWeight.second;
+        }
 
         for (const std::shared_ptr<Bin> &bin : BinComposer::packedBins_)
         {
-
-            runningUtilSum += bin->getRealActualWeightUtilPercentage();
+            totalAvailableWeight += bin->getRealMaxWeight();
         };
 
-        return runningUtilSum / BinComposer::packedBins_.size();
+        return totalItemWeight / totalAvailableWeight * 100;
     };
 
     /**
@@ -132,7 +141,9 @@ public:
     void compose()
     {
 
-        // TODO add a check here for items that only fit in a particular bin. Those items should be packed first.
+#if DEBUG
+        std::cout << "Starting with nr of items: " << (int)BinComposer::itemsToBePacked_.size() << "\n";
+#endif
 
         std::vector<std::shared_ptr<Packer>> processedPackers;
 
@@ -160,38 +171,77 @@ public:
         };
 
         std::shared_ptr<Packer> winningPacker;
-
+        double winningPackerValue = 0;
         // Evaluate the packing results and find the winning bin.
         for (const std::shared_ptr<Packer> processedPacker : processedPackers)
         {
+            double processedPackerValue = 0;
+#if DEBUG
             std::cout << processedPacker->getContext()->getRequestedBin()->getType() << " "
                       << processedPacker->getContext()->getRequestedBin()->getMaxVolume() << " "
                       << " nr of bins = " << processedPacker->getNumberOfBins() << "\n";
+#endif
 
-            // Packer found which requires 1 bin, cannot be beaten so break loop.
-            if (processedPacker->getNumberOfBins() == 1)
+            // Not all items can be fitted, skip to bigger bin in order to pack these items.
+            if (processedPacker->hasUnfittedItems())
             {
-                winningPacker = processedPacker;
-                std::cout << "Here, only 1 bin.\n";
-                break;
-            }
-
-            // If there is no winningPacker yet, set it to the packer which reached this point.
-            if (!winningPacker && (int)processedPacker->getBins().size() > 1)
-            {
-                winningPacker = processedPacker;
-                std::cout << "Here0\n";
-                std::cout << "Winning " << winningPacker->getBins().size() << "\n";
+#if DEBUG
+                std::cout << "Has unfitted items, skipping."
+                          << "\n";
+#endif
                 continue;
             }
 
-            // Current packer requires less bins than the current winningPacker, set new winner.
-            if (winningPacker && processedPacker->getBins().size() < winningPacker->getBins().size())
+            if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::BINS)
             {
-                std::cout << "Here1\n";
-                std::cout << "Winning " << winningPacker->getBins().size() << "\n";
-                std::cout << "processedPacker " << processedPacker->getBins().size() << "\n";
+#if DEBUG
+                std::cout << "Minimization strategy is BINS."
+                          << "\n";
+#endif
+                // Packer found which requires 1 bin, cannot be beaten so break loop.
+                if (processedPacker->getNumberOfBins() == 1)
+                {
+#if DEBUG
+                    std::cout << "Requires 1 bin, is winner."
+                              << "\n";
+#endif
+                    winningPacker = processedPacker;
+                    break;
+                }
+            }
 
+            // If there is no winningPacker yet, set it to the packer which reached this point.
+            if (!winningPacker && !processedPacker->getBins().empty())
+            {
+#if DEBUG
+                std::cout << "First bin, so setting it to winner.\n";
+#endif
+                winningPacker = processedPacker;
+                continue;
+            }
+
+            if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::BINS)
+            {
+                winningPackerValue = (double)winningPacker->getBins().size();
+                processedPackerValue = (double)processedPacker->getBins().size();
+            }
+            else
+            {
+                winningPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getRealActualVolumeUtilPercentage();
+                processedPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(processedPacker)->getRealActualVolumeUtilPercentage();
+                // winningPacker->getBins().size() * winningPacker->getContext()->getRequestedBin()->getMaxVolume();
+                // processedPackerValue = processedPacker->getBins().size() * processedPacker->getContext()->getRequestedBin()->getMaxVolume();
+            }
+#if DEBUG
+            std::cout << "Compare values are: winningPacker " << winningPackerValue << " processedPacker " << processedPackerValue << "\n";
+#endif
+
+            // Current packer requires less bins than the current winningPacker, set new winner.
+            if (winningPacker && processedPackerValue > winningPackerValue)
+            {
+#if DEBUG
+                std::cout << "Setting new winner.\n";
+#endif
                 winningPacker = processedPacker;
                 continue;
             };
@@ -200,7 +250,6 @@ public:
         // No items were fitted.
         if (!winningPacker)
         {
-            std::cout << "No items were fitted.\n";
             return;
         };
 

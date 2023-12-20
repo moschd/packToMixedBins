@@ -16,15 +16,17 @@ Default parameters.
 #define DEFAULT_INCLUDE_ITEMS true
 #define DEFAULT_ITEM_DIMENSIONS_AFTER false
 #define DEFAULT_RESPONSE_PRECISION 7
+#define DEFAULT_MINIMIZATION_STRATEGY 10
 
 /*
 Compile to a shared object file.
 */
 #define COMPILE_TO_SHARED_OBJECT_FILE false
+#define DEBUG !COMPILE_TO_SHARED_OBJECT_FILE
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
 #define LOCAL_FOLDER "/home/dennismosch/packingOptimizerCompany/algorithms/packToMixedBins"
-#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo2.json"
+#define LOCAL_INPUT_FILE LOCAL_FOLDER "/testfiles/demo.json"
 #define LOCAL_OUTPUT_FILE LOCAL_FOLDER "/output.json"
 #endif
 
@@ -64,12 +66,13 @@ Driver code.
 extern "C"
 {
     char *packToMixedBinsAlgorithm(char *result,
-                             const int bufferSize,
-                             const char *incomingJson,
-                             const bool includeBins = DEFAULT_INCLUDE_BINS,
-                             const bool includeItems = DEFAULT_INCLUDE_ITEMS,
-                             const bool itemDimensionsAfter = DEFAULT_ITEM_DIMENSIONS_AFTER,
-                             const int responsePrecision = DEFAULT_RESPONSE_PRECISION)
+                                   const int bufferSize,
+                                   const char *incomingJson,
+                                   const bool includeBins = DEFAULT_INCLUDE_BINS,
+                                   const bool includeItems = DEFAULT_INCLUDE_ITEMS,
+                                   const bool itemDimensionsAfter = DEFAULT_ITEM_DIMENSIONS_AFTER,
+                                   const int responsePrecision = DEFAULT_RESPONSE_PRECISION,
+                                   const int minimizationStrategy = DEFAULT_MINIMIZATION_STRATEGY)
     {
 
 #else
@@ -81,6 +84,8 @@ int main()
     const bool includeItems = DEFAULT_INCLUDE_ITEMS;
     const bool itemDimensionsAfter = DEFAULT_ITEM_DIMENSIONS_AFTER;
     const int responsePrecision = DEFAULT_RESPONSE_PRECISION;
+    const int minimizationStrategy = DEFAULT_MINIMIZATION_STRATEGY;
+
     std::ifstream incomingJsonFile(LOCAL_INPUT_FILE);
 
     std::string line, text;
@@ -101,7 +106,7 @@ int main()
             std::make_shared<ItemRegister>(constants::itemRegister::parameter::sortMethod::OPTIMIZED,
                                            incomingJsonItems.size());
 
-        std::shared_ptr<BinComposer> binComposer = std::make_unique<BinComposer>(itemRegister);
+        std::shared_ptr<BinComposer> binComposer = std::make_shared<BinComposer>(itemRegister, minimizationStrategy);
 
         for (int idx = incomingJsonBins.size(); idx--;)
         {

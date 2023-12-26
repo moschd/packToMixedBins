@@ -40,32 +40,6 @@ private:
                   { return requestedBinLeft->getMaxVolume() < requestedBinRight->getMaxVolume(); });
     };
 
-    /**
-     * @brief Remove itemKeys from the global items to be packed by iterating over the packed items of the packed bin which has been added last.
-     *
-     */
-    void updateItemsToBePacked()
-    {
-        BinComposer::itemsToBePacked_.erase(
-            std::remove_if(begin(BinComposer::itemsToBePacked_),
-                           end(BinComposer::itemsToBePacked_),
-                           [&](int &itemToBePackedKey) -> bool
-                           {
-                               bool isPacked = false;
-                               for (const int packedItem : BinComposer::packedBins_.back()->getFittedItems())
-                               {
-                                   if (packedItem == itemToBePackedKey)
-                                   {
-                                       isPacked = true;
-                                       break;
-                                   };
-                               };
-
-                               return isPacked;
-                           }),
-            end(BinComposer::itemsToBePacked_));
-    }
-
 public:
     BinComposer(std::shared_ptr<ItemRegister> aItemRegister, int aMinimizationStrategy) : masterItemRegister_(aItemRegister)
     {
@@ -88,7 +62,8 @@ public:
     {
         aBin->id_ = (int)BinComposer::packedBins_.size() + 1;
         BinComposer::packedBins_.push_back(aBin);
-        BinComposer::updateItemsToBePacked();
+
+        BinComposer::itemsToBePacked_ = BinComposer::mixedBinPackerHandler_->removeDuplicateIntegers(BinComposer::itemsToBePacked_, aBin->getFittedItems());
     };
 
     const double getTotalVolumeUtilPercentage() const
@@ -251,14 +226,50 @@ public:
             return;
         };
 
+        std::cout << "  Going to pack bin again.\n";
         std::vector<int> fittedItems = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getFittedItems();
-
+        std::cout << "fitted:\n";
+        for (const int a : fittedItems)
+        {
+            std::cout << a << " ";
+        }
+        std::cout << "\n";
+        // Sort method cannot be OPTIMIZED since OPTIMIZED does not have to take into account the order of items in the sortedItemConsKeyVector.
+        // but we rely on this order to make sure the new bin is the same as the old bin.
+        winningPacker->getContext()->getItemRegister()->setSortMethodHelper(constants::itemRegister::parameter::sortMethod::VOLUME);
         for (std::vector<int> sortedItemConsKeyVector : winningPacker->getContext()->getItemRegister()->getNewSortedItemKeys())
         {
+
+            std::cout << "before:\n";
+            for (const int a : sortedItemConsKeyVector)
+            {
+                std::cout << a << " ";
+            }
+
+            if ((int)sortedItemConsKeyVector.size() == (int)fittedItems.size())
+            {
+                std::cout << "Nothing new.\n";
+                continue;
+            };
+            std::cout << "\n";
+
+            sortedItemConsKeyVector = BinComposer::mixedBinPackerHandler_->removeDuplicateIntegers(sortedItemConsKeyVector, fittedItems);
+            std::cout << "After:\n";
+            for (const int a : sortedItemConsKeyVector)
+            {
+                std::cout << a << " ";
+            }
+            std::cout << "\n";
+
             fittedItems.insert(fittedItems.end(), sortedItemConsKeyVector.begin(), sortedItemConsKeyVector.end());
+            std::cout << "final:\n";
+            for (const int a : fittedItems)
+            {
+                std::cout << a << " ";
+            }
+            std::cout << "\n";
+
             winningPacker->startPackingCluster(fittedItems);
-            // Change sort method to Volume for this second packing iteration. The problem is it might use OPTIMIZED.
-            // By using optimized it does not take the order of fittedItems into account and that makes our insert useless.
         };
 
         BinComposer::addPackedBin(BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker));

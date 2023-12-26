@@ -141,6 +141,9 @@ public:
         ItemRegister::completeItemVector_.reserve(nrOfItems);
     }
 
+    // Set sort method after initialization.
+    void setSortMethodHelper(const std::string aSortMethod) { ItemRegister::setSortMethod(aSortMethod); };
+
     const std::string &getSortMethod() const { return ItemRegister::sortMethod_; };
 
     /// @brief Get a new, unique, transient item id.

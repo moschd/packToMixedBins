@@ -16,7 +16,7 @@ Default parameters.
 #define DEFAULT_INCLUDE_ITEMS true
 #define DEFAULT_ITEM_DIMENSIONS_AFTER false
 #define DEFAULT_RESPONSE_PRECISION 7
-#define DEFAULT_MINIMIZATION_STRATEGY 10
+#define DEFAULT_MINIMIZATION_STRATEGY 20
 
 /*
 Compile to a shared object file.

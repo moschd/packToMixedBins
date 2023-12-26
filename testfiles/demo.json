@@ -18,14 +18,14 @@
             "type": "Pallet-3",
             "maxWeight": 1500,
             "width": 1.2,
-            "height": 0.4,
+            "height": 1.2,
             "depth": 0.8
         }
     ],
     "items": [
         {
             "id": "DTM001",
-            "width": 1.2,
+            "width": 1.1,
             "height": 0.8,
             "depth": 0.8,
             "weight": 10,
@@ -33,7 +33,47 @@
         },
         {
             "id": "DTM001.1",
-            "width": 1.1,
+            "width": 0.2,
+            "height": 0.04,
+            "depth": 0.8,
+            "weight": 10,
+            "allowedRotations": "012345"
+        },
+                {
+            "id": "DTM001.1",
+            "width": 0.2,
+            "height": 0.04,
+            "depth": 0.8,
+            "weight": 10,
+            "allowedRotations": "012345"
+        },
+                        {
+            "id": "DTM001.1",
+            "width": 0.2,
+            "height": 0.04,
+            "depth": 0.8,
+            "weight": 10,
+            "allowedRotations": "012345"
+        },
+                {
+            "id": "DTM001.1",
+            "width": 0.2,
+            "height": 0.04,
+            "depth": 0.8,
+            "weight": 10,
+            "allowedRotations": "012345"
+        },
+                {
+            "id": "DTM001.1",
+            "width": 0.2,
+            "height": 0.04,
+            "depth": 0.8,
+            "weight": 10,
+            "allowedRotations": "012345"
+        },
+                {
+            "id": "DTM001.1",
+            "width": 0.2,
             "height": 0.04,
             "depth": 0.8,
             "weight": 10,
@@ -41,7 +81,7 @@
         },
         {
             "id": "DTM002",
-            "width": 1.2,
+            "width": 1.1,
             "height": 0.4,
             "depth": 0.8,
             "weight": 10,
@@ -49,26 +89,26 @@
         },
         {
             "id": "DTM003",
-            "width": 1.2,
+            "width": 1.1,
             "height": 0.4,
             "depth": 0.8,
-            "weight": 10,
+            "weight": 101,
             "allowedRotations": "012345"
         },
         {
             "id": "DTM004",
-            "width": 1.2,
+            "width": 1.1,
             "height": 0.8,
             "depth": 0.8,
-            "weight": 10,
+            "weight": 101,
             "allowedRotations": "012345"
         },
         {
             "id": "DTM004",
-            "width": 1.2,
+            "width": 1.1,
             "height": 0.4,
             "depth": 0.8,
-            "weight": 10,
+            "weight": 101,
             "allowedRotations": "012345"
         }
     ]

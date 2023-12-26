@@ -162,6 +162,21 @@ private:
     };
 
     /**
+     * @brief Checks if two double should be considered as being equal.
+     *
+     * @param double1
+     * @param double2
+     * @return true
+     * @return false
+     */
+    const bool doublesAreLooselyEqual(const double double1, const double double2) const
+    {
+        const double relative_difference_factor = 0.0001; // 0.01%
+        const double greater_magnitude = std::max(std::abs(double1), std::abs(double2));
+        return (std::abs(double1 - double2) < relative_difference_factor * greater_magnitude);
+    }
+
+    /**
      * @brief Checks if adding the item would exceed the bins physical limits.
      *
      * @param aItemKey
@@ -170,9 +185,28 @@ private:
      */
     const bool wouldExceedPhysicalLimit(const int aItemKey) const
     {
-        const std::shared_ptr<Item> aItemToPack = PackingCluster::context_->getItem(aItemKey);
-        return (PackingCluster::getLastCreatedBin()->getRealActualVolumeUtil() + aItemToPack->Item::volume_) > context_->getRequestedBin()->getMaxVolume() ||
-               (PackingCluster::getLastCreatedBin()->getRealActualWeightUtil() + aItemToPack->Item::weight_) > context_->getRequestedBin()->getMaxWeight();
+        const bool exceedsLimit = true;
+
+        const double newBinWeight = PackingCluster::getLastCreatedBin()->getRealActualWeightUtil() + PackingCluster::context_->getItem(aItemKey)->Item::weight_;
+        const double newBinVolume = PackingCluster::getLastCreatedBin()->getRealActualVolumeUtil() + PackingCluster::context_->getItem(aItemKey)->Item::volume_;
+
+        if (!PackingCluster::doublesAreLooselyEqual(newBinWeight, context_->getRequestedBin()->getMaxWeight()))
+        {
+            if (newBinWeight > context_->getRequestedBin()->getMaxWeight())
+            {
+                return exceedsLimit;
+            };
+        }
+
+        if (!PackingCluster::doublesAreLooselyEqual(newBinVolume, context_->getRequestedBin()->getMaxVolume()))
+        {
+            if (newBinVolume > context_->getRequestedBin()->getMaxVolume())
+            {
+                return exceedsLimit;
+            };
+        };
+
+        return !exceedsLimit;
     }
 
     /**

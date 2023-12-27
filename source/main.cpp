@@ -142,7 +142,7 @@ int main()
             binComposer->addItem(idx + 1);
         };
 
-        binComposer->compose();
+        binComposer->startPacking();
 
         /* Initialize outgoing json builder */
         ResponseBuilder outgoingJsonBuilder(responsePrecision, includeBins, includeItems, itemDimensionsAfter);

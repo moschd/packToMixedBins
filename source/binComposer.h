@@ -71,13 +71,12 @@ public:
         double totalAvailableVolume = 0.0;
         double totalItemVolume = 0.0;
 
-        for (auto const &itemConsKeyVolume : BinComposer::masterItemRegister_->getTotalVolumeMap())
-        {
-            totalItemVolume += itemConsKeyVolume.second;
-        }
-
         for (const std::shared_ptr<Bin> &bin : BinComposer::packedBins_)
         {
+            for (const int item : bin->getFittedItems())
+            {
+                totalItemVolume += BinComposer::masterItemRegister_->getConstItem(item)->getRealVolume();
+            };
             totalAvailableVolume += bin->getRealVolume();
         };
 
@@ -89,13 +88,13 @@ public:
         double totalAvailableWeight = 0.0;
         double totalItemWeight = 0.0;
 
-        for (auto const &itemConsKeyWeight : BinComposer::masterItemRegister_->getTotalWeightMap())
-        {
-            totalItemWeight += itemConsKeyWeight.second;
-        }
-
         for (const std::shared_ptr<Bin> &bin : BinComposer::packedBins_)
         {
+            for (const int item : bin->getFittedItems())
+            {
+                totalItemWeight += BinComposer::masterItemRegister_->getConstItem(item)->getRealWeight();
+            };
+
             totalAvailableWeight += bin->getRealMaxWeight();
         };
 
@@ -110,11 +109,82 @@ public:
     std::shared_ptr<ItemRegister> getMasterItemRegister() { return BinComposer::masterItemRegister_; };
 
     /**
+     * @brief Get the items which will never fit in any bin.
+     *
+     * @return const std::vector<int>
+     */
+    const std::vector<int> getItemsWhichWillNeverFit()
+    {
+        std::vector<int> itemsWhichWillNeverFit = {};
+
+        for (const int aItemKeyToBePacked : BinComposer::itemsToBePacked_)
+        {
+            bool canFit = false;
+
+            const std::shared_ptr<Item> itemToFit = BinComposer::getMasterItemRegister()->getConstItem(aItemKeyToBePacked);
+
+            for (const std::shared_ptr<RequestedBin> requestedBin : BinComposer::requestedBins_)
+            {
+
+                if (canFit)
+                {
+                    break;
+                }
+
+                if (itemToFit->weight_ > requestedBin->getMaxWeight())
+                {
+                    continue;
+                };
+
+                for (int stringCharCounter = 0; stringCharCounter < itemToFit->Item::allowedRotations_.std::string::size(); stringCharCounter++)
+                {
+                    itemToFit->Item::rotate(itemToFit->Item::allowedRotations_[stringCharCounter] - '0');
+
+                    /* Check if item is not exceeding the bin dimensions, if so try a different rotation. */
+                    if (requestedBin->getWidth() < itemToFit->Item::furthestPointWidth_ ||
+                        requestedBin->getDepth() < itemToFit->Item::furthestPointDepth_ ||
+                        requestedBin->getHeight() < itemToFit->Item::furthestPointHeight_)
+                    {
+                        continue;
+                    }
+
+                    canFit = true;
+                    break;
+                };
+            }
+
+            itemToFit->reset();
+
+            if (!canFit)
+            {
+                itemsWhichWillNeverFit.push_back(aItemKeyToBePacked);
+            }
+        };
+
+        return itemsWhichWillNeverFit;
+    };
+
+    void startPacking()
+    {
+
+        // Remove items which will never fit and add them back after packing is done..
+        std::vector<int> itemsWhichWillNeverFit = BinComposer::getItemsWhichWillNeverFit();
+        BinComposer::itemsToBePacked_ = BinComposer::mixedBinPackerHandler_->removeDuplicateIntegers(BinComposer::itemsToBePacked_, itemsWhichWillNeverFit);
+        BinComposer::compose();
+        BinComposer::itemsToBePacked_.insert(BinComposer::itemsToBePacked_.end(), itemsWhichWillNeverFit.begin(), itemsWhichWillNeverFit.end());
+    }
+
+    /**
      * @brief Start constructing winning bins.
      *
      */
     void compose()
     {
+
+        if (BinComposer::itemsToBePacked_.empty())
+        {
+            return;
+        }
 
 #if DEBUG
         std::cout << "Starting with nr of items: " << (int)BinComposer::itemsToBePacked_.size() << "\n";

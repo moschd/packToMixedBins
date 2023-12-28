@@ -166,7 +166,6 @@ public:
 
     void startPacking()
     {
-
         // Remove items which will never fit and add them back after packing is done..
         std::vector<int> itemsWhichWillNeverFit = BinComposer::getItemsWhichWillNeverFit();
         BinComposer::itemsToBePacked_ = BinComposer::mixedBinPackerHandler_->removeDuplicateIntegers(BinComposer::itemsToBePacked_, itemsWhichWillNeverFit);
@@ -185,10 +184,6 @@ public:
         {
             return;
         }
-
-#if DEBUG
-        std::cout << "Starting with nr of items: " << (int)BinComposer::itemsToBePacked_.size() << "\n";
-#endif
 
         std::vector<std::shared_ptr<Packer>> processedPackers;
 
@@ -221,35 +216,18 @@ public:
         for (const std::shared_ptr<Packer> processedPacker : processedPackers)
         {
             double processedPackerValue = 0;
-#if DEBUG
-            std::cout << processedPacker->getContext()->getRequestedBin()->getType() << " "
-                      << processedPacker->getContext()->getRequestedBin()->getMaxVolume() << " "
-                      << " nr of bins = " << processedPacker->getNumberOfBins() << "\n";
-#endif
 
-            // Not all items can be fitted, skip to bigger bin in order to pack these items.
+            // Not all items can be fitted, skip to bigger bin in order to pack these items. This works because the items which can never fit have been removed previously.
             if (processedPacker->hasUnfittedItems())
             {
-#if DEBUG
-                std::cout << "Has unfitted items, skipping."
-                          << "\n";
-#endif
                 continue;
             }
 
             if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::BINS)
             {
-#if DEBUG
-                std::cout << "Minimization strategy is BINS."
-                          << "\n";
-#endif
                 // Packer found which requires 1 bin, cannot be beaten so break loop.
                 if (processedPacker->getNumberOfBins() == 1)
                 {
-#if DEBUG
-                    std::cout << "Requires 1 bin, is winner."
-                              << "\n";
-#endif
                     winningPacker = processedPacker;
                     break;
                 }
@@ -258,9 +236,6 @@ public:
             // If there is no winningPacker yet, set it to the packer which reached this point.
             if (!winningPacker && !processedPacker->getBins().empty())
             {
-#if DEBUG
-                std::cout << "First bin, so setting it to winner.\n";
-#endif
                 winningPacker = processedPacker;
                 continue;
             }
@@ -275,16 +250,10 @@ public:
                 winningPackerValue = winningPacker->getBins().size() * winningPacker->getContext()->getRequestedBin()->getMaxVolume();
                 processedPackerValue = processedPacker->getBins().size() * processedPacker->getContext()->getRequestedBin()->getMaxVolume();
             }
-#if DEBUG
-            std::cout << "Compare values are: winningPacker " << winningPackerValue << " processedPacker " << processedPackerValue << "\n";
-#endif
 
             // Current packer requires less bins than the current winningPacker, set new winner.
             if (winningPacker && processedPackerValue < winningPackerValue)
             {
-#if DEBUG
-                std::cout << "Setting new winner.\n";
-#endif
                 winningPacker = processedPacker;
                 continue;
             };
@@ -296,49 +265,19 @@ public:
             return;
         };
 
-        std::cout << "  Going to pack bin again.\n";
         std::vector<int> fittedItems = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getFittedItems();
-        std::cout << "fitted:\n";
-        for (const int a : fittedItems)
-        {
-            std::cout << a << " ";
-        }
-        std::cout << "\n";
+        const std::string consolidationKeyOfFittedItems = BinComposer::masterItemRegister_->getConstItem(fittedItems.front())->itemConsolidationKey_;
+
         // Sort method cannot be OPTIMIZED since OPTIMIZED does not have to take into account the order of items in the sortedItemConsKeyVector.
         // but we rely on this order to make sure the new bin is the same as the old bin.
         winningPacker->getContext()->getItemRegister()->setSortMethodHelper(constants::itemRegister::parameter::sortMethod::VOLUME);
-        for (std::vector<int> sortedItemConsKeyVector : winningPacker->getContext()->getItemRegister()->getNewSortedItemKeys())
+        std::vector<int> sortedItemConsKeyVector = winningPacker->getContext()->getItemRegister()->getNewSortedItemKeysForKey(consolidationKeyOfFittedItems);
+
+        // If these are equal, then nothing new can be packed.
+        if ((int)sortedItemConsKeyVector.size() > (int)fittedItems.size())
         {
-
-            std::cout << "before:\n";
-            for (const int a : sortedItemConsKeyVector)
-            {
-                std::cout << a << " ";
-            }
-
-            if ((int)sortedItemConsKeyVector.size() == (int)fittedItems.size())
-            {
-                std::cout << "Nothing new.\n";
-                continue;
-            };
-            std::cout << "\n";
-
             sortedItemConsKeyVector = BinComposer::mixedBinPackerHandler_->removeDuplicateIntegers(sortedItemConsKeyVector, fittedItems);
-            std::cout << "After:\n";
-            for (const int a : sortedItemConsKeyVector)
-            {
-                std::cout << a << " ";
-            }
-            std::cout << "\n";
-
             fittedItems.insert(fittedItems.end(), sortedItemConsKeyVector.begin(), sortedItemConsKeyVector.end());
-            std::cout << "final:\n";
-            for (const int a : fittedItems)
-            {
-                std::cout << a << " ";
-            }
-            std::cout << "\n";
-
             winningPacker->startPackingCluster(fittedItems);
         };
 

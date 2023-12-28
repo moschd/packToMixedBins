@@ -72,6 +72,12 @@ namespace constants
 
     namespace itemRegister
     {
+
+        namespace itemConsolidationKey
+        {
+            const std::string PO_INTERNAL_ALL = "PO_INTERNAL_ALL";
+        };
+
         namespace parameter
         {
             namespace sortMethod

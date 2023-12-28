@@ -116,13 +116,19 @@ private:
      *
      * @return const std::vector<std::vector<int>>
      */
-    const std::vector<std::vector<int>> getFinalSortedItemKeys(std::vector<int> aItemKeyVector) const
+    const std::vector<std::vector<int>> getFinalSortedItemKeys(std::vector<int> aItemKeyVector, const std::string aConsKey) const
     {
 
         std::vector<std::vector<int>> sortedByConsKeyAndSortMethod = {};
 
         for (std::vector<int> itemKeysPerConsKey : ItemRegister::splitItemsByConsKey(aItemKeyVector))
         {
+            if (aConsKey != constants::itemRegister::itemConsolidationKey::PO_INTERNAL_ALL &&
+                ItemRegister::getConstItem(itemKeysPerConsKey.front())->itemConsolidationKey_ != aConsKey)
+            {
+                continue;
+            };
+
             sortedByConsKeyAndSortMethod.push_back(ItemRegister::sortItemKeysBySortMethod(itemKeysPerConsKey));
         };
 
@@ -198,7 +204,17 @@ public:
      */
     const std::vector<std::vector<int>> getNewSortedItemKeys() const
     {
-        return ItemRegister::getFinalSortedItemKeys(ItemRegister::completeItemKeyVector_);
+        return ItemRegister::getFinalSortedItemKeys(ItemRegister::completeItemKeyVector_, constants::itemRegister::itemConsolidationKey::PO_INTERNAL_ALL);
+    };
+
+    /**
+     * @brief Get the itemKey vector for a specific item consolidation key.
+     *
+     * @return const std::vector<int>
+     */
+    const std::vector<int> getNewSortedItemKeysForKey(const std::string aItemConsolidationKey) const
+    {
+        return ItemRegister::getFinalSortedItemKeys(ItemRegister::completeItemKeyVector_, aItemConsolidationKey).front();
     };
 
     /**

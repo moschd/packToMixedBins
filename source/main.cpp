@@ -21,7 +21,7 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE true
+#define COMPILE_TO_SHARED_OBJECT_FILE false
 #define DEBUG !COMPILE_TO_SHARED_OBJECT_FILE
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
@@ -117,6 +117,7 @@ int main()
                                                incomingJsonBins[idx][constants::json::inbound::bins::HEIGHT].asDouble() * MULTIPLIER,
                                                incomingJsonBins[idx][constants::json::inbound::bins::MAX_WEIGHT].asDouble(),
                                                incomingJsonBins[idx][constants::json::inbound::bins::NR_OF_AVAILABLE_BINS].asInt(),
+                                               incomingJsonBins[idx][constants::json::inbound::bins::ITEM_LIMIT].asInt(),
                                                incomingJsonBins[idx][constants::json::inbound::bins::PACKING_DIRECTION].asString(),
                                                incomingJsonBins[idx][constants::json::inbound::bins::SORT_METHOD].asString(),
                                                incomingJsonBins[idx][constants::json::inbound::bins::GRAVITY_STRENGTH].asDouble());

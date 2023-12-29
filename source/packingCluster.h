@@ -158,7 +158,7 @@ private:
      */
     const bool wouldExceedLimit(const int aItemKey) const
     {
-        return PackingCluster::wouldExceedPhysicalLimit(aItemKey);
+        return PackingCluster::wouldExceedPhysicalLimit(aItemKey) || PackingCluster::wouldExceedArtificialItemLimit();
     };
 
     /**
@@ -208,6 +208,19 @@ private:
 
         return !exceedsLimit;
     }
+
+    /**
+     * @brief Checks if the packer confirms to the max items per bin limit enforces by the user.
+     *
+     * @return true
+     * @return false
+     */
+    const bool wouldExceedArtificialItemLimit() const
+    {
+        const int newItemsInBinCount = ((int)PackingCluster::getLastCreatedBin()->getFittedItems().size() + 1);
+
+        return context_->getRequestedBin()->getItemLimit() < newItemsInBinCount;
+    };
 
     /**
      * @brief Return an integer representing the estimated number of items that will fit a empty bin.

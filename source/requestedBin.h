@@ -15,6 +15,7 @@ private:
     int maxDepth_;
     int maxHeight_;
     int nrOfAvailableBins_;
+    int itemLimit_;
     double maxVolume_;
     double maxWeight_;
     double estAvgVolumeUtil_;
@@ -50,6 +51,7 @@ public:
                  int aBinHeight,
                  double aBinMaxWeight,
                  int aNrOfAvailableBins,
+                 int aItemLimit,
                  std::string aPackingDirection,
                  std::string aItemSortMethod,
                  double aBinGravityStrength) : type_(aBinType),
@@ -58,6 +60,7 @@ public:
                                                maxHeight_(aBinHeight),
                                                maxWeight_(aBinMaxWeight),
                                                nrOfAvailableBins_(aNrOfAvailableBins),
+                                               itemLimit_(aItemLimit),
                                                itemSortMethod_(aItemSortMethod),
                                                binGravityStrength_(aBinGravityStrength)
     {
@@ -80,6 +83,7 @@ public:
     const std::array<int, 3> &getPackingDirection() const { return RequestedBin::packingDirection_; }
     const std::string &getItemSortMethod() const { return RequestedBin::itemSortMethod_; }
     const double &getBinGravityStrength() const { return RequestedBin::binGravityStrength_; }
+    const int getItemLimit() const { return RequestedBin::itemLimit_; };
 
     /**
      * @brief Compares integer to the available number of bins as specified by the input.

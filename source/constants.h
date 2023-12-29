@@ -117,6 +117,7 @@ namespace constants
                 const std::string GRAVITY_STRENGTH = "gravityStrength";
                 const std::string PACKING_DIRECTION = "packingDirection";
                 const std::string NR_OF_AVAILABLE_BINS = "nrOfAvailableBins";
+                const std::string ITEM_LIMIT = "itemLimit";
             };
 
             namespace item

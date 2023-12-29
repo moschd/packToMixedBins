@@ -158,7 +158,7 @@ private:
      */
     const bool wouldExceedLimit(const int aItemKey) const
     {
-        return PackingCluster::wouldExceedPhysicalLimit(aItemKey) || PackingCluster::wouldExceedArtificialItemLimit();
+        return PackingCluster::wouldExceedPhysicalLimit(aItemKey) || PackingCluster::wouldExceedArtificialItemLimit(1);
     };
 
     /**
@@ -215,11 +215,11 @@ private:
      * @return true
      * @return false
      */
-    const bool wouldExceedArtificialItemLimit() const
+    const bool wouldExceedArtificialItemLimit(const int aItemAddition) const
     {
-        const int newItemsInBinCount = ((int)PackingCluster::getLastCreatedBin()->getFittedItems().size() + 1);
 
-        return context_->getRequestedBin()->getItemLimit() < newItemsInBinCount;
+        const int newNrOfItemsInBin = aItemAddition + ((int)PackingCluster::getLastCreatedBin()->getFittedItems().size());
+        return PackingCluster::context_->getRequestedBin()->exceedsItemLimit(newNrOfItemsInBin);
     };
 
     /**

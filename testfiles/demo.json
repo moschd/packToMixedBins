@@ -5,8 +5,7 @@
 			"maxWeight": 1500,
 			"width": 1.2,
 			"height": 1.65,
-			"depth": 0.8,
-			"itemLimit": 5
+			"depth": 0.8
 		}
 	],
 	"items": [

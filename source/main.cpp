@@ -21,7 +21,7 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE false
+#define COMPILE_TO_SHARED_OBJECT_FILE true
 #define DEBUG !COMPILE_TO_SHARED_OBJECT_FILE
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE

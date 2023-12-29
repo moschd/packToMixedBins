@@ -83,6 +83,8 @@ public:
     const std::array<int, 3> &getPackingDirection() const { return RequestedBin::packingDirection_; }
     const std::string &getItemSortMethod() const { return RequestedBin::itemSortMethod_; }
     const double &getBinGravityStrength() const { return RequestedBin::binGravityStrength_; }
+
+    // Set to -1 if not applicable.
     const int getItemLimit() const { return RequestedBin::itemLimit_; };
 
     /**
@@ -104,6 +106,25 @@ public:
         }
 
         return RequestedBin::nrOfAvailableBins_ < aInteger;
+    }
+
+    /**
+     * @brief Compares integer to the allowed number of items in the bin as specified by the input.
+     *
+     * Default value of this attribute is 0, so if itemLimit is 0 it means the user did not provide any limitation.
+     *
+     * @param aInteger
+     * @return true
+     * @return false
+     */
+    const bool exceedsItemLimit(const int aInteger) const
+    {
+        if (RequestedBin::itemLimit_ == 0)
+        {
+            return false;
+        }
+
+        return RequestedBin::itemLimit_ < aInteger;
     }
 };
 

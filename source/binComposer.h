@@ -180,6 +180,7 @@ public:
     void compose()
     {
 
+        std::cout << "Items to be packed: " << BinComposer::itemsToBePacked_.size() << "\n";
         if (BinComposer::itemsToBePacked_.empty())
         {
             return;
@@ -191,22 +192,48 @@ public:
         for (std::shared_ptr<RequestedBin> requestedBin : BinComposer::requestedBins_)
         {
 
+            std::vector<int> nonCompatibleItems = {};
             std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(requestedBin->getItemSortMethod(), (int)BinComposer::itemsToBePacked_.size());
 
             for (const int aItemKeyToBePacked : BinComposer::itemsToBePacked_)
             {
+
                 std::shared_ptr<Item> copiedItem = std::make_shared<Item>(*BinComposer::getMasterItemRegister()->getConstItem(aItemKeyToBePacked));
+
+                bool isBinCompatible = copiedItem->compatibleBins_.empty();
+                for (const std::string compatibleBin : BinComposer::getMasterItemRegister()->getConstItem(aItemKeyToBePacked)->compatibleBins_)
+                {
+                    if (isBinCompatible)
+                    {
+                        break;
+                    };
+                    isBinCompatible = (compatibleBin == requestedBin->getType());
+                }
+
+                if (!isBinCompatible)
+                {
+                    nonCompatibleItems.push_back(aItemKeyToBePacked);
+                }
+
                 itemRegister->addItem(copiedItem);
+            };
+
+            std::cout << "Finished with items in register: " << itemRegister->getCompleteItemVector().size() << " " << requestedBin->getType() << "\n";
+            if (itemRegister->getCompleteItemVector().empty())
+            {
+                continue;
             };
 
             std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(requestedBin->getBinGravityStrength(), itemRegister);
             std::shared_ptr<Packer> packingProcessor = std::make_shared<Packer>(std::make_shared<PackingContext>(masterGravity, itemRegister, requestedBin));
 
-            for (const std::vector<int> sortedItemConsKeyVector : packingProcessor->getContext()->getItemRegister()->getNewSortedItemKeys())
+            for (std::vector<int> sortedItemConsKeyVector : packingProcessor->getContext()->getItemRegister()->getNewSortedItemKeys())
             {
+                sortedItemConsKeyVector = BinComposer::mixedBinPackerHandler_->removeDuplicateIntegers(sortedItemConsKeyVector, nonCompatibleItems);
                 packingProcessor->startPackingCluster(sortedItemConsKeyVector);
             };
 
+            packingProcessor->getClusters().front()->addUnfittedItemsHelper(nonCompatibleItems);
             processedPackers.push_back(packingProcessor);
         };
 
@@ -265,8 +292,10 @@ public:
             return;
         };
 
+        std::cout << "Winning bin is: " << winningPacker->getContext()->getRequestedBin()->getType() << "\n";
         std::vector<int> fittedItems = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getFittedItems();
         const std::string consolidationKeyOfFittedItems = BinComposer::masterItemRegister_->getConstItem(fittedItems.front())->itemConsolidationKey_;
+        std::cout << "Fitted items: " << fittedItems.size() << "\n";
 
         // Sort method cannot be OPTIMIZED since OPTIMIZED does not have to take into account the order of items in the sortedItemConsKeyVector.
         // but we rely on this order to make sure the new bin is the same as the old bin.

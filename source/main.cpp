@@ -21,7 +21,7 @@ Default parameters.
 /*
 Compile to a shared object file.
 */
-#define COMPILE_TO_SHARED_OBJECT_FILE true
+#define COMPILE_TO_SHARED_OBJECT_FILE false
 #define DEBUG !COMPILE_TO_SHARED_OBJECT_FILE
 
 #if !COMPILE_TO_SHARED_OBJECT_FILE
@@ -128,6 +128,13 @@ int main()
         /* Initialize items and add them to the master register */
         for (int idx = incomingJsonItems.size(); idx--;)
         {
+
+            std::vector<std::string> compatibleBins = {};
+            for (int compatibleBinIdx = incomingJsonItems[idx][constants::json::item::COMPATIBLE_BINS].size(); compatibleBinIdx--;)
+            {
+                compatibleBins.push_back(incomingJsonItems[idx][constants::json::item::COMPATIBLE_BINS][compatibleBinIdx].asString());
+            };
+
             binComposer->getMasterItemRegister()->addItem(
                 std::make_shared<Item>(idx + 1,
                                        incomingJsonItems[idx][constants::json::item::ID].asString(),
@@ -138,6 +145,7 @@ int main()
                                        incomingJsonItems[idx][constants::json::item::ITEM_CONS_KEY].asString(),
                                        incomingJsonItems[idx][constants::json::item::ALLOWED_ROTATIONS].asString(),
                                        incomingJsonItems[idx][constants::json::item::GRAVITY_STRENGTH].asDouble(),
+                                       compatibleBins,
                                        incomingJsonItems[idx][constants::json::item::STACKING_STYLE].asString()));
 
             binComposer->addItem(idx + 1);

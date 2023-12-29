@@ -30,6 +30,7 @@ public:
   std::string itemConsolidationKey_;
   double gravityStrength_;
   std::string stackingStyle_;
+  std::vector<std::string> compatibleBins_;
 
   Item(int aSystemId,
        std::string aItemId,
@@ -40,10 +41,12 @@ public:
        std::string aItemConsKey,
        std::string aAllowedRotations,
        double aGravityStrength,
+       std::vector<std::string> aCompatibleBins,
        std::string aStackingStyle) : transientSysId_(aSystemId),
                                      weight_(aWeight),
                                      itemConsolidationKey_(aItemConsKey),
                                      gravityStrength_(aGravityStrength),
+                                     compatibleBins_(aCompatibleBins),
                                      GeometricShape(aWidth, aDepth, aHeight, aAllowedRotations)
   {
     id_ = aItemId.size() ? aItemId : "NA";

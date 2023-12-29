@@ -27,6 +27,7 @@ private:
             "none",
             "01",
             context_->getItem(BASE_ITEM_KEY)->gravityStrength_,
+            context_->getItem(BASE_ITEM_KEY)->compatibleBins_,
             context_->getItem(BASE_ITEM_KEY)->stackingStyle_);
 
         /* Set correct attributes. */

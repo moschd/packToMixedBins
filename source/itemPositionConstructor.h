@@ -112,6 +112,7 @@ private:
      */
     const std::shared_ptr<Item> createBaseItem(const int aItemKey) const
     {
+        const std::vector<std::string> compatibleBins;
         return std::make_shared<Item>(BASE_ITEM_KEY,
                                       std::to_string(context_->getItem(aItemKey)->transientSysId_),
                                       context_->getItem(aItemKey)->width_,
@@ -121,6 +122,7 @@ private:
                                       "none",
                                       "01",
                                       context_->getItem(aItemKey)->gravityStrength_,
+                                      compatibleBins,
                                       context_->getItem(aItemKey)->stackingStyle_);
     }
 

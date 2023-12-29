@@ -177,6 +177,7 @@ namespace constants
             const std::string ROTATION_TYPE_DESCRIPTION = "rotationTypeDescription";
             const std::string GRAVITY_STRENGTH = "gravityStrength";
             const std::string STACKING_STYLE = "stackingStyle";
+            const std::string COMPATIBLE_BINS = "compatibleBins";
 
             namespace stackingStyle
             {

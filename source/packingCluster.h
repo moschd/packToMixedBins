@@ -339,7 +339,6 @@ private:
         for (const int itemToPackKey : aItemsToBePacked)
         {
 
-            // checks for weight constraint
             if (PackingCluster::wouldExceedLimit(itemToPackKey))
             {
                 PackingCluster::getLastCreatedBin()->addUnfittedItem(itemToPackKey);
@@ -413,6 +412,16 @@ public:
      * @return const std::vector<int>
      */
     const std::vector<int> &getUnfittedItems() const { return PackingCluster::unfittedItems_; };
+
+    /**
+     * @brief Adds unfitted items to the cluster.
+     *
+     * @param aUnfittedItems
+     */
+    void addUnfittedItemsHelper(std::vector<int> aUnfittedItems)
+    {
+        PackingCluster::addUnfittedItems(aUnfittedItems);
+    }
 
     /**
      * @brief Get last bin.

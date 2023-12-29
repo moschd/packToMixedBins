@@ -31,7 +31,7 @@ namespace Geometry
         return intersectingX(cuboidOne, cuboidTwo) && intersectingY(cuboidOne, cuboidTwo);
     }
 
-   /**
+/**
      * @brief Return the smallest distance between item starting points.
      * Ignores zeros unless all distances are 0.
      *
@@ -41,34 +41,25 @@ namespace Geometry
      * @return const int
      */
     template <class T>
-    inline const int nearestBoundary(const T &objectOne, const T &objectTwo)
+    inline const int nearestBoundary(const T &aItemBeingPlaced, const T &aItemAlreadyPlaced)
     {
 
-        const int widthDistance = std::max(objectOne->position_[constants::axis::WIDTH], objectTwo->position_[constants::axis::WIDTH]) -
-                                  std::min(objectOne->position_[constants::axis::WIDTH], objectTwo->position_[constants::axis::WIDTH]);
-
-        const int depthDistance = std::max(objectOne->position_[constants::axis::DEPTH], objectTwo->position_[constants::axis::DEPTH]) -
-                                  std::min(objectOne->position_[constants::axis::DEPTH], objectTwo->position_[constants::axis::DEPTH]);
-
-        const int heightDistance = std::max(objectOne->position_[constants::axis::HEIGHT], objectTwo->position_[constants::axis::HEIGHT]) -
-                                   std::min(objectOne->position_[constants::axis::HEIGHT], objectTwo->position_[constants::axis::HEIGHT]);
+        const int widthDistance = aItemAlreadyPlaced->position_[constants::axis::WIDTH] - aItemBeingPlaced->position_[constants::axis::WIDTH];
+        const int depthDistance = aItemAlreadyPlaced->position_[constants::axis::DEPTH] - aItemBeingPlaced->position_[constants::axis::DEPTH];
+        const int heightDistance = aItemAlreadyPlaced->position_[constants::axis::HEIGHT] - aItemBeingPlaced->position_[constants::axis::HEIGHT];
 
         std::vector<int> distances = {widthDistance, depthDistance, heightDistance};
         std::sort(distances.begin(), distances.end());
 
+        // std::cout << aItemBeingPlaced->id_ << " and " << aItemAlreadyPlaced->id_ << "\n";
+        // std::cout << "Width distance: " << widthDistance << "\n";
+        // std::cout << "Depth distance: " << depthDistance << "\n";
+        // std::cout << "Height distance: " << heightDistance << "\n";
+
         for (int distance : distances)
         {
-            // if (objectOne->id_ == "DTM002" && objectTwo->id_ == "DTM012")
-            // {
-            //     std::cout << " distance of " << distance << "\n";
-            // }
             if (distance > 0)
             {
-
-                // if (objectOne->id_ == "DTM002" && objectTwo->id_ == "DTM012")
-                // {
-                //     std::cout << "Returning smallest distance of " << distance << "\n";
-                // }
                 return distance;
             };
         };

@@ -8,17 +8,10 @@
 			"depth": 0.8
 		},
 		{
-			"type": "Pallet-2",
+			"type": "Pallet-1",
 			"maxWeight": 1500,
 			"width": 1.2,
-			"height": 0.9,
-			"depth": 0.8
-		},
-		{
-			"type": "Pallet-3",
-			"maxWeight": 1500,
-			"width": 1.2,
-			"height": 1.2,
+			"height": 1.65,
 			"depth": 0.8
 		}
 	],

@@ -17,10 +17,13 @@ private:
 
     void setMinimizationStrategy(const int aStrategy)
     {
-
         if (constants::binComposer::minimizationStrategy::BINS == aStrategy)
         {
             BinComposer::minimizationStrategy_ = constants::binComposer::minimizationStrategy::BINS;
+        }
+        else if (constants::binComposer::minimizationStrategy::STRICT_BINS == aStrategy)
+        {
+            BinComposer::minimizationStrategy_ = constants::binComposer::minimizationStrategy::STRICT_BINS;
         }
         else
         {
@@ -39,6 +42,26 @@ private:
                   [this](std::shared_ptr<RequestedBin> &requestedBinLeft, std::shared_ptr<RequestedBin> &requestedBinRight)
                   { return requestedBinLeft->getMaxVolume() < requestedBinRight->getMaxVolume(); });
     };
+
+    void removeRequestedBin(std::shared_ptr<RequestedBin> aRequestedBin)
+    {
+
+        bool binFound = false;
+        int binIndex = 0;
+        for (int idx = BinComposer::requestedBins_.size(); idx--;)
+        {
+            if (BinComposer::requestedBins_[idx]->getType() == aRequestedBin->getType())
+            {
+                binFound = true;
+                binIndex = idx;
+            };
+        }
+
+        if (binFound)
+        {
+            BinComposer::requestedBins_.erase(BinComposer::requestedBins_.begin() + binIndex);
+        };
+    }
 
 public:
     BinComposer(std::shared_ptr<ItemRegister> aItemRegister, int aMinimizationStrategy) : masterItemRegister_(aItemRegister)
@@ -180,7 +203,6 @@ public:
     void compose()
     {
 
-        std::cout << "Items to be packed: " << BinComposer::itemsToBePacked_.size() << "\n";
         if (BinComposer::itemsToBePacked_.empty())
         {
             return;
@@ -218,7 +240,6 @@ public:
                 itemRegister->addItem(copiedItem);
             };
 
-            std::cout << "Finished with items in register: " << itemRegister->getCompleteItemVector().size() << " " << requestedBin->getType() << "\n";
             if (itemRegister->getCompleteItemVector().empty())
             {
                 continue;
@@ -272,6 +293,11 @@ public:
                 winningPackerValue = (double)winningPacker->getBins().size();
                 processedPackerValue = (double)processedPacker->getBins().size();
             }
+            else if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::STRICT_BINS)
+            {
+                winningPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getRealActualVolumeUtilPercentage();
+                processedPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(processedPacker)->getRealActualVolumeUtilPercentage();
+            }
             else
             {
                 winningPackerValue = winningPacker->getBins().size() * winningPacker->getContext()->getRequestedBin()->getMaxVolume();
@@ -292,10 +318,8 @@ public:
             return;
         };
 
-        std::cout << "Winning bin is: " << winningPacker->getContext()->getRequestedBin()->getType() << "\n";
         std::vector<int> fittedItems = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getFittedItems();
         const std::string consolidationKeyOfFittedItems = BinComposer::masterItemRegister_->getConstItem(fittedItems.front())->itemConsolidationKey_;
-        std::cout << "Fitted items: " << fittedItems.size() << "\n";
 
         // Sort method cannot be OPTIMIZED since OPTIMIZED does not have to take into account the order of items in the sortedItemConsKeyVector.
         // but we rely on this order to make sure the new bin is the same as the old bin.
@@ -314,6 +338,11 @@ public:
 
         if (!BinComposer::itemsToBePacked_.empty())
         {
+            if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::STRICT_BINS)
+            {
+                BinComposer::removeRequestedBin(winningPacker->getContext()->getRequestedBin());
+            };
+
             BinComposer::compose();
         }
     }

@@ -55,6 +55,7 @@ namespace constants
         {
             constexpr const unsigned int VOLUME{10};
             constexpr const unsigned int BINS{20};
+            constexpr const unsigned int STRICT_BINS{30};
         }
     }
 

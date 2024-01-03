@@ -214,35 +214,11 @@ public:
         for (std::shared_ptr<RequestedBin> requestedBin : BinComposer::requestedBins_)
         {
 
-            std::vector<int> nonCompatibleItems = {};
             std::shared_ptr<ItemRegister> itemRegister = std::make_shared<ItemRegister>(requestedBin->getItemSortMethod(), (int)BinComposer::itemsToBePacked_.size());
-
             for (const int aItemKeyToBePacked : BinComposer::itemsToBePacked_)
             {
-
                 std::shared_ptr<Item> copiedItem = std::make_shared<Item>(*BinComposer::getMasterItemRegister()->getConstItem(aItemKeyToBePacked));
-
-                bool isBinCompatible = copiedItem->compatibleBins_.empty();
-                for (const std::string compatibleBin : BinComposer::getMasterItemRegister()->getConstItem(aItemKeyToBePacked)->compatibleBins_)
-                {
-                    if (isBinCompatible)
-                    {
-                        break;
-                    };
-                    isBinCompatible = (compatibleBin == requestedBin->getType());
-                }
-
-                if (!isBinCompatible)
-                {
-                    nonCompatibleItems.push_back(aItemKeyToBePacked);
-                }
-
                 itemRegister->addItem(copiedItem);
-            };
-
-            if (itemRegister->getCompleteItemVector().empty())
-            {
-                continue;
             };
 
             std::shared_ptr<Gravity> masterGravity = std::make_shared<Gravity>(requestedBin->getBinGravityStrength(), itemRegister);
@@ -250,11 +226,9 @@ public:
 
             for (std::vector<int> sortedItemConsKeyVector : packingProcessor->getContext()->getItemRegister()->getNewSortedItemKeys())
             {
-                sortedItemConsKeyVector = BinComposer::mixedBinPackerHandler_->removeDuplicateIntegers(sortedItemConsKeyVector, nonCompatibleItems);
                 packingProcessor->startPackingCluster(sortedItemConsKeyVector);
             };
 
-            packingProcessor->getClusters().front()->addUnfittedItemsHelper(nonCompatibleItems);
             processedPackers.push_back(packingProcessor);
         };
 
@@ -271,14 +245,12 @@ public:
                 continue;
             }
 
-            if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::BINS)
+            // Packer found which requires 1 bin, cannot be beaten so break loop.
+            if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::BINS &&
+                processedPacker->getNumberOfBins() == 1)
             {
-                // Packer found which requires 1 bin, cannot be beaten so break loop.
-                if (processedPacker->getNumberOfBins() == 1)
-                {
-                    winningPacker = processedPacker;
-                    break;
-                }
+                winningPacker = processedPacker;
+                break;
             }
 
             // If there is no winningPacker yet, set it to the packer which reached this point.
@@ -288,27 +260,37 @@ public:
                 continue;
             }
 
-            if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::BINS)
+            if (!winningPacker)
             {
+                continue;
+            }
+
+            switch (BinComposer::minimizationStrategy_)
+            {
+            case constants::binComposer::minimizationStrategy::BINS:
                 winningPackerValue = (double)winningPacker->getBins().size();
                 processedPackerValue = (double)processedPacker->getBins().size();
-            }
-            else if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::STRICT_BINS)
-            {
+                break;
+            case constants::binComposer::minimizationStrategy::STRICT_BINS:
                 winningPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(winningPacker)->getRealActualVolumeUtilPercentage();
                 processedPackerValue = BinComposer::mixedBinPackerHandler_->getWinningBin(processedPacker)->getRealActualVolumeUtilPercentage();
-            }
-            else
-            {
+                break;
+            default:
                 winningPackerValue = winningPacker->getBins().size() * winningPacker->getContext()->getRequestedBin()->getMaxVolume();
                 processedPackerValue = processedPacker->getBins().size() * processedPacker->getContext()->getRequestedBin()->getMaxVolume();
             }
 
             // Current packer requires less bins than the current winningPacker, set new winner.
-            if (winningPacker && processedPackerValue < winningPackerValue)
+            if (BinComposer::minimizationStrategy_ == constants::binComposer::minimizationStrategy::STRICT_BINS)
+            {
+                if (processedPackerValue > winningPackerValue)
+                {
+                    winningPacker = processedPacker;
+                }
+            }
+            else if (processedPackerValue < winningPackerValue)
             {
                 winningPacker = processedPacker;
-                continue;
             };
         }
 
